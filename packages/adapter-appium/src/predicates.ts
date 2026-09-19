@@ -11,7 +11,7 @@
  * failed expectation or a guard that skips the step (LLD §8.2, §8.3).
  */
 import type { CheckResult, CheckSubject, Predicate, Ref, ValueRef } from "@svatah/yam-schema";
-import { CheckError, DataError, DialogError } from "@svatah/yam-surface";
+import { CheckError, DataError, UnsupportedError } from "@svatah/yam-surface";
 import type { AppiumClient, ElementId } from "./client.js";
 
 export interface AppiumCheckContext {
@@ -70,9 +70,10 @@ export async function evaluateAppiumPredicate(
      * another app's window and an in-app modal is just more of the page source.
      * The capability descriptor says `dialogs: false`, so the executor refuses
      * a plan needing one at start (LLD §2.4); a `check` that got here anyway is
-     * told plainly rather than answered with a guess.
+     * told plainly rather than answered with a guess — as unsupported (SF-11),
+     * because a `DialogError` reads as a dialog that misbehaved.
      */
-    throw new DialogError(
+    throw new UnsupportedError(
       "The Appium adapter has no dialog surface: `capabilities().dialogs` is false, and a " +
         "permission prompt belongs to another application (LLD §2.4).",
       { adapter: "appium" },
@@ -209,7 +210,7 @@ export async function evaluateAppiumPredicate(
     }
     case "css": {
       if (context.native) {
-        throw new CheckError(
+        throw new UnsupportedError(
           'A native context has no computed style, so the "css" predicate cannot be answered.',
           { adapter: "appium" },
         );

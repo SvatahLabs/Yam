@@ -62,7 +62,26 @@ export interface AtspiNode {
   readonly box?: readonly [number, number, number, number];
   /** The names of the actions the element declares, from `Action.GetActions`. */
   readonly actions?: readonly string[];
-  /** The D-Bus destination and path, so a command can address it again. */
+  /**
+   * What the bus said when the element's Action interface was asked and did
+   * not answer (SF-11).
+   *
+   * Absent both when the element has no Action interface and when it answered.
+   * The walker used to drop this error with every other one, so a D-Bus call
+   * that timed out once read exactly like an element that offers no actions,
+   * and the gesture was refused as unsupported: "never", about something a
+   * second read would have answered.
+   */
+  readonly actionsError?: string;
+  /**
+   * The object itself on the bus: the application's bus name and the object's
+   * path (SF-10).
+   *
+   * This is the one identity AT-SPI gives an element that does not depend on
+   * where it sits or what it is called. The walker publishes it when the
+   * binding exposes it; when it does not, a check falls back to the element's
+   * id or name and refuses to guess between elements those cannot tell apart.
+   */
   readonly address?: { readonly bus: string; readonly path: string };
 }
 
@@ -183,6 +202,29 @@ export const WALK_SCRIPT = [
   "        if name in table:",
   "            return table[name]",
   "    return None",
+  /*
+   * The object's address, which the walker never published (SF-10).
+   *
+   * `AtspiNode.address` was declared and read, and nothing wrote it, so the
+   * surface's identity check always fell through to names and paths. A pyatspi
+   * accessible is a libatspi `AtspiObject`, whose public fields are the
+   * application (with its `bus_name`) and the object `path`; PyGObject exposes
+   * both as attributes. Both are asked for inside a `try`, because this has not
+   * been run against a live registry, and an element whose address cannot be
+   * read is published without one rather than with a guess.
+   */
+  "def address(element):",
+  "    try:",
+  "        path = element.path",
+  "        bus = element.app.bus_name",
+  "    except Exception:",
+  "        return None",
+  "    if isinstance(path, str) and isinstance(bus, str) and path != '' and bus != '':",
+  "        return {'bus': bus, 'path': path}",
+  "    return None",
+  "def failure(error):",
+  "    said = str(error).strip()",
+  "    return (said or error.__class__.__name__)[:200]",
   "def walk(element, parent):",
   "    if len(nodes) >= limit:",
   "        truncated[0] = True",
@@ -219,11 +261,28 @@ export const WALK_SCRIPT = [
   "        node['box'] = [extents.x, extents.y, extents.width, extents.height]",
   "    except Exception:",
   "        pass",
+  /*
+   * An element with no Action interface and an Action interface that did not
+   * answer are two answers (SF-11). pyatspi raises `NotImplementedError` for
+   * the first; anything else — a D-Bus timeout, a `GLib.Error` from an
+   * application that is busy — is recorded, so the surface can say "try again"
+   * rather than "this element offers nothing".
+   */
   "    try:",
   "        action = element.queryAction()",
-  "        node['actions'] = [action.getName(i) for i in range(action.nActions)]",
-  "    except Exception:",
-  "        pass",
+  "    except NotImplementedError:",
+  "        action = None",
+  "    except Exception as error:",
+  "        action = None",
+  "        node['actionsError'] = failure(error)",
+  "    if action is not None:",
+  "        try:",
+  "            node['actions'] = [action.getName(i) for i in range(action.nActions)]",
+  "        except Exception as error:",
+  "            node['actionsError'] = failure(error)",
+  "    where = address(element)",
+  "    if where is not None:",
+  "        node['address'] = where",
   "    nodes.append(node)",
   "    at = len(nodes) - 1",
   "    try:",
@@ -300,6 +359,13 @@ export interface AtspiBridgeOptions {
 export function pythonBridge(options: AtspiBridgeOptions = {}): AtspiBridge {
   const run = options.run ?? runProcess;
   const python = options.python ?? "python3";
+  /*
+   * The application the last read was of, so a command acts on that one.
+   * `PERFORM_SCRIPT` took the first window of the first application on the bus,
+   * whatever it was called — right only while the driven application was the
+   * only one there, which a desktop with a panel and a file manager never is.
+   */
+  let application: string | undefined;
 
   return {
     async availability(): Promise<AtspiAvailability> {
@@ -339,8 +405,9 @@ export function pythonBridge(options: AtspiBridgeOptions = {}): AtspiBridge {
         : { available: true, busAddress: address };
     },
 
-    async window({ application, maxNodes, deadlineMs = 30_000 }): Promise<AtspiWindow> {
-      const asked = await run(python, ["-c", WALK_SCRIPT, application, String(maxNodes)], deadlineMs);
+    async window({ application: wanted, maxNodes, deadlineMs = 30_000 }): Promise<AtspiWindow> {
+      application = wanted;
+      const asked = await run(python, ["-c", WALK_SCRIPT, wanted, String(maxNodes)], deadlineMs);
       if (asked.timedOut) {
         throw new AtspiBridgeError(
           `Reading "${application}" from the accessibility bus took longer than ${deadlineMs} ms.`,
@@ -356,7 +423,11 @@ export function pythonBridge(options: AtspiBridgeOptions = {}): AtspiBridge {
     },
 
     async perform(command: AtspiCommand): Promise<void> {
-      const asked = await run(python, ["-c", PERFORM_SCRIPT, JSON.stringify(command)], 30_000);
+      const asked = await run(
+        python,
+        ["-c", PERFORM_SCRIPT, JSON.stringify({ ...command, ...(application === undefined ? {} : { application }) })],
+        30_000,
+      );
       if (asked.code !== 0 || asked.stdout.includes('"ok": false')) {
         throw new AtspiBridgeError(
           "The accessibility bus refused the command.",
@@ -389,14 +460,30 @@ export const PERFORM_SCRIPT = [
   "    json.dump({'ok': True}, sys.stdout)",
   "    sys.exit(0)",
   "path = command['path']",
+  "wanted = command.get('application')",
   "element = None",
   "desktop = pyatspi.Registry.getDesktop(0)",
   "for app in desktop:",
-  "    for window in app:",
+  "    try:",
+  "        if wanted is not None and app.name != wanted:",
+  "            continue",
+  "    except Exception:",
+  "        continue",
+  "    windows = list(app)",
+  "    for window in windows:",
+  "        try:",
+  "            active = window.getState().contains(pyatspi.STATE_ACTIVE)",
+  "        except Exception:",
+  "            active = True",
+  "        if not active and len(windows) > 1:",
+  "            continue",
   "        element = window",
   "        break",
   "    if element is not None:",
   "        break",
+  "if element is None:",
+  "    json.dump({'ok': False, 'error': 'no window of %s is on the accessibility bus' % wanted}, sys.stdout)",
+  "    sys.exit(1)",
   "for index in path:",
   "    element = element[index]",
   "if kind == 'action':",

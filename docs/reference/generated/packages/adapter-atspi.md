@@ -28,6 +28,8 @@ Linux AT-SPI accessibility adapter
 | `buildNodes` | function | `export function buildNodes(` | Turn a flattened AT-SPI tree into snapshot nodes with stable references. |
 | `BuiltNode` | interface | `export interface BuiltNode` |  |
 | `createAtspiSurface` | function | `export function createAtspiSurface(config: Config): AtspiSurface` |  |
+| `findAgain` | function | `export function findAgain(` | The element a reference was issued for, in a fresh read of the window |
+| `FoundAgain` | typealias | `export type FoundAgain ` | What `findAgain` could say about an element it was asked to find in a fresh read. |
 | `isInteractive` | function | `export function isInteractive(node: AtspiNode): boolean` | Whether a node is worth showing when the caller asked for controls only. |
 | `nameOf` | function | `export function nameOf(node: AtspiNode): string` | What the element is called, in the order a screen reader would say it. |
 | `parseTree` | function | `export function parseTree(stdout: string): AtspiWindow` | Read what the walker wrote. |

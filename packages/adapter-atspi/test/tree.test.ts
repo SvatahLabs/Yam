@@ -14,10 +14,22 @@
  * `getState()` and `getAttributes()` produce: lower-case role phrases,
  * lower-case state names, and `accessible-id` among the object attributes.
  */
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { normaliseRole } from "@svatah/yam-surface";
+import {
+  ActionabilityError,
+  DataError,
+  LocateError,
+  TimeoutError,
+  UnsupportedError,
+  normaliseRole,
+} from "@svatah/yam-surface";
 import {
   AtspiSurface,
+  WALK_SCRIPT,
   actionFor,
   buildNodes,
   nameOf,
@@ -26,6 +38,7 @@ import {
   statesOf,
   AtspiBridgeError,
   type AtspiBridge,
+  type AtspiCommand,
   type AtspiNode,
 } from "../src/index.js";
 
@@ -304,6 +317,8 @@ describe("the surface, over a recorded bus (SF-23)", () => {
     const snapshot = await one.snapshot();
     const label = snapshot.nodes.find((n) => n.name === "Not a control")!;
     await expect(one.act("click", label.ref)).rejects.toThrow(/declares no action for click/u);
+    // A label does not grow a `click` by waiting, so this is not a timeout (SF-11).
+    await expect(one.act("click", label.ref)).rejects.toThrow(UnsupportedError);
   });
 
   it("refuses a web action, as a desktop adapter always has (REQ-SURF-5)", async () => {
@@ -312,6 +327,15 @@ describe("the surface, over a recorded bus (SF-23)", () => {
     await expect(one.act("navigate", undefined, { url: "http://x" })).rejects.toThrow(
       /has no "navigate"/u,
     );
+    // Unsupported, not an invalid argument: no argument would make it work (SF-11).
+    await expect(one.act("navigate", undefined, { url: "http://x" })).rejects.toThrow(
+      UnsupportedError,
+    );
+    await expect(one.read("url")).rejects.toThrow(UnsupportedError);
+    await expect(one.restore()).rejects.toThrow(UnsupportedError);
+    await expect(
+      one.check({ kind: "urlContains", value: { kind: "literal", value: "/x" } } as never, "page"),
+    ).rejects.toThrow(UnsupportedError);
   });
 
   it("answers a predicate about a control's state", async () => {
@@ -329,6 +353,7 @@ describe("the surface, over a recorded bus (SF-23)", () => {
     const one = await surface();
     expect(one.capabilities().screenshot).toBe(false);
     await expect(one.screenshot()).rejects.toThrow(/compositor question/u);
+    await expect(one.screenshot()).rejects.toThrow(UnsupportedError);
   });
 
   it("refuses to open when the bus does not answer, in the bus's own words", async () => {
@@ -350,5 +375,742 @@ describe("the surface, over a recorded bus (SF-23)", () => {
   it("needs an application to drive, and says how to name one", async () => {
     const one = new AtspiSurface({ bridge: recorded() });
     await expect(one.open({})).rejects.toThrow(/--app <application>/u);
+  });
+});
+
+/**
+ * A bus whose window changes, the way an application's does after a click.
+ *
+ * `recorded` serves one tree forever, which is exactly what hid the defects
+ * below: a check that answered from the last snapshot and one that re-read the
+ * window were indistinguishable against a window that never changed.
+ */
+function changingBus(initial: AtspiNode[]) {
+  let nodes = initial;
+  let title = "Yam";
+  let reads = 0;
+  const bridge: AtspiBridge = {
+    async availability() {
+      return { available: true, busAddress: "unix:abstract=/tmp/at-spi" };
+    },
+    async window({ maxNodes }) {
+      reads += 1;
+      return { nodes: nodes.slice(0, maxNodes), title, truncated: false };
+    },
+    async perform() {
+      /* The tests change the window themselves, as the application would. */
+    },
+  };
+  return {
+    bridge,
+    show: (next: AtspiNode[]) => {
+      nodes = next;
+    },
+    retitle: (next: string) => {
+      title = next;
+    },
+    reads: () => reads,
+  };
+}
+
+async function openOn(bridge: AtspiBridge): Promise<AtspiSurface> {
+  const surface = new AtspiSurface({ bridge });
+  await surface.open({ processName: "Yam" });
+  return surface;
+}
+
+/** `WINDOW` with the Surfaces toggle unchecked, as a click on it would leave it. */
+const UNCHECKED: AtspiNode[] = WINDOW.map((one) =>
+  one.automationId === "rail-surfaces"
+    ? { ...one, states: ["enabled", "showing", "visible", "checkable"] }
+    : one,
+);
+
+/** `WINDOW` without "Save flow": index 2 gone, and every parent index after it moved. */
+const WITHOUT_SAVE: AtspiNode[] = WINDOW.filter((one) => one.name !== "Save flow");
+
+/** Two rows with no automation id, the case a path alone gets wrong. */
+const ROWS: AtspiNode[] = [
+  node({ parent: -1, role: "frame", name: "Yam" }),
+  node({ parent: 0, role: "list", name: "Flows" }),
+  node({ parent: 1, role: "list item", name: "checkout.flow", actions: ["click"] }),
+  node({ parent: 1, role: "list item", name: "signup.flow", actions: ["click"] }),
+];
+
+describe("check answers about the window as it is now", () => {
+  it("re-reads before answering, so a state changed by the last click is seen", async () => {
+    const bus = changingBus(WINDOW);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const toggle = snapshot.nodes.find((n) => n.name === "Surfaces")!;
+    expect((await one.check({ kind: "checked" } as never, "ref", toggle.ref)).ok).toBe(true);
+
+    bus.show(UNCHECKED);
+    expect((await one.check({ kind: "checked" } as never, "ref", toggle.ref)).ok).toBe(false);
+    expect((await one.check({ kind: "unchecked" } as never, "ref", toggle.ref)).ok).toBe(true);
+  });
+
+  it("leaves the caller's references good: a check is not a new snapshot (SF-10)", async () => {
+    const bus = changingBus(WINDOW);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const toggle = snapshot.nodes.find((n) => n.name === "Surfaces")!;
+    await one.check({ kind: "checked" } as never, "ref", toggle.ref);
+    await expect(one.act("click", toggle.ref)).resolves.toMatchObject({ ok: true });
+  });
+
+  it("re-reads the window's text for a page predicate", async () => {
+    const bus = changingBus(WINDOW);
+    const one = await openOn(bus.bridge);
+    await one.snapshot();
+    const saved = { kind: "textContains", value: { kind: "literal", value: "Save flow" } } as never;
+    expect((await one.check(saved, "page")).ok).toBe(true);
+    bus.show(WITHOUT_SAVE);
+    expect((await one.check(saved, "page")).ok).toBe(false);
+  });
+
+  it("passes `absent` on an element that has gone, instead of refusing its reference", async () => {
+    const bus = changingBus(WINDOW);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const save = snapshot.nodes.find((n) => n.name === "Save flow")!;
+    bus.show(WITHOUT_SAVE);
+
+    expect(await one.check({ kind: "absent" } as never, "ref", save.ref)).toMatchObject({ ok: true });
+    expect(
+      (await one.check({ kind: "present", negate: true } as never, "ref", save.ref)).ok,
+      "a negated presence is the same question",
+    ).toBe(true);
+    expect((await one.check({ kind: "present" } as never, "ref", save.ref)).ok).toBe(false);
+    expect((await one.check({ kind: "visible" } as never, "ref", save.ref)).ok).toBe(false);
+  });
+
+  it("does not mistake the row that moved into a deleted row's place for it", async () => {
+    const bus = changingBus(ROWS);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const checkout = snapshot.nodes.find((n) => n.name === "checkout.flow")!;
+    const signup = snapshot.nodes.find((n) => n.name === "signup.flow")!;
+    // Delete the first row: the second now sits at the first one's index path.
+    bus.show(ROWS.filter((one_) => one_.name !== "checkout.flow"));
+
+    expect((await one.check({ kind: "absent" } as never, "ref", checkout.ref)).ok).toBe(true);
+    expect((await one.check({ kind: "present" } as never, "ref", signup.ref)).ok).toBe(true);
+  });
+
+  it("still answers about a reference from an earlier snapshot by what it named", async () => {
+    const bus = changingBus(WINDOW);
+    const one = await openOn(bus.bridge);
+    const first = await one.snapshot();
+    await one.snapshot();
+    const save = first.nodes.find((n) => n.name === "Save flow")!;
+    expect((await one.check({ kind: "present" } as never, "ref", save.ref)).ok).toBe(true);
+    // Acting on it is still refused: an index from then must not address now (SF-10).
+    await expect(one.act("click", save.ref)).rejects.toThrow(/not an element of the current snapshot/u);
+  });
+
+  it("refuses a reference no snapshot issued, because nothing is known about it", async () => {
+    const one = await openOn(changingBus(WINDOW).bridge);
+    await one.snapshot();
+    await expect(one.check({ kind: "absent" } as never, "ref", "a99_1")).rejects.toThrow(LocateError);
+  });
+
+  it("refuses a predicate it cannot answer before reading the bus", async () => {
+    const bus = changingBus(WINDOW);
+    const one = await openOn(bus.bridge);
+    const reads = bus.reads();
+    await expect(one.check({ kind: "css", name: "color" } as never, "page")).rejects.toThrow(
+      UnsupportedError,
+    );
+    expect(bus.reads()).toBe(reads);
+  });
+});
+
+describe("waitFor, which this adapter did not have (SF-16)", () => {
+  it("waits for an element to go, and keeps the reference good", async () => {
+    const bus = changingBus(WINDOW);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const save = snapshot.nodes.find((n) => n.name === "Save flow")!;
+    setTimeout(() => bus.show(WITHOUT_SAVE), 150);
+    await expect(
+      one.act("waitFor", save.ref, { state: "detached", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true, ref: save.ref });
+  });
+
+  it("waits for an element to be showing, which is what `visible` means here", async () => {
+    const hidden = WINDOW.map((one) =>
+      one.name === "Save flow" ? { ...one, states: ["enabled", "visible"] } : one,
+    );
+    const bus = changingBus(hidden);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const save = snapshot.nodes.find((n) => n.name === "Save flow")!;
+    setTimeout(() => bus.show(WINDOW), 150);
+    await expect(one.act("waitFor", save.ref, { timeoutMs: 3_000 })).resolves.toMatchObject({
+      ok: true,
+    });
+  });
+
+  it("times out, as a timeout, and says where the element is", async () => {
+    const one = await openOn(changingBus(WINDOW).bridge);
+    const snapshot = await one.snapshot();
+    const save = snapshot.nodes.find((n) => n.name === "Save flow")!;
+    const failure = await one
+      .act("waitFor", save.ref, { state: "detached", timeoutMs: 300 })
+      .catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(TimeoutError);
+    expect((failure as Error).message).toMatch(/to be detached, and it is showing/u);
+  });
+
+  it("waits for the window's text with no reference", async () => {
+    const bus = changingBus(WITHOUT_SAVE);
+    const one = await openOn(bus.bridge);
+    setTimeout(() => bus.show(WINDOW), 150);
+    await expect(
+      one.act("waitFor", undefined, { text: "Save flow", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("waits for a title the window takes later", async () => {
+    const bus = changingBus(WINDOW);
+    const one = await openOn(bus.bridge);
+    setTimeout(() => bus.retitle("Yam — checkout.flow"), 150);
+    await expect(
+      one.act("waitFor", undefined, { title: "checkout.flow", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("refuses a URL at once, and says what is missing when there is nothing to wait for", async () => {
+    const one = await openOn(changingBus(WINDOW).bridge);
+    const started = Date.now();
+    await expect(
+      one.act("waitFor", undefined, { url: "/x", timeoutMs: 5_000 }),
+    ).rejects.toThrow(UnsupportedError);
+    await expect(one.act("waitFor", undefined, { timeoutMs: 5_000 })).rejects.toThrow(DataError);
+    expect(Date.now() - started).toBeLessThan(1_000);
+  });
+});
+
+/**
+ * Telling one element from another after the window changed (SF-10).
+ *
+ * The identity check preferred whichever look-alike sat at the old index path,
+ * and the walker never published the D-Bus address that was meant to come
+ * first. So after deleting the first of two rows that nothing distinguishes,
+ * the second row — now at the first one's path — answered for it: `absent`
+ * failed, and every other question was answered about the neighbour.
+ */
+/** A value predicate over a literal, as the executor hands one to the surface. */
+const literal = (kind: string, value: string): never =>
+  ({ kind, value: { kind: "literal", value } }) as never;
+
+describe("finding an element again, when rows look alike", () => {
+  /** Two list items with no name, no id and no text: only position tells them apart. */
+  const UNNAMED: AtspiNode[] = [
+    node({ parent: -1, role: "frame", name: "Yam" }),
+    node({ parent: 0, role: "list", name: "Flows" }),
+    node({ parent: 1, role: "list item", states: ["enabled", "showing", "selected"] }),
+    node({ parent: 1, role: "list item" }),
+  ];
+  /** Two rows the application gave the same automation id. */
+  const SAME_ID: AtspiNode[] = [
+    node({ parent: -1, role: "frame", name: "Yam" }),
+    node({ parent: 0, role: "list", name: "Flows" }),
+    node({ parent: 1, role: "list item", name: "checkout.flow", automationId: "flow-row" }),
+    node({ parent: 1, role: "list item", name: "signup.flow", automationId: "flow-row" }),
+  ];
+  const withAddresses = (nodes: AtspiNode[]): AtspiNode[] =>
+    nodes.map((one, at) => ({ ...one, address: { bus: ":1.42", path: `/org/a11y/atspi/accessible/${at}` } }));
+  const withoutFirstRow = (nodes: AtspiNode[]): AtspiNode[] => nodes.filter((_, at) => at !== 2);
+
+  it("refuses to answer for a deleted unnamed row with its neighbour, given no address", async () => {
+    const bus = changingBus(UNNAMED);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const [first, second] = snapshot.nodes.filter((n) => n.role === "listitem");
+    bus.show(withoutFirstRow(UNNAMED));
+
+    // Before: `absent` said false and `selected` answered with the second row's state.
+    await expect(one.check({ kind: "absent" } as never, "ref", first!.ref)).rejects.toThrow(LocateError);
+    await expect(one.check({ kind: "selected" } as never, "ref", first!.ref)).rejects.toThrow(
+      /cannot be told apart/u,
+    );
+    await expect(one.check({ kind: "present" } as never, "ref", second!.ref)).rejects.toThrow(
+      LocateError,
+    );
+  });
+
+  it("still answers about an unnamed row in a window where nothing moved", async () => {
+    const bus = changingBus(UNNAMED);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const [first, second] = snapshot.nodes.filter((n) => n.role === "listitem");
+    // A state change is not a move: the rows are the same rows in the same places.
+    bus.show(UNNAMED.map((n, at) => (at === 2 ? { ...n, states: ["enabled", "showing"] } : n)));
+
+    expect((await one.check({ kind: "selected" } as never, "ref", first!.ref)).ok).toBe(false);
+    expect((await one.check({ kind: "present" } as never, "ref", second!.ref)).ok).toBe(true);
+  });
+
+  it("refuses rows that share an automation id once one of them is deleted", async () => {
+    const bus = changingBus(SAME_ID);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const checkout = snapshot.nodes.find((n) => n.name === "checkout.flow")!;
+    bus.show(withoutFirstRow(SAME_ID));
+
+    // Before: `text` on the deleted row answered "signup.flow".
+    await expect(
+      one.check(literal("text", "signup.flow"), "ref", checkout.ref),
+    ).rejects.toThrow(LocateError);
+    await expect(one.check({ kind: "absent" } as never, "ref", checkout.ref)).rejects.toThrow(
+      /2 list item elements had the automation id "flow-row"/u,
+    );
+  });
+
+  it("answers exactly, deleted row and neighbour both, when the walker publishes addresses", async () => {
+    for (const rows of [UNNAMED, SAME_ID]) {
+      const bus = changingBus(withAddresses(rows));
+      const one = await openOn(bus.bridge);
+      const snapshot = await one.snapshot();
+      const [first, second] = snapshot.nodes.filter((n) => n.role === "listitem");
+      bus.show(withoutFirstRow(withAddresses(rows)));
+
+      expect((await one.check({ kind: "absent" } as never, "ref", first!.ref)).ok).toBe(true);
+      expect((await one.check({ kind: "present" } as never, "ref", second!.ref)).ok).toBe(true);
+      expect(
+        (await one.check({ kind: "selected" } as never, "ref", second!.ref)).ok,
+        "the neighbour answers with its own state, not the deleted row's",
+      ).toBe(false);
+    }
+    const bus = changingBus(withAddresses(SAME_ID));
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const signup = snapshot.nodes.find((n) => n.name === "signup.flow")!;
+    bus.show(withoutFirstRow(withAddresses(SAME_ID)));
+    expect(await one.check(literal("textContains", "flow"), "ref", signup.ref)).toMatchObject({
+      ok: true,
+      actual: "signup.flow",
+    });
+  });
+
+  it("reads a recycled address with a different role as the element having gone", async () => {
+    const bus = changingBus(withAddresses(WINDOW));
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const save = snapshot.nodes.find((n) => n.name === "Save flow")!;
+    bus.show(withAddresses(WINDOW).map((n, at) => (at === 2 ? { ...n, role: "label", actions: [] } : n)));
+    expect((await one.check({ kind: "absent" } as never, "ref", save.ref)).ok).toBe(true);
+  });
+
+  it("waits on an ambiguous row by refusing at once, rather than timing out on a guess", async () => {
+    const bus = changingBus(UNNAMED);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const [first] = snapshot.nodes.filter((n) => n.role === "listitem");
+    bus.show(withoutFirstRow(UNNAMED));
+    const started = Date.now();
+    await expect(
+      one.act("waitFor", first!.ref, { state: "detached", timeoutMs: 5_000 }),
+    ).rejects.toThrow(LocateError);
+    expect(Date.now() - started).toBeLessThan(1_000);
+  });
+});
+
+/**
+ * A rename is not a removal (SF-16).
+ *
+ * An element with no automation id is found again by its name, so a label that
+ * counts — "3 items", then "4 items" — read as gone the moment it changed, and
+ * `the count should say "4 items"` could not be asked of the reference the
+ * snapshot gave.
+ */
+describe("an element whose name changed", () => {
+  const COUNTED: AtspiNode[] = [
+    node({ parent: -1, role: "frame", name: "Yam" }),
+    node({ parent: 0, role: "list", name: "Flows" }),
+    node({ parent: 1, role: "list item", name: "checkout.flow" }),
+    node({ parent: 1, role: "list item", name: "signup.flow" }),
+    node({ parent: 0, role: "label", name: "3 items" }),
+  ];
+
+  it("is still there, and answers with its new name", async () => {
+    const bus = changingBus(COUNTED);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const count = snapshot.nodes.find((n) => n.name === "3 items")!;
+    bus.show(COUNTED.map((n) => (n.name === "3 items" ? { ...n, name: "4 items" } : n)));
+
+    expect((await one.check({ kind: "present" } as never, "ref", count.ref)).ok).toBe(true);
+    expect((await one.check({ kind: "absent" } as never, "ref", count.ref)).ok).toBe(false);
+    expect(
+      await one.check(literal("text", "4 items"), "ref", count.ref),
+    ).toMatchObject({ ok: true, actual: "4 items" });
+  });
+
+  it("is not a deleted row's neighbour that moved into its place and changed its name", async () => {
+    const bus = changingBus(COUNTED);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const checkout = snapshot.nodes.find((n) => n.name === "checkout.flow")!;
+    // The first row goes; the second moves into its path and is renamed in the same repaint.
+    bus.show(
+      COUNTED.filter((n) => n.name !== "checkout.flow").map((n) =>
+        n.name === "signup.flow" ? { ...n, name: "signup-v2.flow" } : n,
+      ),
+    );
+    expect((await one.check({ kind: "absent" } as never, "ref", checkout.ref)).ok).toBe(true);
+  });
+
+  it("is not an existing element that moved into its place", async () => {
+    const bus = changingBus(COUNTED);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const checkout = snapshot.nodes.find((n) => n.name === "checkout.flow")!;
+    // Same number of rows, but the one at the old path is a row that was already there.
+    bus.show([COUNTED[0]!, COUNTED[1]!, COUNTED[3]!, { ...COUNTED[3]!, name: "billing.flow" }, COUNTED[4]!]);
+    expect((await one.check({ kind: "absent" } as never, "ref", checkout.ref)).ok).toBe(true);
+  });
+});
+
+/**
+ * Questions the bus answers, which were refused (SF-11).
+ */
+describe("title and geometry predicates", () => {
+  it("answers a title predicate from the window as it is now", async () => {
+    const bus = changingBus(WINDOW);
+    const one = await openOn(bus.bridge);
+    const titled = { kind: "titleContains", value: { kind: "literal", value: "checkout.flow" } } as never;
+    expect((await one.check(titled, "page")).ok).toBe(false);
+    bus.retitle("Yam — checkout.flow");
+    expect(await one.check(titled, "page")).toMatchObject({ ok: true, actual: "Yam — checkout.flow" });
+    expect(
+      (await one.check({ kind: "title", value: { kind: "literal", value: "Yam" } } as never, "page")).ok,
+    ).toBe(false);
+    expect((await one.state()).windowTitle).toBe("Yam — checkout.flow");
+  });
+
+  it("answers box, size and location from the element's extents", async () => {
+    const one = await openOn(changingBus(WINDOW).bridge);
+    const snapshot = await one.snapshot();
+    const save = snapshot.nodes.find((n) => n.name === "Save flow")!;
+    const box = { kind: "box", numbers: [12, 8, 90, 24] } as never;
+    expect(await one.check(box, "ref", save.ref)).toMatchObject({ ok: true });
+    expect((await one.check({ kind: "size", numbers: [90, 24] } as never, "ref", save.ref)).ok).toBe(true);
+    expect((await one.check({ kind: "location", numbers: [12, 8] } as never, "ref", save.ref)).ok).toBe(true);
+    expect(
+      await one.check({ kind: "location", numbers: [0, 0] } as never, "ref", save.ref),
+    ).toMatchObject({ ok: false, actual: [12, 8] });
+  });
+
+  it("refuses geometry for an element that publishes no extents", async () => {
+    const one = await openOn(changingBus(WINDOW).bridge);
+    const snapshot = await one.snapshot();
+    const label = snapshot.nodes.find((n) => n.name === "Not a control")!;
+    await expect(one.check({ kind: "size", numbers: [1, 1] } as never, "ref", label.ref)).rejects.toThrow(
+      UnsupportedError,
+    );
+  });
+});
+
+/** A bus that records every command and serves whatever tree a test puts in front of it. */
+function recordingBus(initial: AtspiNode[]) {
+  const performed: AtspiCommand[] = [];
+  const reads: Array<AtspiNode[]> = [];
+  let nodes = initial;
+  const bridge: AtspiBridge = {
+    async availability() {
+      return { available: true, busAddress: "unix:abstract=/tmp/at-spi" };
+    },
+    async window() {
+      reads.push(nodes);
+      return { nodes, title: "Yam", truncated: false };
+    },
+    async perform(command) {
+      performed.push(command);
+    },
+  };
+  return {
+    bridge,
+    performed,
+    show: (next: AtspiNode[]) => {
+      nodes = next;
+    },
+  };
+}
+
+describe("setChecked sets, rather than toggles (SF-11)", () => {
+  const BOXES: AtspiNode[] = [
+    node({ parent: -1, role: "frame", name: "Yam" }),
+    node({
+      parent: 0,
+      role: "check box",
+      name: "Headless",
+      states: ["enabled", "showing", "checkable"],
+      actions: ["click"],
+    }),
+    node({
+      parent: 0,
+      role: "check box",
+      name: "Record video",
+      states: ["enabled", "showing", "checkable", "checked"],
+      actions: ["click"],
+    }),
+  ];
+
+  it("leaves a box that is already in the state asked for alone", async () => {
+    const bus = recordingBus(BOXES);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const headless = snapshot.nodes.find((n) => n.name === "Headless")!;
+    const video = snapshot.nodes.find((n) => n.name === "Record video")!;
+
+    // Verified before the fix: this clicked, and checked the box.
+    await expect(one.act("setChecked", headless.ref, { checked: false })).resolves.toMatchObject({
+      ok: true,
+    });
+    await expect(one.act("setChecked", video.ref, { checked: true })).resolves.toMatchObject({
+      ok: true,
+    });
+    expect(bus.performed).toEqual([]);
+  });
+
+  it("clicks a box that is in the other state, and only that one", async () => {
+    const bus = recordingBus(BOXES);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const headless = snapshot.nodes.find((n) => n.name === "Headless")!;
+    const video = snapshot.nodes.find((n) => n.name === "Record video")!;
+
+    await one.act("setChecked", headless.ref, { checked: true });
+    await one.act("setChecked", video.ref, { checked: "false" });
+    expect(bus.performed).toEqual([
+      { kind: "action", path: [0], action: "click" },
+      { kind: "action", path: [1], action: "click" },
+    ]);
+  });
+
+  it("reads the state now, not from the snapshot taken before the last click", async () => {
+    const bus = recordingBus(BOXES);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const headless = snapshot.nodes.find((n) => n.name === "Headless")!;
+    bus.show(BOXES.map((n) => (n.name === "Headless" ? { ...n, states: [...n.states!, "checked"] } : n)));
+    await one.act("setChecked", headless.ref, { checked: true });
+    expect(bus.performed).toEqual([]);
+  });
+});
+
+describe("an Action interface that did not answer is not an element with no actions (SF-11)", () => {
+  const BUSY: AtspiNode[] = [
+    node({ parent: -1, role: "frame", name: "Yam" }),
+    node({ parent: 0, role: "push button", name: "Save flow", actionsError: "Timeout was reached" }),
+  ];
+  const ANSWERED: AtspiNode[] = [
+    BUSY[0]!,
+    node({ parent: 0, role: "push button", name: "Save flow", actions: ["click"] }),
+  ];
+
+  it("reads the window again, and acts when the interface answers the second time", async () => {
+    const bus = recordingBus(BUSY);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const save = snapshot.nodes.find((n) => n.name === "Save flow")!;
+    bus.show(ANSWERED);
+    await expect(one.act("click", save.ref)).resolves.toMatchObject({ ok: true });
+    expect(bus.performed).toEqual([{ kind: "action", path: [0], action: "click" }]);
+  });
+
+  it("says try again, not never, when it still does not answer", async () => {
+    const bus = recordingBus(BUSY);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const save = snapshot.nodes.find((n) => n.name === "Save flow")!;
+    const failure = await one.act("click", save.ref).catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(ActionabilityError);
+    expect(failure).not.toBeInstanceOf(UnsupportedError);
+    expect((failure as Error).message).toMatch(/Timeout was reached/u);
+    expect(bus.performed).toEqual([]);
+  });
+
+  it("still refuses as unsupported an element that answered with no actions", async () => {
+    const bus = recordingBus([BUSY[0]!, node({ parent: 0, role: "label", name: "Status", actions: [] })]);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const status = snapshot.nodes.find((n) => n.name === "Status")!;
+    await expect(one.act("click", status.ref)).rejects.toThrow(UnsupportedError);
+  });
+});
+
+/**
+ * The six states the executor sends a reference wait (pattern 19). `enabled`
+ * and `disabled` were refused as unknown states.
+ */
+describe("waiting for an element to be enabled or disabled", () => {
+  const disabledSave = WINDOW.map((one) =>
+    one.name === "Save flow" ? { ...one, states: ["showing", "visible"] } : one,
+  );
+
+  it("waits for enabled, and not while the element is disabled", async () => {
+    const bus = changingBus(disabledSave);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const save = snapshot.nodes.find((n) => n.name === "Save flow")!;
+    await expect(
+      one.act("waitFor", save.ref, { state: "enabled", timeoutMs: 300 }),
+    ).rejects.toThrow(/to be enabled, and it is showing and disabled/u);
+    await expect(
+      one.act("waitFor", save.ref, { state: "disabled", timeoutMs: 300 }),
+    ).resolves.toEqual({ ok: true, ref: save.ref });
+    setTimeout(() => bus.show(WINDOW), 150);
+    await expect(
+      one.act("waitFor", save.ref, { state: "enabled", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true, ref: save.ref });
+  });
+
+  it("does not call an element that has gone disabled", async () => {
+    const bus = changingBus(WINDOW);
+    const one = await openOn(bus.bridge);
+    const snapshot = await one.snapshot();
+    const save = snapshot.nodes.find((n) => n.name === "Save flow")!;
+    bus.show(WITHOUT_SAVE);
+    await expect(
+      one.act("waitFor", save.ref, { state: "disabled", timeoutMs: 300 }),
+    ).rejects.toThrow(/is not in the window/u);
+    await expect(
+      one.act("waitFor", save.ref, { state: "attached", timeoutMs: 300 }),
+    ).rejects.toThrow(TimeoutError);
+  });
+
+  it("refuses a state it does not know, naming the six", async () => {
+    const one = await openOn(changingBus(WINDOW).bridge);
+    const snapshot = await one.snapshot();
+    const save = snapshot.nodes.find((n) => n.name === "Save flow")!;
+    await expect(one.act("waitFor", save.ref, { state: "checked" })).rejects.toThrow(DataError);
+    await expect(one.act("waitFor", save.ref, { state: "checked" })).rejects.toThrow(
+      /attached, detached, visible, hidden, enabled or disabled/u,
+    );
+  });
+});
+
+describe("a wait's default is the configured step timeout", () => {
+  it("waits as long as `timeoutMs` says when the step does not", async () => {
+    const one = new AtspiSurface({ bridge: changingBus(WINDOW).bridge, timeoutMs: 250 });
+    await one.open({ processName: "Yam" });
+    const started = Date.now();
+    const failure = await one
+      .act("waitFor", undefined, { text: "never here" })
+      .catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(TimeoutError);
+    expect((failure as Error).message).toMatch(/Waited 250 ms/u);
+    expect(Date.now() - started).toBeLessThan(2_000);
+
+    const snapshot = await one.snapshot();
+    const save = snapshot.nodes.find((n) => n.name === "Save flow")!;
+    await expect(one.act("waitFor", save.ref, { state: "detached" })).rejects.toThrow(/Waited 250 ms/u);
+  });
+});
+
+/**
+ * The walker itself, against a stand-in for `pyatspi` (SF-10, SF-11).
+ *
+ * Not a live registry — nothing here is — but the Python the bridge ships is
+ * run, so what it writes for an address and for an Action interface that
+ * failed is the walker's own output rather than a fixture that assumes it.
+ * Skipped on a host with no `python3`.
+ */
+const PYTHON = spawnSync("python3", ["--version"]).status === 0;
+
+const FAKE_PYATSPI = `
+DESKTOP_COORDS = 0
+STATE_ACTIVE = 'STATE_ACTIVE'
+class _App(object):
+    def __init__(self, bus_name):
+        self.bus_name = bus_name
+class _States(object):
+    def __init__(self, states):
+        self._states = states
+    def getStates(self):
+        return self._states
+    def contains(self, state):
+        return state in self._states
+class _Action(object):
+    def __init__(self, names):
+        self._names = names
+        self.nActions = len(names)
+    def getName(self, index):
+        return self._names[index]
+class Accessible(object):
+    def __init__(self, role, name='', children=(), actions=None, action_error=None, path=None, app=None):
+        self._role = role
+        self.name = name
+        self.description = ''
+        self._children = list(children)
+        self._actions = actions
+        self._action_error = action_error
+        if path is not None:
+            self.path = path
+        if app is not None:
+            self.app = app
+    def getRoleName(self):
+        return self._role
+    def getAttributes(self):
+        return []
+    def getState(self):
+        return _States(['STATE_ENABLED', 'STATE_SHOWING', 'STATE_ACTIVE'])
+    def queryText(self):
+        raise NotImplementedError
+    def queryValue(self):
+        raise NotImplementedError
+    def queryComponent(self):
+        raise NotImplementedError
+    def queryAction(self):
+        if self._action_error is not None:
+            raise RuntimeError(self._action_error)
+        if self._actions is None:
+            raise NotImplementedError
+        return _Action(self._actions)
+    def __iter__(self):
+        return iter(self._children)
+_app = _App(':1.42')
+_window = Accessible('frame', 'Yam', path='/org/a11y/atspi/accessible/1', app=_app, children=[
+    Accessible('push button', 'Save', actions=['click'], path='/org/a11y/atspi/accessible/2', app=_app),
+    Accessible('push button', 'Busy', action_error='Timeout was reached',
+               path='/org/a11y/atspi/accessible/3', app=_app),
+    Accessible('label', 'Plain'),
+])
+class _Application(Accessible):
+    pass
+class _Registry(object):
+    def getDesktop(self, index):
+        return [_Application('application', 'Yam', children=[_window])]
+Registry = _Registry()
+`;
+
+describe.skipIf(!PYTHON)("the walker, run against a stand-in pyatspi", () => {
+  it("publishes addresses, and tells an Action interface that failed from one that is absent", () => {
+    const dir = mkdtempSync(join(tmpdir(), "yam-atspi-"));
+    try {
+      writeFileSync(join(dir, "pyatspi.py"), FAKE_PYATSPI);
+      const ran = spawnSync("python3", ["-c", WALK_SCRIPT, "Yam", "50"], {
+        encoding: "utf8",
+        env: { ...process.env, PYTHONPATH: dir },
+      });
+      expect(ran.stderr).toBe("");
+      const window = parseTree(ran.stdout);
+      const [frame, save, busy, plain] = window.nodes;
+      expect(frame?.address).toEqual({ bus: ":1.42", path: "/org/a11y/atspi/accessible/1" });
+      expect(save).toMatchObject({ actions: ["click"], address: { path: "/org/a11y/atspi/accessible/2" } });
+      expect(save?.actionsError).toBeUndefined();
+      expect(busy?.actionsError).toBe("Timeout was reached");
+      expect(busy?.actions).toBeUndefined();
+      // No Action interface is not a failure, and no address is published as none rather than a guess.
+      expect(plain?.actionsError).toBeUndefined();
+      expect(plain?.actions).toBeUndefined();
+      expect(plain?.address).toBeUndefined();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

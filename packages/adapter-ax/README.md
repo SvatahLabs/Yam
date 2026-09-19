@@ -43,12 +43,19 @@ yam surface doctor --adapter ax
 | `granted` | the accessibility API answers |
 | `prompt-pending` | nobody has answered the prompt yet — including the case where the prompt is on screen right now, or where there is no one to answer it |
 | `denied` | the permission was refused for this program; switch it on and **restart the program** |
+| `unknown` | the check itself did not answer (System Events timed out, or failed without a refusal code) and macOS's own trust check did not say the permission is missing |
 | `unsupported` | not macOS |
 
-A session refuses to open when the permission is missing, with that message. It
-is checked before the first snapshot on purpose: a session that opened and then
-failed on its first `locate` would report a `locator` failure for an element
-that was there all along.
+A timeout is only `prompt-pending` when macOS's trust check
+(`AXIsProcessTrustedWithOptions`, asked without a prompt) agrees the program is
+not trusted; otherwise it is `unknown`, with what failed.
+
+A session refuses to open when the permission is missing, with that message, as
+a `PermissionError` (`denied`, `prompt-pending`). `unknown` refuses as a
+`SessionError` that says what failed, and `unsupported` as an
+`UnsupportedError`. It is checked before the first snapshot on purpose: a
+session that opened and then failed on its first `locate` would report a
+`locator` failure for an element that was there all along.
 
 ### `ax/session`: is anyone at this machine? (Draft 2.12 §7.5)
 
@@ -136,9 +143,32 @@ above changing.
 | `drag` | no | a drag is press-move-release and System Events has no such sequence |
 | `upload`, `trace`, `webmcp` | no | browser ideas |
 
-`navigate`, `back`, `forward` and `refresh` throw `NavigationError`: a desktop
+`navigate`, `back`, `forward` and `refresh` throw `UnsupportedError`: a desktop
 application has no address bar, and answering them with a silent no-op would let
 a plan compiled for the web "pass" against an application it never touched.
+
+The same rule for gestures System Events cannot make. `hover` throws
+`UnsupportedError` (there is no pointer move that does not press), and so do
+`keyDown` and `keyUp` (a key is sent as one press and release; press the chord
+in one step instead). `scrollIntoView` performs `AXScrollToVisible` when the
+element lists it; otherwise it answers `ok` only when the element's box is
+inside the window's, and throws `UnsupportedError` when it is not.
+
+A screenshot that fails with `could not create image from display` is a
+`PermissionError` only when macOS says Screen Recording is not granted; with the
+grant in place the same words mean there is no display to capture (a locked
+screen, an SSH login), which is a `SessionError`.
+
+`read("title")` reads the window now. An application that is still running with
+every window closed answers with the last title the session saw; one that has
+quit throws `SessionError`.
+
+A reference `waitFor` honours `args.state` — `attached`, `detached`, `visible`,
+`hidden`, `enabled` or `disabled`, `visible` when none is given — re-reading the
+window and finding the element again by its automation id or name rather than
+by its index. An element that cannot be told apart from a look-alike is a
+`LocateError`; an unknown state is a `DataError`. It waits `args.timeoutMs`,
+else the configured step timeout.
 
 ## Candidates
 

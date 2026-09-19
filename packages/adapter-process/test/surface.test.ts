@@ -15,7 +15,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { mkdtempSync, mkdirSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ProcessSurface } from "../src/surface.js";
+import { UnsupportedError } from "@svatah/yam-surface";
+import { ProcessSurface, shellEnvironment } from "../src/surface.js";
 import { ptyReadiness } from "../src/pty.js";
 
 const pty = ptyReadiness();
@@ -32,7 +33,7 @@ afterEach(async () => {
 async function terminal(
   command: string,
   args: string[],
-  options: { root?: string; size?: [number, number] } = {},
+  options: { root?: string; size?: [number, number]; inheritEnv?: boolean; env?: Record<string, string> } = {},
 ): Promise<ProcessSurface> {
   const surface = new ProcessSurface(options.root === undefined ? {} : { root: options.root });
   open.push(surface);
@@ -42,6 +43,8 @@ async function terminal(
       args,
       ...(options.root === undefined ? {} : { path: options.root }),
       ...(options.size === undefined ? {} : { size: options.size }),
+      ...(options.inheritEnv === undefined ? {} : { inheritEnv: options.inheritEnv }),
+      ...(options.env === undefined ? {} : { env: options.env }),
     },
   });
   return surface;
@@ -162,9 +165,31 @@ withPty("a terminal is a surface (SF-22)", () => {
   it("refuses an action a terminal does not have, by name", async () => {
     const one = await terminal("/bin/sh", ["-c", "sleep 3"]);
     await expect(one.act("click")).rejects.toThrow(/A terminal has no "click"/u);
+    // Unsupported, not a bad argument: nothing the caller sends makes a terminal click.
+    await expect(one.act("click")).rejects.toBeInstanceOf(UnsupportedError);
     await expect(one.act("navigate", undefined, { url: "http://x" })).rejects.toThrow(
       /A terminal has no "navigate"/u,
     );
+  }, 60_000);
+
+  it("starts with only a shell's environment when told not to inherit (SF-15)", async () => {
+    expect(shellEnvironment({ PATH: "/bin", HOME: "/h", LC_ALL: "C", ANTHROPIC_API_KEY: "sk-x", YAM_SERVICE_TOKEN: "t" })).toEqual({
+      PATH: "/bin",
+      HOME: "/h",
+      LC_ALL: "C",
+    });
+    process.env["YAM_TEST_NOT_FOR_AGENTS"] = "leaked";
+    try {
+      const one = await terminal("/bin/sh", ["-c", 'echo "[$YAM_TEST_NOT_FOR_AGENTS|$GIVEN]"; sleep 3'], {
+        inheritEnv: false,
+        env: { GIVEN: "given" },
+      });
+      const screen = await until(one, "|given]");
+      expect(screen.found, screen.seen).toBe(true);
+      expect(screen.seen).toContain("[|given]");
+    } finally {
+      delete process.env["YAM_TEST_NOT_FOR_AGENTS"];
+    }
   }, 60_000);
 
   it("cannot be restored, and says why rather than starting a second program", async () => {

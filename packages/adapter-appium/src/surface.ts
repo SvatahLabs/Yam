@@ -38,11 +38,15 @@ import type { AgentSurface } from "@svatah/yam-surface";
 import {
   ActionabilityError,
   buildSnapshot,
+  DataError,
   LocateError,
   NavigationError,
   ScriptError,
   SessionError,
   structuralHash,
+  TimeoutError,
+  UnsupportedError,
+  waitForPage,
   type SnapshotNode,
 } from "@svatah/yam-surface";
 import {
@@ -77,6 +81,62 @@ const DEFAULT_MAX_NODES = 1_000;
  * on a desktop.
  */
 const ENTER = "\uE007";
+
+/**
+ * The named keys a flow sends, as the WebDriver codepoints a key action takes.
+ *
+ * A W3C key action's `value` is one key: a single character, or a codepoint in
+ * the private-use range the spec assigns to named keys. `press "Tab"` sent the
+ * three characters `Tab` as that value, which a driver rejects as an invalid
+ * argument — or, worse, types. A small table of its own rather than an import
+ * from the BiDi adapter: an adapter depends on the surface and the schema, not
+ * on another adapter.
+ */
+const W3C_KEYS: Readonly<Record<string, string>> = {
+  enter: ENTER,
+  tab: "\uE004",
+  escape: "\uE00C",
+  backspace: "\uE003",
+  delete: "\uE017",
+  arrowup: "\uE013",
+  arrowdown: "\uE015",
+  arrowleft: "\uE012",
+  arrowright: "\uE014",
+  home: "\uE011",
+  end: "\uE010",
+  pageup: "\uE00E",
+  pagedown: "\uE00F",
+  space: "\uE00D",
+};
+
+/** What a key action sends for a key name: the character itself, or its codepoint. */
+function w3cKeyFor(key: string): string {
+  if ([...key].length === 1) return key;
+  const named = W3C_KEYS[key.toLowerCase()];
+  if (named === undefined) {
+    throw new UnsupportedError(
+      `The Appium adapter cannot press "${key}": a key action sends one character or one named ` +
+        "key, and it knows Enter, Tab, Escape, Backspace, Delete, ArrowUp, ArrowDown, ArrowLeft, " +
+        "ArrowRight, Home, End, PageUp, PageDown and Space.",
+      { adapter: "appium" },
+    );
+  }
+  return named;
+}
+
+/**
+ * How many swipes a native `scrollIntoView` makes before it says the element
+ * cannot be brought on screen.
+ *
+ * Each swipe moves at most four tenths of the screen, so eight is three screens
+ * of travel — more than a form or a settings page needs, and few enough that a
+ * list which is not going to produce the element fails while someone is still
+ * looking at it.
+ */
+const MAX_SCROLL_SWIPES = 8;
+
+/** The W3C element reference, which is how an element crosses into a script. */
+const W3C_ELEMENT = "element-6066-11e4-a52e-4f735466cecf";
 
 /**
  * What this adapter can do (LLD §2.4).
@@ -347,8 +407,14 @@ export class AppiumSurface implements AgentSurface {
 
     switch (action) {
       case "navigate": {
+        /*
+         * Unsupported in this context, not a navigation that failed (SF-11). No
+         * wait makes a native screen take a URL, nothing was dispatched, and a
+         * `NavigationError` is told to a caller as `CONNECT_FAILED` — about a
+         * device that is connected and fine. The message says which context can.
+         */
         if (this.native()) {
-          throw new NavigationError(
+          throw new UnsupportedError(
             'A native context has no URL to navigate to. Switch to a webview first ("switchFrame" ' +
               'with name "webview"), or start the session with `browserName`.',
             { adapter: "appium" },
@@ -376,9 +442,30 @@ export class AppiumSurface implements AgentSurface {
         this.invalidate();
         return { ok: true, navigated: true };
 
+      /*
+       * A phone has no pointer to rest over anything (SF-11).
+       *
+       * `hover` used to be a tap, which is not a gesture without an effect: it
+       * presses whatever it lands on, so "move to the menu" opened the menu, or
+       * followed the link, before the step that was meant to. Refused instead,
+       * and before the reference is resolved, because no element makes it
+       * possible.
+       */
+      case "hover":
+        throw new UnsupportedError(
+          "A touch screen has no hover: there is no pointer to rest over an element, and a tap " +
+            "in its place would press it. Tap the element if pressing it is what is meant.",
+          { adapter: "appium" },
+        );
+
+      /*
+       * `hoverAndClick` stays a tap. Its meaning is the click — "move to the
+       * element and click it" — and the move is how a desktop pointer gets
+       * there; on a touch screen the tap arrives at the element directly, so
+       * the one gesture a phone has is the whole of what was asked.
+       */
       case "click":
       case "doubleClick":
-      case "hover":
       case "hoverAndClick": {
         const id = await this.elementFor(need(ref));
         await client.click(id);
@@ -388,9 +475,22 @@ export class AppiumSurface implements AgentSurface {
         this.invalidate();
         return { ok: true, ref };
       }
+      /*
+       * Nothing is held to release (SF-11). `pressAndHold` here is a whole long
+       * press — down, pause, up — because a W3C action sequence ends with its
+       * pointer lifted, so no press survives the call that made it. `release`
+       * used to send its own down and up, which is a tap: a second press on the
+       * element rather than the end of the first.
+       */
+      case "release":
+        throw new UnsupportedError(
+          'There is no held press to release: "pressAndHold" on a touch screen is a complete ' +
+            "long press, lifted when it ends, and a release sent now would be a tap.",
+          { adapter: "appium" },
+        );
+
       case "rightClick":
       case "pressAndHold":
-      case "release":
       case "dragTo": {
         const id = await this.elementFor(need(ref));
         const rect = await client.getRect(id);
@@ -438,33 +538,30 @@ export class AppiumSurface implements AgentSurface {
         return { ok: true, ref };
       }
 
-      case "submit":
-      case "press":
       case "keyDown":
-      case "keyUp": {
+      case "keyUp":
+        /*
+         * Refused, where both sent a whole key press (SF-11). A W3C action
+         * sequence releases every key it pressed when it ends, so a `keyDown`
+         * sent on its own is a press and a release — no key survives the call
+         * to be held — and a `keyUp` presses a key that was not down. There is
+         * no held-key primitive here to send; nothing was sent.
+         */
+        throw new UnsupportedError(
+          `The Appium adapter has no "${action}": a key action sequence releases its keys when it ` +
+            "ends, so a key cannot be held down across steps. Press the key in one step instead.",
+          { adapter: "appium" },
+        );
+
+      case "submit":
+      case "press": {
         /*
          * A phone's keyboard is not a desktop's: `press "Enter"` is the IME's
-         * action key, and there is no `keyDown`/`keyUp` pair to send. Appium
-         * exposes it as a key code, and the driver-specific ways of sending one
-         * differ enough that refusing with the reason beats sending something
-         * that half works on one driver (LLD §2.4's rule: declare, do not
-         * emulate).
+         * action key, which is why `submit` is the same gesture here. A named
+         * key goes as its W3C codepoint (`w3cKeyFor`), a single character as
+         * itself, and anything else is refused before it reaches the driver.
          */
-        if (action === "submit" || str("key", "Enter") === "Enter") {
-          await client.performActions([
-            {
-              type: "key",
-              id: "keyboard",
-              actions: [
-                { type: "keyDown", value: ENTER },
-                { type: "keyUp", value: ENTER },
-              ],
-            },
-          ]);
-          this.invalidate();
-          return { ok: true, ...(ref === undefined ? {} : { ref }) };
-        }
-        const key = str("key");
+        const key = action === "submit" ? ENTER : w3cKeyFor(str("key", "Enter"));
         await client.performActions([
           {
             type: "key",
@@ -475,36 +572,66 @@ export class AppiumSurface implements AgentSurface {
             ],
           },
         ]);
+        // Enter submits, and a submit navigates as often as a tap does.
+        if (key === ENTER) this.invalidate();
         return { ok: true, ...(ref === undefined ? {} : { ref }) };
       }
 
-      case "scrollIntoView":
+      case "scrollIntoView": {
+        const target = need(ref);
+        if (!this.native()) {
+          /*
+           * The element goes in as the script's argument. It used to be called
+           * with an empty argument list, so `arguments[0]` was undefined, the
+           * guard in front of it made that silent, and the step answered
+           * `{ok: true}` having scrolled nothing at all.
+           */
+          const id = await this.elementFor(target);
+          await client.execute("arguments[0].scrollIntoView({block: 'center'})", [
+            { [W3C_ELEMENT]: id },
+          ]);
+          return { ok: true, ref: target };
+        }
+        return await this.swipeIntoView(target);
+      }
+
       case "scrollToTop":
       case "scrollToBottom": {
         if (!this.native()) {
           await client.execute(
             action === "scrollToTop"
               ? "window.scrollTo(0, 0)"
-              : action === "scrollToBottom"
-                ? "window.scrollTo(0, document.body.scrollHeight)"
-                : "arguments[0] && arguments[0].scrollIntoView({block: 'center'})",
+              : "window.scrollTo(0, document.body.scrollHeight)",
             [],
           );
           return { ok: true, ...(ref === undefined ? {} : { ref }) };
         }
-        // Native scrolling is a swipe, and where to swipe depends on the screen.
-        const middle = await this.screenCentre();
-        const distance = action === "scrollToTop" ? middle.y : -middle.y;
+        /*
+         * Native scrolling is a swipe from the screen's centre, four tenths of
+         * the screen's height up or down.
+         *
+         * The distance was the centre's own `y` — a coordinate, not a length.
+         * On a screen whose box starts at 0 that is half the height, so the
+         * finger ended exactly on the edge, where Android and iOS start their
+         * own gestures (the notification shade, the home indicator); on one
+         * whose box starts lower, it ended past the edge altogether. Four tenths
+         * from the centre stops a tenth short of either edge, which is the rule
+         * `swipeIntoView` already follows.
+         */
+        const [left, top, width, height] = await this.screenBox();
+        const x = Math.round(left + width / 2);
+        const y = Math.round(top + height / 2);
+        const distance = Math.round(height * 0.4) * (action === "scrollToTop" ? 1 : -1);
         await client.performActions([
           {
             type: "pointer",
             id: "finger",
             parameters: { pointerType: "touch" },
             actions: [
-              { type: "pointerMove", duration: 0, x: middle.x, y: middle.y },
+              { type: "pointerMove", duration: 0, x, y },
               { type: "pointerDown", button: 0 },
               { type: "pause", duration: 100 },
-              { type: "pointerMove", duration: 400, x: middle.x, y: middle.y + distance },
+              { type: "pointerMove", duration: 400, x, y: y + distance },
               { type: "pointerUp", button: 0 },
             ],
           },
@@ -519,26 +646,36 @@ export class AppiumSurface implements AgentSurface {
         return { ok: true };
       }
       case "waitFor": {
-        const target = need(ref);
-        const state = String(args["state"] ?? "visible");
-        const deadline = Date.now() + (this.options.timeoutMs ?? 10_000);
-        for (;;) {
-          const id = await this.elementFor(target).catch(() => undefined);
-          const shown = id === undefined ? false : await client.isDisplayed(id).catch(() => false);
-          const ok =
-            state === "hidden" || state === "detached"
-              ? !shown
-              : state === "enabled"
-                ? id !== undefined && (await client.isEnabled(id).catch(() => false))
-                : shown;
-          if (ok) return { ok: true, ref: target };
-          if (Date.now() >= deadline) {
-            throw new ActionabilityError(`Timed out waiting for ${target} to be ${state}.`, {
-              adapter: "appium",
-            });
+        /*
+         * No reference is a wait for the screen — its text, its URL, its title
+         * (SF-16) — and it used to be refused as a missing reference, so the
+         * wait an agent most often needs, for the next screen's words, could
+         * not be asked for at all.
+         */
+        if (ref === undefined) {
+          /*
+           * A URL is refused in a native context before anything waits (SF-16).
+           * `read("url")` answers "" there, so a wait for one re-read an empty
+           * string for its whole timeout and then failed as a timeout — on a
+           * screen that will never have an address. The AX and UIA adapters
+           * refuse it the same way; a webview has a URL and waits for it.
+           */
+          if (this.native() && typeof args["url"] === "string") {
+            throw new UnsupportedError(
+              'A native context has no URL to wait for. Wait for its text or its title, or switch ' +
+                'to a webview first ("switchFrame" with name "webview").',
+              { adapter: "appium" },
+            );
           }
-          await new Promise((done) => setTimeout(done, 100));
+          return await waitForPage(this, args, {
+            adapter: "appium",
+            textOf: () => this.screenText(),
+            ...(this.options.timeoutMs === undefined
+              ? {}
+              : { defaultTimeoutMs: this.options.timeoutMs }),
+          });
         }
+        return await this.waitForElement(need(ref), args);
       }
 
       case "switchFrame": {
@@ -581,10 +718,14 @@ export class AppiumSurface implements AgentSurface {
           ),
         };
       case "evaluate": {
+        // Unsupported, not a script that threw (SF-11): nothing ran, and
+        // `OUTCOME_UNKNOWN` would send a caller to find out whether it had.
         if (this.native()) {
-          throw new ScriptError("A native context has no JavaScript to evaluate.", {
-            adapter: "appium",
-          });
+          throw new UnsupportedError(
+            'A native context has no JavaScript to evaluate. Switch to a webview first ("switchFrame" ' +
+              'with name "webview").',
+            { adapter: "appium" },
+          );
         }
         return { ok: true, value: await client.execute(str("script", str("expression", "")), []) };
       }
@@ -605,15 +746,19 @@ export class AppiumSurface implements AgentSurface {
          * phone's screen is the size it is, so pattern 33 has nothing to
          * resize, and the capability descriptor says so rather than the
          * adapter pretending (LLD §2.4).
+         *
+         * `UnsupportedError`, where it was a `ScriptError` (SF-11): a caller was
+         * told `OUTCOME_UNKNOWN` — go and check whether it happened — about an
+         * action that was never sent to the device.
          */
-        throw new ScriptError(
+        throw new UnsupportedError(
           `The Appium adapter does not implement "${action}": ` +
             "a phone has no windows, no file picker and no native <select> " +
             "(LLD §2.4 — the capability descriptor declares it rather than emulating it).",
           { adapter: "appium" },
         );
       case "invoke":
-        throw new ScriptError(
+        throw new UnsupportedError(
           '"invoke" calls another story and is the executor\'s, not an adapter\'s (LLD §8.2).',
           { adapter: "appium" },
         );
@@ -626,7 +771,7 @@ export class AppiumSurface implements AgentSurface {
        * flow "pass" against something it never quit.
        */
       case "quit":
-        throw new NavigationError(
+        throw new UnsupportedError(
           'There is no application to quit here. "Quit the app" is a desktop step ' +
             "(pattern 31); drive this application through its own controls instead.",
           { adapter: "appium" },
@@ -634,7 +779,7 @@ export class AppiumSurface implements AgentSurface {
 
       default: {
         const never: never = action;
-        throw new ScriptError(`The Appium adapter has no row for "${String(never)}".`, {
+        throw new UnsupportedError(`The Appium adapter has no row for "${String(never)}".`, {
           adapter: "appium",
         });
       }
@@ -779,6 +924,69 @@ export class AppiumSurface implements AgentSurface {
   }
 
   /**
+   * `waitFor` with a reference: the element in the state `args.state` names
+   * (pattern 19).
+   *
+   * The six states, as every adapter means them: `attached` is an element the
+   * driver still finds, `detached` is one it does not, `visible` is found and
+   * displayed, `hidden` is gone or not displayed, and `enabled` and `disabled`
+   * are found with `isEnabled` true or false.
+   *
+   * This read four of them and guessed the rest: `attached` and `disabled`
+   * both fell through to "displayed", so `Wait for the button to be disabled`
+   * returned the moment an enabled button was on screen, and `attached` waited
+   * for visibility it did not ask for. An unknown state fell through the same
+   * way instead of being refused. And every read that threw was "not shown" —
+   * a lost session read as a `hidden` that had arrived. Now only the driver's
+   * own "this element is gone" (stale, no such element) is absence, and
+   * anything else ends the wait with what the driver said.
+   *
+   * The budget is `args.timeoutMs` (SF-16) — this waited the session's step
+   * timeout whatever the step said — else the session's timeout; running out
+   * is a `TimeoutError` that says where the element is.
+   */
+  private async waitForElement(target: Ref, args: ActArgs): Promise<ActResult> {
+    const state = waitStateOf(args);
+    // A reference this session never issued is a mistake to say now, not an absence to wait out.
+    if (target.startsWith("h")) this.handleFor(target);
+    else this.nodeFor(target);
+    const fallback = this.options.timeoutMs ?? 10_000;
+    const asked = Number(args["timeoutMs"] ?? fallback);
+    const timeoutMs = Number.isFinite(asked) && asked >= 0 ? asked : fallback;
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+      const found = await this.elementState(target);
+      if (waitStateHolds(state, found)) return { ok: true, ref: target };
+      if (Date.now() >= deadline) {
+        const where =
+          found === undefined
+            ? "the driver no longer finds it"
+            : `it is ${found.displayed ? "displayed" : "not displayed"} and ` +
+              `${found.enabled ? "enabled" : "disabled"}`;
+        throw new TimeoutError(`Waited ${timeoutMs} ms for ${target} to be ${state}, and ${where}.`, {
+          adapter: "appium",
+          timeoutMs,
+        });
+      }
+      await new Promise((done) => setTimeout(done, 100));
+    }
+  }
+
+  /** Whether the driver finds the element now, and if it does, what it says about it. */
+  private async elementState(
+    target: Ref,
+  ): Promise<{ readonly displayed: boolean; readonly enabled: boolean } | undefined> {
+    const client = this.live();
+    try {
+      const id = await this.elementFor(target);
+      return { displayed: await client.isDisplayed(id), enabled: await client.isEnabled(id) };
+    } catch (error) {
+      if (error instanceof LocateError || isGoneElement(error)) return undefined;
+      throw error;
+    }
+  }
+
+  /**
    * The driver-side element a reference means.
    *
    * An `hN` already is one. An `rN` is a position in the page source, so it is
@@ -795,10 +1003,137 @@ export class AppiumSurface implements AgentSurface {
     return found[0]!;
   }
 
-  private async screenCentre(): Promise<{ x: number; y: number }> {
-    const source = parsePageSource(await this.live().getPageSource());
-    const box = boxOf(source) ?? [0, 0, 1080, 1920];
-    return { x: Math.round(box[0] + box[2] / 2), y: Math.round(box[1] + box[3] / 2) };
+  /**
+   * The screen's own rectangle: the first element of the page source that has
+   * one.
+   *
+   * Not the root's. `parsePageSource` hands back a synthetic `hierarchy` with no
+   * attributes above the XML's own, so `boxOf(root)` was always undefined and
+   * every native swipe was measured against a 1080 by 1920 screen that an
+   * iPhone's 390 by 844 is not. The first box in document order is the
+   * application's frame on Android and the `XCUIElementTypeApplication` on iOS.
+   */
+  private async screenBox(): Promise<[number, number, number, number]> {
+    const pending: SourceNode[] = [parsePageSource(await this.live().getPageSource())];
+    while (pending.length > 0) {
+      const node = pending.shift()!;
+      const box = boxOf(node);
+      if (box !== undefined && box[2] > 0 && box[3] > 0) return box;
+      pending.push(...node.children);
+    }
+    return [0, 0, 1080, 1920];
+  }
+
+  /**
+   * The words on the screen, for a page wait (SF-16).
+   *
+   * In a webview that is the document's `innerText`, which is what a person
+   * reads there; a webview's page source is its HTML, whose text the native
+   * conversion does not look for. In a native context it is the snapshot's
+   * names and values, the same words a page `textContains` answers from, so a
+   * wait and the assertion after it cannot disagree.
+   */
+  private async screenText(): Promise<string> {
+    if (!this.native()) {
+      return String(
+        (await this.live().execute<string>("return document.body ? document.body.innerText : ''", [])) ??
+          "",
+      );
+    }
+    return (await this.snapshot()).nodes
+      .map((node) => `${node.name ?? ""} ${node.value ?? ""}`)
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  /**
+   * Swipe until the element is on screen, or say that it will not come
+   * (SF-11, LLD §7.4).
+   *
+   * This was one half-screen swipe in a fixed direction whatever the element
+   * was and wherever it was — so an element above the screen was scrolled
+   * further away, one two screens down stayed off it, and one already in view
+   * was scrolled out of it, and every one of those answered `{ok: true}`.
+   *
+   * Now the element's rectangle decides. Below the screen, the finger moves up;
+   * above it, down; by the distance still to go, at most four tenths of a
+   * screen and never from an edge, where Android and iOS start their own
+   * gestures. The pause before the finger lifts is what keeps a list from
+   * flinging past the element. It stops when the element is inside the screen,
+   * and gives up — with the element's position and the screen's in the
+   * message — when a swipe moved nothing (the list has ended, or the element is
+   * not in anything that scrolls this way) or after `MAX_SCROLL_SWIPES`.
+   *
+   * Vertical only: a vertical swipe cannot bring a carousel's next card across,
+   * and pretending to try would be the defect this replaces.
+   */
+  private async swipeIntoView(target: Ref): Promise<ActResult> {
+    const client = this.live();
+    const id = await this.elementFor(target);
+    const [left, top, width, height] = await this.screenBox();
+    const bottom = top + height;
+    const x = Math.round(left + width / 2);
+    const rectOf = async (): Promise<{ x: number; y: number; width: number; height: number }> => {
+      const rect = await client.getRect(id).catch(() => undefined);
+      if (rect === undefined) throw staleRef(target);
+      return rect;
+    };
+    /*
+     * Inside is the whole element between the top and the bottom. An element
+     * taller than the screen can never be, and is in view once it spans the
+     * screen's middle.
+     */
+    const inside = (rect: { y: number; height: number }): boolean =>
+      rect.height > height
+        ? rect.y <= top + height / 2 && rect.y + rect.height >= top + height / 2
+        : rect.y >= top && rect.y + rect.height <= bottom;
+
+    let rect = await rectOf();
+    let swipes = 0;
+    while (!inside(rect)) {
+      if (swipes >= MAX_SCROLL_SWIPES) {
+        throw new ActionabilityError(
+          `${target} is still outside the screen after ${swipes} swipes: it is at y ${rect.y} ` +
+            `(height ${rect.height}) and the screen runs from ${top} to ${bottom}.`,
+          { adapter: "appium" },
+        );
+      }
+      const below = rect.y + rect.height > bottom;
+      const still = below ? rect.y + rect.height - bottom : top - rect.y;
+      const margin = Math.round(height * 0.05);
+      const distance = Math.min(Math.round(height * 0.4), still + margin);
+      const from = Math.round(top + height / 2 + (below ? distance / 2 : -distance / 2));
+      const to = below ? from - distance : from + distance;
+      await client.performActions([
+        {
+          type: "pointer",
+          id: "finger",
+          parameters: { pointerType: "touch" },
+          actions: [
+            { type: "pointerMove", duration: 0, x, y: from },
+            { type: "pointerDown", button: 0 },
+            { type: "pause", duration: 100 },
+            { type: "pointerMove", duration: 400, x, y: to },
+            { type: "pause", duration: 200 },
+            { type: "pointerUp", button: 0 },
+          ],
+        },
+      ]);
+      swipes += 1;
+      this.invalidate();
+      const moved = await rectOf();
+      if (moved.y === rect.y && moved.height === rect.height) {
+        throw new ActionabilityError(
+          `${target} is outside the screen (at y ${rect.y}, height ${rect.height}; the screen runs ` +
+            `from ${top} to ${bottom}) and a swipe ${below ? "up" : "down"} did not move it: the ` +
+            "list has ended, or the element is not inside anything that scrolls this way.",
+          { adapter: "appium" },
+        );
+      }
+      rect = moved;
+    }
+    return { ok: true, ref: target };
   }
 }
 
@@ -821,6 +1156,49 @@ const NATIVE_ATTRIBUTES = [
   "displayed",
   "type",
 ];
+
+/** The six states a reference `waitFor` waits for (pattern 19). */
+const WAIT_STATES = ["attached", "detached", "visible", "hidden", "enabled", "disabled"] as const;
+type WaitState = (typeof WAIT_STATES)[number];
+
+/** `args.state`, `visible` when there is none; anything else is a caller's mistake. */
+function waitStateOf(args: ActArgs): WaitState {
+  const asked = args["state"] ?? "visible";
+  if (typeof asked === "string" && (WAIT_STATES as readonly string[]).includes(asked)) {
+    return asked as WaitState;
+  }
+  throw new DataError(
+    `waitFor cannot wait for ${JSON.stringify(asked)}; it waits for attached, detached, visible, ` +
+      "hidden, enabled or disabled.",
+    { adapter: "appium" },
+  );
+}
+
+function waitStateHolds(
+  state: WaitState,
+  found: { readonly displayed: boolean; readonly enabled: boolean } | undefined,
+): boolean {
+  switch (state) {
+    case "attached":
+      return found !== undefined;
+    case "detached":
+      return found === undefined;
+    case "visible":
+      return found?.displayed === true;
+    case "hidden":
+      return found === undefined || !found.displayed;
+    case "enabled":
+      return found?.enabled === true;
+    case "disabled":
+      return found !== undefined && !found.enabled;
+  }
+}
+
+/** The W3C errors a driver answers about an element that is no longer there. */
+function isGoneElement(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return /stale element|no such element/i.test(`${error.name} ${error.message}`);
+}
 
 function staleRef(ref: Ref): LocateError {
   return new LocateError(

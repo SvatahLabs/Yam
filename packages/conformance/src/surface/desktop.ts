@@ -843,15 +843,20 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
        * that answered `navigate` with a silent no-op would let a plan compiled
        * for the web "pass" against an application it never touched.
        */
+      /*
+       * `UnsupportedError` since the refusal became its own class (SF-11); a
+       * `NavigationError` is still conformant, so an adapter written against
+       * the earlier contract does not start failing a suite it passed.
+       */
       await throws(
-        "navigate throws NavigationError",
+        "navigate is refused as unsupported",
         () => surface.act("navigate", undefined, { url: "https://example.test" }),
-        "NavigationError",
+        ["UnsupportedError", "NavigationError"],
       );
       await throws(
-        "read('url') throws NavigationError",
+        "read('url') is refused as unsupported",
         () => surface.read("url"),
-        "NavigationError",
+        ["UnsupportedError", "NavigationError"],
       );
     },
   },

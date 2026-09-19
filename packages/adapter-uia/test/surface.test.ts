@@ -7,8 +7,21 @@
  * correctly; that is the live gate `docs/spec/progress/phase-6.md` records.
  */
 import { describe, expect, it } from "vitest";
-import { ActionabilityError, LocateError, NavigationError, SessionError } from "@svatah/yam-surface";
-import { escapeSendKeys, sendKeysFor, UiaSurface, UIA_CAPABILITIES } from "../src/index.js";
+import {
+  ActionabilityError,
+  DataError,
+  LocateError,
+  SessionError,
+  TimeoutError,
+  UnsupportedError,
+} from "@svatah/yam-surface";
+import {
+  escapeSendKeys,
+  sendKeysFor,
+  UiaSurface,
+  UIA_CAPABILITIES,
+  type UiaNode,
+} from "../src/index.js";
 import { recordedBridge, type RecordedBridge } from "./recorded.js";
 
 async function open(
@@ -200,11 +213,52 @@ describe("act through UIA patterns (LLD §7.5)", () => {
   });
 
   it("says plainly that a desktop application has no navigation", async () => {
-    const { surface } = await open();
+    // Unsupported, not a navigation that failed (SF-11): nothing was sent.
+    const { surface, bridge } = await open();
+    const before = bridge.commands.length;
     for (const action of ["navigate", "back", "forward", "refresh"] as const) {
-      await expect(surface.act(action, undefined, { url: "/x" })).rejects.toThrow(NavigationError);
+      await expect(surface.act(action, undefined, { url: "/x" })).rejects.toThrow(UnsupportedError);
     }
-    await expect(surface.read("url")).rejects.toThrow(NavigationError);
+    await expect(surface.read("url")).rejects.toThrow(UnsupportedError);
+    await expect(surface.read("result")).rejects.toThrow(UnsupportedError);
+    expect(bridge.commands.length).toBe(before);
+  });
+
+  it("refuses to drag, whatever the references, as unsupported rather than a timeout", async () => {
+    const { surface } = await open();
+    const snapshot = await surface.snapshot();
+    await expect(
+      surface.act("dragTo", snapshot.nodes[1]!.ref, {}, snapshot.nodes[2]!.ref),
+    ).rejects.toThrow(UnsupportedError);
+    await expect(surface.act("dragTo", "r99999", {}, "r99998")).rejects.toThrow(/cannot drag/);
+    await expect(surface.act("upload", undefined, {})).rejects.toThrow(UnsupportedError);
+  });
+
+  it("refuses to deselect, rather than selecting what it was asked to deselect", async () => {
+    /*
+     * `deselectOption` shared `selectOption`'s code: expand the combo box, then
+     * `SelectionItemPattern.Select()` on the named item — choosing the option
+     * the caller wanted cleared. The bridge has no `RemoveFromSelection` to
+     * send, so the answer is a refusal, and nothing is expanded on the way.
+     */
+    const { surface, bridge } = await open();
+    const [gateway] = await surface.locate({ by: "automationId", value: "record-gateway", score: 1 });
+    const before = bridge.commands.length;
+    await expect(
+      surface.act("deselectOption", gateway!, { label: "anthropic" }),
+    ).rejects.toThrow(UnsupportedError);
+    await expect(
+      surface.act("deselectOption", gateway!, { label: "anthropic" }),
+    ).rejects.toThrow(/RemoveFromSelection/);
+    expect(bridge.commands.slice(before)).toEqual([]);
+  });
+
+  it("refuses a predicate a window cannot answer as unsupported, not as a failed check", async () => {
+    const { surface } = await open();
+    await expect(
+      surface.check({ kind: "urlContains", value: { kind: "literal", value: "/x" } }, "page"),
+    ).rejects.toThrow(UnsupportedError);
+    await expect(surface.check({ kind: "present" }, "dialog")).rejects.toThrow(UnsupportedError);
   });
 });
 
@@ -246,5 +300,322 @@ describe("state and restore", () => {
     await expect(surface.restore({ kind: "desktop", windowTitle: "Other" })).rejects.toThrow(
       /put it back where the checkpoint was/,
     );
+  });
+});
+
+/**
+ * `waitFor` with no reference waits for the window (SF-16).
+ *
+ * The loop that served both cases returned only when it found a reference, so
+ * with none it re-read the window for its whole timeout and failed — however
+ * early the words it was waiting for appeared.
+ */
+describe("waiting for the window rather than an element (SF-16)", () => {
+  it("returns as soon as the window says the text", async () => {
+    const { surface } = await open();
+    await expect(
+      surface.act("waitFor", undefined, { text: "Stop recording", timeoutMs: 1_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("waits for text that arrives after the wait began", async () => {
+    const { surface, bridge } = await open();
+    // "Run again" is on the Run screen and nowhere on Record.
+    setTimeout(() => bridge.setScreen("run"), 150);
+    await expect(
+      surface.act("waitFor", undefined, { text: "Run again", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("times out, as a timeout, on text that never comes", async () => {
+    const { surface } = await open();
+    await expect(
+      surface.act("waitFor", undefined, { text: "No such words", timeoutMs: 300 }),
+    ).rejects.toThrow(TimeoutError);
+  });
+
+  it("waits for a title the window takes later", async () => {
+    const recorded = recordedBridge({ screen: "record" });
+    let title = "Yam";
+    const bridge: RecordedBridge = {
+      ...recorded,
+      async window(request) {
+        return { ...(await recorded.window(request)), title };
+      },
+    };
+    const surface = new UiaSurface({ processName: "Yam", bridge });
+    await surface.open({ kind: "desktop", processName: "Yam" } as never);
+    setTimeout(() => {
+      title = "Yam - scratch.yam";
+    }, 150);
+    await expect(
+      surface.act("waitFor", undefined, { title: "scratch.yam", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("refuses a URL wait at once, and says what is missing when there is nothing to wait for", async () => {
+    const { surface } = await open();
+    const started = Date.now();
+    await expect(
+      surface.act("waitFor", undefined, { url: "/booking", timeoutMs: 5_000 }),
+    ).rejects.toThrow(UnsupportedError);
+    await expect(surface.act("waitFor", undefined, { timeoutMs: 5_000 })).rejects.toThrow(DataError);
+    expect(Date.now() - started).toBeLessThan(1_000);
+  });
+
+  it("still waits on a reference the way it did", async () => {
+    const { surface } = await open();
+    const [ref] = await surface.locate({ by: "automationId", value: "record-gateway", score: 1 });
+    await expect(surface.act("waitFor", ref!, { timeoutMs: 1_000 })).resolves.toEqual({ ok: true });
+  });
+});
+
+/**
+ * Gestures the bridge cannot make are refused, not reported as done (SF-11).
+ *
+ * `hover` and a `scrollIntoView` with no pattern answered `{ok: true}` having
+ * done nothing, and `keyDown`/`keyUp` sent a whole key press.
+ */
+describe("no-op actions that reported success (SF-11)", () => {
+  /** The Record screen, with the Gateway combo box's recorded node changed. */
+  async function openWith(change: Partial<UiaNode>): Promise<{
+    surface: UiaSurface;
+    bridge: RecordedBridge;
+  }> {
+    const recorded = recordedBridge({ screen: "record" });
+    const bridge: RecordedBridge = {
+      ...recorded,
+      async window(request) {
+        const window = await recorded.window(request);
+        return {
+          ...window,
+          nodes: window.nodes.map((node) =>
+            node.automationId === "record-gateway" ? ({ ...node, ...change } as UiaNode) : node,
+          ),
+        };
+      },
+    };
+    const surface = new UiaSurface({ processName: "Yam", bridge });
+    await surface.open({ kind: "desktop", processName: "Yam" } as never);
+    return { surface, bridge };
+  }
+  const sent = (bridge: RecordedBridge) => bridge.commands.filter((one) => one.kind !== "activate");
+  const gateway = async (surface: UiaSurface) =>
+    (await surface.locate({ by: "automationId", value: "record-gateway", score: 1 }))[0];
+
+  it("refuses to hover, and sends nothing", async () => {
+    const { surface, bridge } = await open();
+    await expect(surface.act("hover", await gateway(surface))).rejects.toThrow(UnsupportedError);
+    expect(sent(bridge)).toEqual([]);
+  });
+
+  it("scrolls through ScrollItemPattern when the element has it", async () => {
+    const { surface, bridge } = await openWith({
+      patterns: ["Value", "ScrollItem"],
+      box: [302, 2_000, 200, 28],
+    });
+    await expect(surface.act("scrollIntoView", await gateway(surface))).resolves.toEqual({ ok: true });
+    expect(sent(bridge)).toEqual([
+      { kind: "pattern", path: expect.any(Array), pattern: "Scroll", method: "ScrollIntoView" },
+    ]);
+  });
+
+  it("answers ok without a pattern only for an element already inside the window", async () => {
+    const { surface, bridge } = await open();
+    // [302, 67, 200, 28] inside a 1280 by 860 window.
+    await expect(surface.act("scrollIntoView", await gateway(surface))).resolves.toEqual({ ok: true });
+    expect(sent(bridge)).toEqual([]);
+  });
+
+  it("refuses an element outside the window it has no pattern to scroll to", async () => {
+    const { surface, bridge } = await openWith({ box: [302, 2_000, 200, 28] });
+    const failure = await surface
+      .act("scrollIntoView", await gateway(surface))
+      .catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(UnsupportedError);
+    expect((failure as Error).message).toMatch(/outside the window/);
+    expect(sent(bridge)).toEqual([]);
+
+    const boxless = await openWith({ box: undefined });
+    await expect(
+      boxless.surface.act("scrollIntoView", await gateway(boxless.surface)),
+    ).rejects.toThrow(/publishes no bounding rectangle/);
+  });
+
+  it("refuses keyDown and keyUp rather than sending a whole press", async () => {
+    const { surface, bridge } = await open();
+    const ref = await gateway(surface);
+    for (const action of ["keyDown", "keyUp"] as const) {
+      await expect(surface.act(action, ref, { key: "Shift" })).rejects.toThrow(UnsupportedError);
+    }
+    expect(sent(bridge)).toEqual([]);
+    await surface.act("press", undefined, { key: "Enter" });
+    expect(sent(bridge)).toEqual([{ kind: "keys", text: sendKeysFor("Enter") }]);
+  });
+});
+
+describe("a page wait's default is the configured step timeout", () => {
+  it("waits as long as `timeoutMs` says when the step does not", async () => {
+    const surface = new UiaSurface({
+      processName: "Yam",
+      bridge: recordedBridge({ screen: "record" }),
+      timeoutMs: 250,
+    });
+    await surface.open({ kind: "desktop", processName: "Yam" } as never);
+    const failure = await surface
+      .act("waitFor", undefined, { text: "No such words" })
+      .catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(TimeoutError);
+    expect((failure as Error).message).toMatch(/Waited 250 ms/);
+  });
+});
+
+/**
+ * A reference wait waits for the state it was asked for (pattern 19).
+ *
+ * The executor sends the step's predicate as `args.state`, and this adapter
+ * ignored it: it re-read the window until some node sat at the reference's
+ * index, which is at once.
+ */
+describe("waiting for an element to be in a state", () => {
+  /** Drop nodes, and everything under them, and renumber the parents that remain. */
+  function without(nodes: readonly UiaNode[], gone: (node: UiaNode) => boolean): UiaNode[] {
+    const dropped = new Set<number>();
+    nodes.forEach((node, at) => {
+      if (gone(node) || dropped.has(node.parent)) dropped.add(at);
+    });
+    const renumbered = new Map<number, number>();
+    let next = 0;
+    nodes.forEach((_, at) => {
+      if (!dropped.has(at)) renumbered.set(at, next++);
+    });
+    return nodes
+      .filter((_, at) => !dropped.has(at))
+      .map((node) => ({ ...node, parent: node.parent < 0 ? -1 : renumbered.get(node.parent)! }));
+  }
+  const isGateway = (node: UiaNode): boolean => node.automationId === "record-gateway";
+  const gatewayWith = (change: Partial<UiaNode>) => (nodes: UiaNode[]) =>
+    nodes.map((node) => (isGateway(node) ? ({ ...node, ...change } as UiaNode) : node));
+
+  async function changing(
+    initial: (nodes: UiaNode[]) => UiaNode[] = (nodes) => nodes,
+    options: { timeoutMs?: number } = {},
+  ) {
+    const recorded = recordedBridge({ screen: "record" });
+    let shape = initial;
+    const bridge: RecordedBridge = {
+      ...recorded,
+      async window(request) {
+        const window = await recorded.window(request);
+        return { ...window, nodes: shape([...window.nodes]) };
+      },
+    };
+    const surface = new UiaSurface({ processName: "Yam", bridge, ...options });
+    await surface.open({ kind: "desktop", processName: "Yam" } as never);
+    const [gateway] = await surface.locate({ by: "automationId", value: "record-gateway", score: 1 });
+    return {
+      surface,
+      gateway: gateway!,
+      show: (next: (nodes: UiaNode[]) => UiaNode[]) => {
+        shape = next;
+      },
+    };
+  }
+  const later = (then: () => void): void => {
+    setTimeout(then, 150);
+  };
+
+  it("waits for hidden — IsOffscreen — and not while the element is showing", async () => {
+    const { surface, gateway, show } = await changing();
+    await expect(
+      surface.act("waitFor", gateway, { state: "hidden", timeoutMs: 300 }),
+    ).rejects.toThrow(/to be hidden, and it is showing and enabled/);
+    later(() => show(gatewayWith({ isOffscreen: true })));
+    await expect(
+      surface.act("waitFor", gateway, { state: "hidden", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("waits for visible on an element that is off screen", async () => {
+    const { surface, gateway, show } = await changing(gatewayWith({ isOffscreen: true }));
+    later(() => show((nodes) => nodes));
+    await expect(
+      surface.act("waitFor", gateway, { state: "visible", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("waits for enabled and for disabled from IsEnabled", async () => {
+    const { surface, gateway, show } = await changing(gatewayWith({ isEnabled: false }));
+    await expect(
+      surface.act("waitFor", gateway, { state: "enabled", timeoutMs: 300 }),
+    ).rejects.toThrow(/to be enabled, and it is showing and disabled/);
+    await expect(
+      surface.act("waitFor", gateway, { state: "disabled", timeoutMs: 300 }),
+    ).resolves.toEqual({ ok: true });
+    later(() => show((nodes) => nodes));
+    await expect(
+      surface.act("waitFor", gateway, { state: "enabled", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("waits for detached and attached by what the element is, not by its index", async () => {
+    const moved = await changing();
+    // Text ahead of it goes: every index after it moves, and the gateway is still there.
+    moved.show((nodes) => without(nodes, (node) => node.name === "Record review"));
+    await expect(
+      moved.surface.act("waitFor", moved.gateway, { state: "detached", timeoutMs: 300 }),
+    ).rejects.toThrow(TimeoutError);
+
+    const going = await changing();
+    later(() => going.show((nodes) => without(nodes, isGateway)));
+    await expect(
+      going.surface.act("waitFor", going.gateway, { state: "detached", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+
+    const coming = await changing();
+    coming.show((nodes) => without(nodes, isGateway));
+    later(() => coming.show((nodes) => nodes));
+    await expect(
+      coming.surface.act("waitFor", coming.gateway, { state: "attached", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("refuses to answer about a deleted element with a look-alike that moved into its place", async () => {
+    const twins = (nodes: UiaNode[]) =>
+      nodes.map((node) =>
+        node.automationId === "action-record-accept" || node.automationId === "action-record-repick"
+          ? ({ ...node, automationId: undefined, name: "Accept" } as UiaNode)
+          : node,
+      );
+    const { surface, show } = await changing(twins);
+    const snapshot = await surface.snapshot();
+    const first = snapshot.nodes.find((node) => node.role === "button" && node.name === "Accept")!;
+    let removed = false;
+    show((nodes) =>
+      without(twins(nodes), (node) => {
+        if (removed || node.name !== "Accept") return false;
+        removed = true;
+        return true;
+      }),
+    );
+    await expect(
+      surface.act("waitFor", first.ref, { state: "detached", timeoutMs: 3_000 }),
+    ).rejects.toThrow(LocateError);
+  });
+
+  it("refuses a state it does not know, naming the six", async () => {
+    const { surface, gateway } = await changing();
+    await expect(surface.act("waitFor", gateway, { state: "checked" })).rejects.toThrow(
+      /attached, detached, visible, hidden, enabled or disabled/,
+    );
+    await expect(surface.act("waitFor", gateway, { state: "checked" })).rejects.toThrow(DataError);
+  });
+
+  it("waits for the step's timeoutMs, else the session's timeout", async () => {
+    const { surface, gateway } = await changing(undefined, { timeoutMs: 250 });
+    await expect(surface.act("waitFor", gateway, { state: "hidden" })).rejects.toThrow(/Waited 250 ms/);
+    await expect(
+      surface.act("waitFor", gateway, { state: "hidden", timeoutMs: 100 }),
+    ).rejects.toThrow(/Waited 100 ms/);
   });
 });

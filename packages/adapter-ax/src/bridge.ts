@@ -61,7 +61,7 @@
  */
 import { spawn } from "node:child_process";
 import { statSync, unlinkSync } from "node:fs";
-import { nameFor, responsibleProgram } from "./grant.js";
+import { accessibilityGranted, nameFor, responsibleProgram } from "./grant.js";
 import { availableParallelism, loadavg } from "node:os";
 
 /**
@@ -208,6 +208,17 @@ export type AxPermissionState =
   | "prompt-pending"
   /** The permission was asked for and refused. */
   | "denied"
+  /**
+   * The check itself did not answer — it timed out, or failed with no refusal
+   * code — and macOS's own trust check did not say the permission is missing
+   * (SF-14). `detail` says what failed.
+   *
+   * Both of those were `prompt-pending`, which a session refused as a missing
+   * permission and sent a person to System Settings to grant something that,
+   * as often as not, was granted: a System Events that did not answer in five
+   * seconds reads exactly like a prompt nobody has answered.
+   */
+  | "unknown"
   /** Not macOS. */
   | "unsupported";
 
@@ -331,6 +342,13 @@ export class AxBridgeError extends Error {
   constructor(
     message: string,
     readonly detail?: string,
+    /**
+     * Which of the window script's answers this is, when it is one:
+     * `no-window` (the process is running and owns no window), `no-process`
+     * or `ambiguous`. The message is for a person; this is for the adapter,
+     * which answers `read("title")` differently for the first two (SF-16).
+     */
+    readonly reason?: string,
   ) {
     super(message);
     this.name = "AxBridgeError";
@@ -1225,6 +1243,12 @@ export interface OsascriptBridgeOptions {
    * "not macOS" answer came first and it never reached the fake.
    */
   readonly platform?: NodeJS.Platform;
+  /**
+   * For tests: macOS's own answer to "is this program trusted for
+   * Accessibility?", asked without a prompt — `accessibilityGranted` from
+   * `grant.ts` unless given. `undefined` is "could not ask".
+   */
+  readonly trusted?: () => boolean | undefined;
 }
 
 const DEFAULT_TIMEOUT_MS = 20_000;
@@ -1367,11 +1391,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
         };
       }
       const result = await run(PERMISSION_SCRIPT, {}, PERMISSION_TIMEOUT_MS);
-      if (result.timedOut) {
-        lastPermission = "prompt-pending";
-        return { state: "prompt-pending", advice: promptAdvice() };
-      }
-      if (result.code === 0 && result.stdout.includes('"ok":true')) {
+      if (result.code === 0 && !result.timedOut && result.stdout.includes('"ok":true')) {
         lastPermission = "granted";
         return { state: "granted", advice: "The Accessibility permission is granted." };
       }
@@ -1379,21 +1399,58 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
       /*
        * `-1743` is "Not authorised to send Apple events"; `-25211` is
        * "not allowed assistive access", which is the accessibility API's own
-       * refusal and the one this adapter runs into. Anything else that fails
-       * here is treated as the prompt, because a first run on a clean machine
-       * produces a timeout rather than either code, and telling someone
-       * "denied" when they have simply not been asked yet sends them to the
-       * wrong screen.
+       * refusal and the one this adapter runs into.
        */
       const denied =
-        detail.includes("-1743") ||
-        detail.includes("-25211") ||
-        detail.includes("assistive access");
-      lastPermission = denied ? "denied" : "prompt-pending";
+        !result.timedOut &&
+        (detail.includes("-1743") ||
+          detail.includes("-25211") ||
+          detail.includes("assistive access"));
+      if (denied) {
+        lastPermission = "denied";
+        return { state: "denied", advice: deniedAdvice(), ...(detail === "" ? {} : { detail }) };
+      }
+      /*
+       * A timeout, or a failure with neither code: is it the prompt? (SF-14)
+       *
+       * A first run on a clean machine produces a timeout rather than either
+       * code, so both used to be `prompt-pending` — and so was a System Events
+       * that was merely slow, on a machine where the permission had been
+       * granted for months. macOS answers the question directly and without a
+       * prompt (`AXIsProcessTrustedWithOptions`), so it is asked: "not trusted"
+       * is the unanswered prompt, and anything else is a check that failed,
+       * which is `unknown` with what failed — never a permission to go and
+       * grant.
+       */
+      const what = result.timedOut
+        ? "the permission check (an assistive-access call through System Events) did not " +
+          `answer within ${PERMISSION_TIMEOUT_MS} ms`
+        : `the permission check failed without a refusal code${detail === "" ? "" : `: ${detail}`}`;
+      const trusted = (options.trusted ?? (() => accessibilityGranted({ platform })))();
+      if (trusted === false) {
+        lastPermission = "prompt-pending";
+        return {
+          state: "prompt-pending",
+          advice: promptAdvice(),
+          ...(detail === "" ? {} : { detail }),
+        };
+      }
+      lastPermission = "unknown";
       return {
-        state: lastPermission,
-        advice: denied ? deniedAdvice() : promptAdvice(),
-        ...(detail === "" ? {} : { detail }),
+        state: "unknown",
+        advice:
+          trusted === true
+            ? "macOS says this program is trusted for Accessibility, so this is not that prompt. " +
+              "System Events may be busy, or waiting on an Automation prompt of its own " +
+              "(System Settings → Privacy & Security → Automation). Run `yam surface doctor " +
+              "--adapter ax` again."
+            : "Whether the permission is granted could not be asked either. Run `yam surface " +
+              "doctor --adapter ax` again.",
+        detail:
+          `${what}; ` +
+          (trusted === true
+            ? "macOS says the Accessibility permission is granted"
+            : "macOS's own trust check could not be asked"),
       };
     },
 
@@ -1573,7 +1630,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
 
       const answer = parseWindow(result.stdout);
       if (!answer.ok) {
-        throw new AxBridgeError(ambiguityAware(request.process, answer));
+        throw new AxBridgeError(ambiguityAware(request.process, answer), undefined, answer.error);
       }
 
       const cost: AxSnapshotCost = {

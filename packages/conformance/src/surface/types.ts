@@ -116,7 +116,8 @@ export interface CaseContext {
   /** Record an equality observation, filling in expected and actual. */
   equals(description: string, actual: unknown, expected: unknown): void;
   /** Record that a call threw the error class the suite required. */
-  throws(description: string, run: () => Promise<unknown>, errorName: string): Promise<void>;
+  /** `errorName` may list several: any one of them passes. */
+  throws(description: string, run: () => Promise<unknown>, errorName: string | readonly string[]): Promise<void>;
   /**
    * Say this case has nothing to measure here, and why (Draft 2.9 §7.5).
    *

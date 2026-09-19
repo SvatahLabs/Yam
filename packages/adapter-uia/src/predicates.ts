@@ -9,9 +9,14 @@
  * `false`. `the URL should contain "/booking"` against a native window is not a
  * failed assertion, it is a question with no meaning here — and reporting it as
  * a failure would send whoever reads the run looking at the application.
+ *
+ * The refusal is an `UnsupportedError` (SF-11), as the AX adapter's is. It was a
+ * `CheckError` or a `NavigationError` depending on the predicate, told to a
+ * caller as `CHECK_FAILED` — the failed assertion this is not — or as
+ * `CONNECT_FAILED`, which sends them to a process that is fine.
  */
 import type { CheckResult, CheckSubject, Predicate, Ref, ValueRef } from "@svatah/yam-schema";
-import { CheckError, DataError, NavigationError } from "@svatah/yam-surface";
+import { CheckError, DataError, UnsupportedError } from "@svatah/yam-surface";
 import { saidBy, type UiaSnapshotNode } from "./tree.js";
 
 /** The literal a `ValueRef` names; an unresolved one is a caller mistake (LLD §8.2). */
@@ -47,6 +52,19 @@ export interface UiaCheckContext {
 }
 
 const norm = (text: string | undefined): string => (text ?? "").replace(/\s+/g, " ").trim();
+
+/**
+ * Every name and value in the window, which for a desktop app is its text.
+ *
+ * Shared by the `page` subject of `text`/`textContains` and by a `waitFor` for
+ * words (SF-16), so the wait and the assertion after it read the same thing.
+ */
+export function pageTextOf(nodes: readonly UiaSnapshotNode[]): string {
+  return nodes
+    .map((node) => `${norm(node.name)} ${norm(node.value)}`.trim())
+    .filter((text) => text !== "")
+    .join(" ");
+}
 
 /**
  * The words an element puts on the screen, its descendants included (T12.7).
@@ -94,7 +112,7 @@ export function evaluateUiaPredicate(
      * this adapter reads one window at a time. `capabilities().dialogs` is
      * false for that reason, and a check that got here anyway is told plainly.
      */
-    throw new CheckError(
+    throw new UnsupportedError(
       "The UIA adapter has no separate dialog surface: a Windows dialog is a top-level " +
         "window of its own, so drive it as one (LLD §2.4).",
       { adapter: "uia" },
@@ -102,7 +120,7 @@ export function evaluateUiaPredicate(
   }
 
   if (predicate.kind === "url" || predicate.kind === "urlContains") {
-    throw new NavigationError(
+    throw new UnsupportedError(
       "A desktop window has no URL. Check the window title instead " +
         '(`the page title should contain "…"`), which the UIA adapter answers from the ' +
         "window's `Name`.",
@@ -118,11 +136,7 @@ export function evaluateUiaPredicate(
   }
 
   if (subject === "page" && (predicate.kind === "text" || predicate.kind === "textContains")) {
-    // Every name and value in the window, which for a desktop app is its text.
-    const actual = context.nodes
-      .map((node) => `${norm(node.name)} ${norm(node.value)}`.trim())
-      .filter((text) => text !== "")
-      .join(" ");
+    const actual = pageTextOf(context.nodes);
     const expected = literalValue(predicate.value);
     const ok = predicate.kind === "text" ? actual === expected : actual.includes(expected);
     return negated(result(ok, actual, expected), predicate.negate);
@@ -203,7 +217,7 @@ export function evaluateUiaPredicate(
        * rather than answered `false`, which would read as "this list is
        * single-select" and is a claim the snapshot cannot support.
        */
-      throw new CheckError(
+      throw new UnsupportedError(
         "The UIA adapter does not read `SelectionPattern.CanSelectMultiple`: it is a " +
           "per-element pattern call the snapshot walk does not make.",
         { adapter: "uia" },
@@ -236,7 +250,7 @@ export function evaluateUiaPredicate(
       return negated(result(actual === expected, actual ?? null, expected), predicate.negate);
     }
     case "css":
-      throw new CheckError(
+      throw new UnsupportedError(
         "A desktop element has no CSS. Ask about a state, a value, or the role instead.",
         { adapter: "uia" },
       );
@@ -258,7 +272,7 @@ export function evaluateUiaPredicate(
     }
     default: {
       const exhaustive = predicate as { kind: string };
-      throw new CheckError(`The UIA adapter has no rule for "${exhaustive.kind}".`, {
+      throw new UnsupportedError(`The UIA adapter has no rule for "${exhaustive.kind}".`, {
         adapter: "uia",
       });
     }

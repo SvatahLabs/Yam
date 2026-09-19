@@ -85,7 +85,25 @@ deterministic one: it either sets the value or reports that it cannot.
 | `drag` | no | `mouse_event` gives press, move and release, but not the timing a real pointer has, and a drag that silently did nothing would be worse than one that says so |
 | `upload`, `trace`, `webmcp` | no | browser ideas |
 
-`navigate`, `back`, `forward` and `refresh` throw `NavigationError`.
+`navigate`, `back`, `forward` and `refresh` throw `UnsupportedError`, which the
+broker answers as `UNSUPPORTED_OPERATION`.
+
+So do the gestures the bridge cannot make. `hover` has no pointer move that does
+not press; `keyDown` and `keyUp` cannot hold a key, because `SendKeys` presses
+and releases (press the chord in one step instead). `scrollIntoView` uses
+`ScrollItemPattern` when the element has it; otherwise it answers `ok` only when
+the element's rectangle is inside the window's, and throws `UnsupportedError`
+when it is not.
+
+`read("title")` reads the window now, and throws `SessionError` when the process
+owns no main window: the bridge cannot tell that from a process that has quit.
+
+A reference `waitFor` honours `args.state` — `attached`, `detached`, `visible`,
+`hidden`, `enabled` or `disabled`, `visible` when none is given — re-reading the
+window and finding the element again by its automation id or name rather than
+by its index. An element that cannot be told apart from a look-alike is a
+`LocateError`; an unknown state is a `DataError`. It waits `args.timeoutMs`,
+else the configured step timeout.
 
 A Chromium window's close, minimise and maximise buttons are not in its tree.
 Chromium's frame publishes them only as the window element's `Window` pattern:

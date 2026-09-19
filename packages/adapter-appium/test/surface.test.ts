@@ -16,7 +16,13 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { LocateError, NavigationError, ScriptError } from "@svatah/yam-surface";
+import {
+  ActionabilityError,
+  DataError,
+  LocateError,
+  TimeoutError,
+  UnsupportedError,
+} from "@svatah/yam-surface";
 import type { AppiumClient, ElementId } from "../src/client.js";
 import { parsePageSource, xpathOf, type SourceNode } from "../src/page-source.js";
 import { AppiumSurface, APPIUM_CAPABILITIES } from "../src/surface.js";
@@ -370,13 +376,18 @@ describe("contexts are what a phone has instead of frames (LLD §7.4)", () => {
   });
 
   it("refuses to navigate a native context, and says how to get one that can", async () => {
-    const { surface } = await open({ source: "android-login.xml" });
+    // Unsupported here, not a navigation or a script that failed (SF-11):
+    // nothing was sent, and no wait gives a native screen a URL.
+    const { surface, device } = await open({ source: "android-login.xml" });
     await expect(surface.act("navigate", undefined, { url: "/login" })).rejects.toThrow(
-      NavigationError,
+      UnsupportedError,
     );
+    await expect(surface.act("navigate", undefined, { url: "/login" })).rejects.toThrow(/webview/);
     await expect(surface.act("evaluate", undefined, { script: "return 1" })).rejects.toThrow(
-      ScriptError,
+      UnsupportedError,
     );
+    expect(device.of("navigateTo")).toEqual([]);
+    expect(device.of("execute")).toEqual([]);
   });
 
   it("navigates and evaluates once the session is in a webview", async () => {
@@ -391,12 +402,448 @@ describe("contexts are what a phone has instead of frames (LLD §7.4)", () => {
 });
 
 describe("actions a phone does not have are refused, not emulated (LLD §2.4)", () => {
-  for (const action of ["switchWindow", "closeOtherWindows", "dialog", "upload", "selectOption"] as const) {
+  /*
+   * As `UnsupportedError` (SF-11). They were `ScriptError`s — and `quit` a
+   * `NavigationError` — which a caller is told as `OUTCOME_UNKNOWN` and
+   * `CONNECT_FAILED`: "check whether it happened", "the device went away".
+   * Neither is true of an action that was never sent.
+   */
+  for (const action of [
+    "switchWindow",
+    "closeOtherWindows",
+    "dialog",
+    "upload",
+    "selectOption",
+    "deselectOption",
+    "deselectAll",
+    "resizeWindow",
+    "quit",
+    "invoke",
+  ] as const) {
     it(`refuses "${action}" with the reason`, async () => {
-      const { surface } = await open({ source: "android-login.xml" });
-      await expect(surface.act(action)).rejects.toThrow(ScriptError);
+      const { surface, device } = await open({ source: "android-login.xml" });
+      await expect(surface.act(action)).rejects.toThrow(UnsupportedError);
+      expect(device.of("performActions")).toEqual([]);
+      expect(device.of("click")).toEqual([]);
     });
   }
+
+  it("refuses to hover, because a tap in its place would press the element", async () => {
+    const { surface, device } = await open({ source: "android-login.xml" });
+    const [submit] = await surface.locate({ by: "accessibilityId", value: "Sign in button", score: 1 });
+    await expect(surface.act("hover", submit!)).rejects.toThrow(UnsupportedError);
+    await expect(surface.act("hover", submit!)).rejects.toThrow(/no hover/);
+    expect(device.of("click")).toEqual([]);
+  });
+
+  it("still taps for hoverAndClick, whose meaning is the click", async () => {
+    const { surface, device } = await open({ source: "android-login.xml" });
+    const [submit] = await surface.locate({ by: "accessibilityId", value: "Sign in button", score: 1 });
+    await surface.act("hoverAndClick", submit!);
+    expect(device.of("click")).toHaveLength(1);
+  });
+
+  it("refuses to release, because a long press on a phone is already over", async () => {
+    const { surface, device } = await open({ source: "android-login.xml" });
+    const [submit] = await surface.locate({ by: "accessibilityId", value: "Sign in button", score: 1 });
+    await surface.act("pressAndHold", submit!);
+    await expect(surface.act("release", submit!)).rejects.toThrow(UnsupportedError);
+    // One gesture reached the device: the long press, and not a second tap.
+    expect(device.of("performActions")).toHaveLength(1);
+  });
+
+  it("refuses a dialog predicate as unsupported", async () => {
+    const { surface } = await open({ source: "android-login.xml" });
+    await expect(surface.check({ kind: "present" }, "dialog")).rejects.toThrow(UnsupportedError);
+  });
+});
+
+/**
+ * Scrolling an element into view (LLD §7.4, SF-11).
+ *
+ * The webview branch called its script with no arguments, so it scrolled
+ * nothing and said it had; the native branch made one half-screen swipe the
+ * same way whatever the element was. Both answered `{ok: true}`.
+ */
+describe("scrolling an element into view", () => {
+  /** A device whose content moves with the swipes it is sent. */
+  function scrollingDevice(options: { startY: number; stuck?: boolean }) {
+    const device = fakeDevice({ source: "android-list.xml" });
+    let offset = 0;
+    const swipes: Array<{ from: number; to: number }> = [];
+    const client: AppiumClient = {
+      ...device.client,
+      getRect: async (element) => {
+        const rect = await device.client.getRect(element);
+        return element.includes("android.widget.Button")
+          ? { ...rect, y: options.startY + offset }
+          : rect;
+      },
+      performActions: async (actions) => {
+        await device.client.performActions(actions);
+        const moves = (
+          (actions[0] as { actions: Array<{ type: string; y?: number }> }).actions
+        ).filter((one) => one.type === "pointerMove");
+        const from = moves[0]!.y!;
+        const to = moves[1]!.y!;
+        swipes.push({ from, to });
+        if (options.stuck !== true) offset += to - from;
+      },
+    };
+    return { device, client, swipes, rectY: () => options.startY + offset };
+  }
+
+  async function openOn(client: AppiumClient): Promise<AppiumSurface> {
+    const surface = new AppiumSurface({ connect: async () => client, timeoutMs: 2_000 });
+    await surface.open({});
+    return surface;
+  }
+
+  it("swipes up, in steps, until an element below the screen is inside it", async () => {
+    // The screen is 2400 tall; the button starts two screens down.
+    const phone = scrollingDevice({ startY: 4_000 });
+    const surface = await openOn(phone.client);
+    const [button] = await surface.locate({ by: "text", value: "Book now", nth: 0, score: 1 });
+    await expect(surface.act("scrollIntoView", button!)).resolves.toMatchObject({ ok: true });
+
+    expect(phone.swipes.length).toBeGreaterThan(1);
+    for (const swipe of phone.swipes) {
+      expect(swipe.to, "the finger moves up to bring content up").toBeLessThan(swipe.from);
+      // Never from an edge, where the platform starts its own gestures.
+      expect(Math.min(swipe.from, swipe.to)).toBeGreaterThan(0);
+      expect(Math.max(swipe.from, swipe.to)).toBeLessThan(2_400);
+    }
+    expect(phone.rectY()).toBeGreaterThanOrEqual(0);
+    expect(phone.rectY() + 90).toBeLessThanOrEqual(2_400);
+  });
+
+  it("swipes down for an element above the screen", async () => {
+    const phone = scrollingDevice({ startY: -1_500 });
+    const surface = await openOn(phone.client);
+    const [button] = await surface.locate({ by: "text", value: "Book now", nth: 0, score: 1 });
+    await surface.act("scrollIntoView", button!);
+    expect(phone.swipes.every((swipe) => swipe.to > swipe.from)).toBe(true);
+    expect(phone.rectY()).toBeGreaterThanOrEqual(0);
+  });
+
+  it("does not swipe at all when the element is already on screen", async () => {
+    const phone = scrollingDevice({ startY: 630 });
+    const surface = await openOn(phone.client);
+    const [button] = await surface.locate({ by: "text", value: "Book now", nth: 0, score: 1 });
+    await surface.act("scrollIntoView", button!);
+    expect(phone.swipes).toEqual([]);
+  });
+
+  it("gives up, and says so, when a swipe does not move the element", async () => {
+    const phone = scrollingDevice({ startY: 4_000, stuck: true });
+    const surface = await openOn(phone.client);
+    const [button] = await surface.locate({ by: "text", value: "Book now", nth: 0, score: 1 });
+    const failure = await surface.act("scrollIntoView", button!).catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(ActionabilityError);
+    expect((failure as Error).message).toMatch(/did not move it/);
+    // One swipe to learn that swiping does nothing, not eight.
+    expect(phone.swipes).toHaveLength(1);
+  });
+
+  it("hands a webview the element to scroll", async () => {
+    const { surface, device } = await open({
+      source: "android-login.xml",
+      context: "WEBVIEW_com.yam.sample",
+    });
+    const submit = (await surface.snapshot()).nodes.find((node) => node.name === "Sign in button")!;
+    await surface.act("scrollIntoView", submit.ref);
+    const [script, args] = device.of("execute").at(-1)!.args as [string, unknown[]];
+    expect(script).toContain("scrollIntoView");
+    expect(args).toHaveLength(1);
+    expect(args[0]).toEqual({
+      "element-6066-11e4-a52e-4f735466cecf": expect.stringContaining("android.widget.Button"),
+    });
+  });
+});
+
+/** `waitFor` with no reference waits for the screen (SF-16). */
+describe("waiting for the screen rather than an element (SF-16)", () => {
+  it("returns once a native screen says the text", async () => {
+    const { surface } = await open({ source: "android-login.xml" });
+    await expect(
+      surface.act("waitFor", undefined, { text: "Remember me", timeoutMs: 1_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("times out, as a timeout, on text the screen never shows", async () => {
+    const { surface } = await open({ source: "android-login.xml" });
+    await expect(
+      surface.act("waitFor", undefined, { text: "Welcome back", timeoutMs: 300 }),
+    ).rejects.toThrow(TimeoutError);
+  });
+
+  it("waits for a webview's URL and its words", async () => {
+    const device = fakeDevice({
+      source: "android-login.xml",
+      context: "WEBVIEW_com.yam.sample",
+      url: "http://10.0.2.2:4173/login",
+    });
+    let body = "Sign in";
+    const client: AppiumClient = {
+      ...device.client,
+      execute: async <T,>(script: string, args: unknown[]) => {
+        await device.client.execute(script, args);
+        return (script.includes("innerText") ? body : "") as T;
+      },
+    };
+    const surface = new AppiumSurface({ connect: async () => client, timeoutMs: 2_000 });
+    await surface.open({});
+    setTimeout(() => {
+      void client.navigateTo("http://10.0.2.2:4173/dashboard");
+      body = "Welcome back, Ada";
+    }, 150);
+    await expect(
+      surface.act("waitFor", undefined, { url: "/dashboard", text: "Welcome back", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("says what is missing when there is nothing to wait for", async () => {
+    const { surface } = await open({ source: "android-login.xml" });
+    await expect(surface.act("waitFor", undefined, {})).rejects.toThrow(DataError);
+  });
+});
+
+/**
+ * A native swipe to the top or the bottom (SF-11).
+ *
+ * The distance was the centre's `y`, a coordinate rather than a length: on a
+ * screen whose box starts at 0 the finger ended on the edge, where the platform
+ * starts its own gestures, and on one whose box starts lower it ended past it.
+ */
+describe("scrolling to the top and the bottom of a native screen", () => {
+  it("swipes four tenths of the screen from its centre, and never reaches an edge", async () => {
+    const device = fakeDevice({ source: "android-login.xml" });
+    // The application's frame starts 200 pixels down, below a status bar.
+    const client: AppiumClient = {
+      ...device.client,
+      getPageSource: async () =>
+        (await device.client.getPageSource()).replace(
+          'bounds="[0,0][1080,2400]"',
+          'bounds="[0,200][1080,2400]"',
+        ),
+    };
+    const surface = new AppiumSurface({ connect: async () => client, timeoutMs: 2_000 });
+    await surface.open({});
+
+    const swipe = (at: number): { from: number; to: number; x: number } => {
+      const sent = device.of("performActions")[at]!.args[0] as Array<{
+        actions: Array<{ type: string; x?: number; y?: number }>;
+      }>;
+      const moves = sent[0]!.actions.filter((one) => one.type === "pointerMove");
+      return { from: moves[0]!.y!, to: moves[1]!.y!, x: moves[0]!.x! };
+    };
+
+    await surface.act("scrollToTop");
+    await surface.act("scrollToBottom");
+    // The box is 1080 by 2200 from y 200: its centre is 1300, four tenths is 880.
+    expect(swipe(0)).toEqual({ from: 1_300, to: 2_180, x: 540 });
+    expect(swipe(1)).toEqual({ from: 1_300, to: 420, x: 540 });
+    for (const at of [0, 1]) {
+      // Before: scrollToTop went from 1300 to 2600, past the bottom of a screen that ends at 2400.
+      expect(swipe(at).to).toBeGreaterThan(200);
+      expect(swipe(at).to).toBeLessThan(2_400);
+    }
+  });
+});
+
+/**
+ * The keyboard a key action has (SF-11).
+ */
+describe("keys", () => {
+  const sentKeys = (device: ReturnType<typeof fakeDevice>): unknown[] =>
+    device.of("performActions").map((call) => {
+      const [sequence] = call.args[0] as Array<{ actions: Array<{ value?: string }> }>;
+      return sequence!.actions.map((one) => one.value);
+    });
+
+  it("sends a named key as its W3C codepoint, and a character as itself", async () => {
+    const { surface, device } = await open({ source: "android-login.xml" });
+    await surface.act("press", undefined, { key: "Tab" });
+    await surface.act("press", undefined, { key: "ArrowDown" });
+    await surface.act("press", undefined, { key: "a" });
+    await surface.act("press", undefined, { key: "Enter" });
+    // Before: "Tab" went to the driver as the three characters T, a, b.
+    expect(sentKeys(device)).toEqual([
+      ["\uE004", "\uE004"],
+      ["\uE015", "\uE015"],
+      ["a", "a"],
+      ["\uE007", "\uE007"],
+    ]);
+  });
+
+  it("refuses a key name it has no codepoint for, before the driver sees it", async () => {
+    const { surface, device } = await open({ source: "android-login.xml" });
+    await expect(surface.act("press", undefined, { key: "F13" })).rejects.toThrow(UnsupportedError);
+    expect(device.of("performActions")).toEqual([]);
+  });
+
+  it("refuses keyDown and keyUp, which a key action sequence cannot hold", async () => {
+    const { surface, device } = await open({ source: "android-login.xml" });
+    for (const action of ["keyDown", "keyUp"] as const) {
+      await expect(surface.act(action, undefined, { key: "Shift" })).rejects.toThrow(UnsupportedError);
+    }
+    expect(device.of("performActions")).toEqual([]);
+  });
+});
+
+describe("native waits that could only burn their timeout (SF-16)", () => {
+  it("refuses a URL wait in a native context at once", async () => {
+    const { surface } = await open({ source: "android-login.xml" });
+    const started = Date.now();
+    await expect(
+      surface.act("waitFor", undefined, { url: "/dashboard", timeoutMs: 5_000 }),
+    ).rejects.toThrow(UnsupportedError);
+    expect(Date.now() - started).toBeLessThan(1_000);
+  });
+
+  it("honours the step's timeoutMs on a reference wait", async () => {
+    const { surface } = await open({ source: "android-login.xml" });
+    const [submit] = await surface.locate({ by: "accessibilityId", value: "Sign in button", score: 1 });
+    const started = Date.now();
+    // The session's timeout is 2000 ms; the step asked for 200.
+    await expect(
+      surface.act("waitFor", submit!, { state: "hidden", timeoutMs: 200 }),
+    ).rejects.toThrow(/Waited 200 ms/);
+    expect(Date.now() - started).toBeLessThan(1_500);
+  });
+
+  it("waits for the screen as long as the session's timeout when the step does not say", async () => {
+    const device = fakeDevice({ source: "android-login.xml" });
+    const surface = new AppiumSurface({ connect: async () => device.client, timeoutMs: 250 });
+    await surface.open({});
+    const failure = await surface
+      .act("waitFor", undefined, { text: "Welcome back" })
+      .catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(TimeoutError);
+    expect((failure as Error).message).toMatch(/Waited 250 ms/);
+  });
+});
+
+/**
+ * A reference wait waits for the state it was asked for (pattern 19).
+ *
+ * `attached` and `disabled` fell through to "displayed", an unknown state was
+ * not refused, and every read that threw counted as "not shown".
+ */
+describe("waiting for an element to be in a state", () => {
+  /** A device whose Sign in button a test can hide, disable or remove while a wait runs. */
+  async function waitingDevice() {
+    const device = fakeDevice({ source: "android-login.xml" });
+    const button = { gone: false, displayed: true, enabled: true, failure: undefined as Error | undefined };
+    const isButton = (id: ElementId): boolean => id.includes("android.widget.Button");
+    const ask = <T,>(id: ElementId, answer: () => T, fallback: () => Promise<T>): Promise<T> => {
+      if (!isButton(id)) return fallback();
+      if (button.failure !== undefined) return Promise.reject(button.failure);
+      if (button.gone) {
+        return Promise.reject(
+          Object.assign(new Error("The element is not attached to the page document"), {
+            name: "stale element reference",
+          }),
+        );
+      }
+      return Promise.resolve(answer());
+    };
+    const client: AppiumClient = {
+      ...device.client,
+      isDisplayed: (id) => ask(id, () => button.displayed, () => device.client.isDisplayed(id)),
+      isEnabled: (id) => ask(id, () => button.enabled, () => device.client.isEnabled(id)),
+      findElements: async (using, value) =>
+        (await device.client.findElements(using, value)).filter((id) => !(button.gone && isButton(id))),
+    };
+    const surface = new AppiumSurface({ connect: async () => client, timeoutMs: 2_000 });
+    await surface.open({});
+    const [handle] = await surface.locate({ by: "accessibilityId", value: "Sign in button", score: 1 });
+    const snapshot = await surface.snapshot();
+    const indexed = snapshot.nodes.find((node) => node.name === "Sign in button")!.ref;
+    return { surface, button, handle: handle!, indexed };
+  }
+  const later = (then: () => void): void => {
+    setTimeout(then, 150);
+  };
+
+  it("waits for disabled, and does not return while the element is enabled", async () => {
+    const { surface, button, handle } = await waitingDevice();
+    // Before: `disabled` meant displayed, and this returned at once.
+    await expect(
+      surface.act("waitFor", handle, { state: "disabled", timeoutMs: 300 }),
+    ).rejects.toThrow(/to be disabled, and it is displayed and enabled/);
+    later(() => {
+      button.enabled = false;
+    });
+    await expect(
+      surface.act("waitFor", handle, { state: "disabled", timeoutMs: 3_000 }),
+    ).resolves.toMatchObject({ ok: true });
+    await expect(
+      surface.act("waitFor", handle, { state: "enabled", timeoutMs: 300 }),
+    ).rejects.toThrow(TimeoutError);
+  });
+
+  it("answers attached for an element that is there but not displayed", async () => {
+    const { surface, button, handle } = await waitingDevice();
+    button.displayed = false;
+    // Before: `attached` waited for it to be displayed.
+    await expect(
+      surface.act("waitFor", handle, { state: "attached", timeoutMs: 300 }),
+    ).resolves.toMatchObject({ ok: true });
+    await expect(
+      surface.act("waitFor", handle, { state: "hidden", timeoutMs: 300 }),
+    ).resolves.toMatchObject({ ok: true });
+    later(() => {
+      button.displayed = true;
+    });
+    await expect(
+      surface.act("waitFor", handle, { state: "visible", timeoutMs: 3_000 }),
+    ).resolves.toMatchObject({ ok: true });
+  });
+
+  it("waits for detached on a driver handle and on a snapshot reference", async () => {
+    const { surface, button, handle, indexed } = await waitingDevice();
+    await expect(
+      surface.act("waitFor", indexed, { state: "detached", timeoutMs: 300 }),
+    ).rejects.toThrow(TimeoutError);
+    later(() => {
+      button.gone = true;
+    });
+    await expect(
+      surface.act("waitFor", handle, { state: "detached", timeoutMs: 3_000 }),
+    ).resolves.toMatchObject({ ok: true });
+    await expect(
+      surface.act("waitFor", indexed, { state: "detached", timeoutMs: 300 }),
+    ).resolves.toMatchObject({ ok: true });
+    await expect(
+      surface.act("waitFor", handle, { state: "attached", timeoutMs: 300 }),
+    ).rejects.toThrow(/the driver no longer finds it/);
+  });
+
+  it("ends the wait on a driver failure instead of reading it as hidden", async () => {
+    const { surface, button, handle } = await waitingDevice();
+    button.failure = new Error("invalid session id");
+    const started = Date.now();
+    await expect(
+      surface.act("waitFor", handle, { state: "hidden", timeoutMs: 3_000 }),
+    ).rejects.toThrow(/invalid session id/);
+    expect(Date.now() - started).toBeLessThan(1_000);
+  });
+
+  it("refuses a state it does not know, naming the six", async () => {
+    const { surface, handle } = await waitingDevice();
+    await expect(surface.act("waitFor", handle, { state: "checked" })).rejects.toThrow(DataError);
+    await expect(surface.act("waitFor", handle, { state: "present" })).rejects.toThrow(
+      /attached, detached, visible, hidden, enabled or disabled/,
+    );
+  });
+
+  it("refuses a reference the session never issued, rather than waiting it out", async () => {
+    const { surface } = await waitingDevice();
+    await expect(
+      surface.act("waitFor", "h99", { state: "detached", timeoutMs: 3_000 }),
+    ).rejects.toThrow(LocateError);
+  });
 });
 
 describe("session state (REQ-AUTO-2)", () => {

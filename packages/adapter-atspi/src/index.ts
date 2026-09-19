@@ -23,6 +23,8 @@ export {
   automationIdOf,
   isInteractive,
   actionFor,
+  findAgain,
   ACTION_PREFERENCE,
   type BuiltNode,
+  type FoundAgain,
 } from "./tree.js";

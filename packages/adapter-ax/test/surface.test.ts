@@ -11,11 +11,20 @@
 import { describe, expect, it } from "vitest";
 import {
   ActionabilityError,
+  DataError,
   LocateError,
-  NavigationError,
+  PermissionError,
   SessionError,
+  TimeoutError,
+  UnsupportedError,
 } from "@svatah/yam-surface";
-import { AxBridgeError, AxSurface, AX_CAPABILITIES, keyChord } from "../src/index.js";
+import {
+  AxBridgeError,
+  AxSurface,
+  AX_CAPABILITIES,
+  keyChord,
+  type AxNode,
+} from "../src/index.js";
 import { recordedBridge, type AppScreen, type RecordedBridge } from "./recorded.js";
 
 async function open(
@@ -48,12 +57,55 @@ describe("opening a session (REQ-ADP-7, LLD §7.5)", () => {
       },
     });
     const surface = new AxSurface({ processName: "Yam", bridge });
+    // `PERMISSION_REQUIRED` to a caller, not `CONNECT_FAILED` (SF-14): the fix
+    // is in System Settings, not in the application.
+    await expect(surface.open({ kind: "desktop" } as never)).rejects.toThrow(PermissionError);
     await expect(surface.open({ kind: "desktop" } as never)).rejects.toThrow(
       /Accessibility permission is not granted \(prompt-pending\)/,
     );
     await expect(surface.open({ kind: "desktop" } as never)).rejects.toThrow(
       /yam surface doctor/,
     );
+  });
+
+  it("refuses a host that is not macOS as unsupported, not as a missing permission (SF-14)", async () => {
+    const bridge = recordedBridge({
+      permission: {
+        state: "unsupported",
+        advice: "The macOS Accessibility adapter runs on macOS only. Use `--adapter uia` on Windows.",
+      },
+    });
+    const surface = new AxSurface({ processName: "Yam", bridge });
+    const failure = await surface.open({ kind: "desktop" } as never).catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(UnsupportedError);
+    // Not System Settings: there is none to send anyone to.
+    expect(failure).not.toBeInstanceOf(PermissionError);
+    expect((failure as Error).message).toMatch(/--adapter uia/);
+  });
+
+  it("says what failed when the permission check itself did not answer (SF-14)", async () => {
+    const bridge = recordedBridge({
+      permission: {
+        state: "unknown",
+        advice: "Run `yam surface doctor --adapter ax` again.",
+        detail:
+          "the permission check did not answer within 5000 ms; macOS says the Accessibility " +
+          "permission is granted",
+      },
+    });
+    const surface = new AxSurface({ processName: "Yam", bridge });
+    const failure = await surface.open({ kind: "desktop" } as never).catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(SessionError);
+    expect(failure).not.toBeInstanceOf(PermissionError);
+    expect((failure as Error).message).toMatch(/could not be checked.*did not answer within 5000 ms/s);
+  });
+
+  it("still calls a refused permission a permission", async () => {
+    const bridge = recordedBridge({
+      permission: { state: "denied", advice: "Switch it on and restart the program." },
+    });
+    const surface = new AxSurface({ processName: "Yam", bridge });
+    await expect(surface.open({ kind: "desktop" } as never)).rejects.toThrow(PermissionError);
   });
 
   it("brings the window forward, so the tree is the one a person would see", async () => {
@@ -299,10 +351,14 @@ describe("act (LLD §7.5)", () => {
   });
 
   it("says plainly that a desktop application has no navigation", async () => {
-    const { surface } = await open();
+    // Unsupported, not a navigation that failed (SF-11): nothing was sent, and
+    // `CONNECT_FAILED` would send a caller to an application that is fine.
+    const { surface, bridge } = await open();
+    const before = bridge.commands.length;
     for (const action of ["navigate", "back", "forward", "refresh"] as const) {
-      await expect(surface.act(action, undefined, { url: "/x" })).rejects.toThrow(NavigationError);
+      await expect(surface.act(action, undefined, { url: "/x" })).rejects.toThrow(UnsupportedError);
     }
+    expect(bridge.commands.length).toBe(before);
   });
 
   it("says plainly that it cannot drag, rather than half-doing it", async () => {
@@ -310,10 +366,58 @@ describe("act (LLD §7.5)", () => {
     const snapshot = await surface.snapshot();
     await expect(
       surface.act("dragTo", snapshot.nodes[1]!.ref, {}, snapshot.nodes[2]!.ref),
+    ).rejects.toThrow(UnsupportedError);
+    await expect(
+      surface.act("dragTo", snapshot.nodes[1]!.ref, {}, snapshot.nodes[2]!.ref),
     ).rejects.toThrow(/cannot drag/);
+    // Whatever the references are: a stale one must not turn "cannot drag"
+    // into "the element is gone".
+    await expect(surface.act("dragTo", "r99999", {}, "r99998")).rejects.toThrow(UnsupportedError);
     expect(AX_CAPABILITIES.drag).toBe(false);
   });
+
+  it("refuses an action it has no row for as unsupported, not as a timeout", async () => {
+    const { surface } = await open();
+    await expect(surface.act("upload", undefined, {})).rejects.toThrow(UnsupportedError);
+    await expect(surface.act("upload", undefined, {})).rejects.toThrow(/has no "upload"/);
+  });
+
+  it("refuses to deselect, rather than selecting what it was asked to deselect", async () => {
+    /*
+     * `deselectOption` shared `selectOption`'s code, so it pressed the pop-up
+     * and then pressed the named item — choosing the very option the caller
+     * wanted cleared, and answering `{ok: true}`. A macOS pop-up menu has no
+     * deselected state to put it in, so the answer is a refusal, and nothing is
+     * pressed on the way to it.
+     */
+    const { surface, bridge } = await open();
+    const [gateway] = await surface.locate({ by: "automationId", value: "record-gateway", score: 1 });
+    const before = bridge.commands.length;
+    await expect(
+      surface.act("deselectOption", gateway!, { label: "anthropic" }),
+    ).rejects.toThrow(UnsupportedError);
+    await expect(
+      surface.act("deselectOption", gateway!, { label: "anthropic" }),
+    ).rejects.toThrow(/no deselected state/);
+    expect(bridge.commands.slice(before)).toEqual([]);
+  });
 });
+
+/** A session whose `screencapture` failed the way a missing grant makes it fail. */
+async function screenshotting(granted: () => boolean | undefined): Promise<AxSurface> {
+  const bridge = recordedBridge({
+    screen: "record",
+    onScreenshot: () => {
+      throw new AxBridgeError(
+        'No screenshot was written to "/tmp/app.png": `screencapture` exited 1.',
+        "could not create image from display",
+      );
+    },
+  });
+  const surface = new AxSurface({ processName: "Yam", bridge, screenRecordingGranted: granted });
+  await surface.open({ kind: "desktop", processName: "Yam" } as never);
+  return surface;
+}
 
 describe("read, check, state (LLD §2.3, §7.5)", () => {
   it("reads a name, a value and the window title", async () => {
@@ -327,7 +431,8 @@ describe("read, check, state (LLD §2.3, §7.5)", () => {
     });
     expect(await surface.read("text", ref)).toBe("Stop recording");
     expect(await surface.read("title")).toBe("Yam");
-    await expect(surface.read("url")).rejects.toThrow(NavigationError);
+    await expect(surface.read("url")).rejects.toThrow(UnsupportedError);
+    await expect(surface.read("result")).rejects.toThrow(UnsupportedError);
   });
 
   it("answers a state predicate from the tree", async () => {
@@ -351,6 +456,12 @@ describe("read, check, state (LLD §2.3, §7.5)", () => {
     await expect(
       surface.check({ kind: "urlContains", value: { kind: "literal", value: "/x" } }, "page"),
     ).rejects.toThrow(/no URL/);
+    // Refused as unsupported (SF-11): a `CheckError` was told as CHECK_FAILED,
+    // which is the failed assertion this refusal exists not to be.
+    await expect(
+      surface.check({ kind: "urlContains", value: { kind: "literal", value: "/x" } }, "page"),
+    ).rejects.toThrow(UnsupportedError);
+    await expect(surface.check({ kind: "present" }, "dialog")).rejects.toThrow(UnsupportedError);
   });
 
   it("reports the window it is on, and restores by activating it", async () => {
@@ -388,18 +499,45 @@ describe("read, check, state (LLD §2.3, §7.5)", () => {
      * `AxBridgeError` out — a step that took no screenshot must not read as one
      * that did.
      */
-    const { surface } = await open({
-      onScreenshot: () => {
-        throw new AxBridgeError(
-          'No screenshot was written to "/tmp/app.png": `screencapture` exited 1.',
-          "could not create image from display",
-        );
-      },
-    });
+    const surface = await screenshotting(() => false);
     await expect(surface.screenshot("/tmp/app.png")).rejects.toThrow(SessionError);
     await expect(surface.screenshot("/tmp/app.png")).rejects.toThrow(
       /No screenshot was written.*could not create image from display/s,
     );
+    // And, macOS agreeing the grant is missing, it is the Screen Recording grant, said as one (SF-14).
+    await expect(surface.screenshot("/tmp/app.png")).rejects.toThrow(PermissionError);
+  });
+
+  /*
+   * The same words from a host with no display to capture (SF-14): a locked
+   * screen, an SSH login. The regex alone sent a person with Screen Recording
+   * granted to System Settings to grant it.
+   */
+  it("does not blame the grant for a display it could not capture when the grant is there", async () => {
+    const surface = await screenshotting(() => true);
+    const failure = await surface.screenshot("/tmp/app.png").catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(SessionError);
+    expect(failure).not.toBeInstanceOf(PermissionError);
+    expect((failure as Error).message).toMatch(/Screen Recording is granted.*locked screen/s);
+
+    const unaskable = await screenshotting(() => undefined);
+    const unknown = await unaskable.screenshot("/tmp/app.png").catch((error: unknown) => error);
+    expect(unknown).toBeInstanceOf(SessionError);
+    expect(unknown).not.toBeInstanceOf(PermissionError);
+    expect((unknown as Error).message).toMatch(/could not be asked/);
+  });
+
+  it("does not blame a permission for a screenshot that failed for another reason", async () => {
+    const { surface } = await open({
+      onScreenshot: () => {
+        throw new AxBridgeError(
+          'No screenshot was written to "/tmp/app.png": `screencapture` did not finish within 20000 ms.',
+        );
+      },
+    });
+    const failure = await surface.screenshot("/tmp/app.png").catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(SessionError);
+    expect(failure).not.toBeInstanceOf(PermissionError);
   });
 });
 
@@ -556,5 +694,396 @@ describe("typing into a framework-rendered field (P-W2-F13)", () => {
     const typed = bridge.commands.filter((one) => one.kind === "keystroke");
     expect(typed[0]).toMatchObject({ text: "a", using: ["command down"] });
     expect(typed[1]).toMatchObject({ text: "ada" });
+  });
+});
+
+/**
+ * `waitFor` with no reference waits for the window (SF-16).
+ *
+ * The loop that served both cases could only succeed when it was given a
+ * reference, so a wait for words or a title re-read the window for its whole
+ * timeout and then failed — on a window that had shown them from the first read.
+ */
+describe("waiting for the window rather than an element (SF-16)", () => {
+  it("returns as soon as the window says the text", async () => {
+    const { surface } = await open();
+    await expect(
+      surface.act("waitFor", undefined, { text: "Stop recording", timeoutMs: 1_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("waits for text that arrives after the wait began", async () => {
+    const { surface, bridge } = await open();
+    // "Run again" is on the Run screen and nowhere on Record.
+    setTimeout(() => bridge.setScreen("run"), 150);
+    await expect(
+      surface.act("waitFor", undefined, { text: "Run again", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("times out, as a timeout, on text that never comes", async () => {
+    const { surface } = await open();
+    await expect(
+      surface.act("waitFor", undefined, { text: "No such words", timeoutMs: 300 }),
+    ).rejects.toThrow(TimeoutError);
+  });
+
+  it("waits for a title the window takes later", async () => {
+    /*
+     * `read("title")` answered from the last refresh, so a title wait — which
+     * asks it until it matches — could never see the window change.
+     */
+    const recorded = recordedBridge({ screen: "record" });
+    let title = "Yam";
+    const bridge: RecordedBridge = {
+      ...recorded,
+      async window(request) {
+        return { ...(await recorded.window(request)), title };
+      },
+    };
+    const surface = new AxSurface({ processName: "Yam", bridge });
+    await surface.open({ kind: "desktop", processName: "Yam" } as never);
+    setTimeout(() => {
+      title = "Yam — scratch.yam";
+    }, 150);
+    await expect(
+      surface.act("waitFor", undefined, { title: "scratch.yam", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+  });
+
+  it("refuses a URL wait at once, instead of spending the timeout on it", async () => {
+    const { surface } = await open();
+    const started = Date.now();
+    await expect(
+      surface.act("waitFor", undefined, { url: "/booking", timeoutMs: 5_000 }),
+    ).rejects.toThrow(UnsupportedError);
+    expect(Date.now() - started).toBeLessThan(1_000);
+  });
+
+  it("says what is missing when there is nothing to wait for", async () => {
+    const { surface } = await open();
+    await expect(surface.act("waitFor", undefined, { timeoutMs: 5_000 })).rejects.toThrow(DataError);
+  });
+
+  it("still waits on a reference the way it did", async () => {
+    const { surface } = await open();
+    const [ref] = await surface.locate({ by: "automationId", value: "record-gateway", score: 1 });
+    await expect(surface.act("waitFor", ref!, { timeoutMs: 1_000 })).resolves.toEqual({ ok: true });
+  });
+});
+
+/**
+ * Gestures this bridge cannot make are refused, not reported as done (SF-11).
+ *
+ * `hover` and `scrollIntoView` answered `{ok: true}` having done nothing, and
+ * `keyDown`/`keyUp` sent a whole key press — so a step passed and the failure
+ * turned up later, somewhere that did not explain it.
+ */
+describe("no-op actions that reported success (SF-11)", () => {
+  /** The Record screen, with one element's recorded node changed. */
+  async function openWith(change: (node: AxNode) => AxNode): Promise<{
+    surface: AxSurface;
+    bridge: RecordedBridge;
+  }> {
+    const recorded = recordedBridge({ screen: "record" });
+    const bridge: RecordedBridge = {
+      ...recorded,
+      async window(request) {
+        const window = await recorded.window(request);
+        return { ...window, nodes: window.nodes.map(change) };
+      },
+    };
+    const surface = new AxSurface({ processName: "Yam", bridge });
+    await surface.open({ kind: "desktop", processName: "Yam" } as never);
+    return { surface, bridge };
+  }
+  const gateway = (change: Partial<AxNode>) => (node: AxNode): AxNode =>
+    node.domIdentifier === "record-gateway" ? ({ ...node, ...change } as AxNode) : node;
+  const sent = (bridge: RecordedBridge) => bridge.commands.filter((one) => one.kind !== "activate");
+
+  it("refuses to hover, and sends nothing", async () => {
+    const { surface, bridge } = await open();
+    const [ref] = await surface.locate({ by: "automationId", value: "record-gateway", score: 1 });
+    await expect(surface.act("hover", ref)).rejects.toThrow(UnsupportedError);
+    await expect(surface.act("hover", ref)).rejects.toThrow(/cannot hover/);
+    expect(sent(bridge)).toEqual([]);
+  });
+
+  it("performs AXScrollToVisible when the element lists it", async () => {
+    const { surface, bridge } = await openWith(
+      gateway({ actions: ["AXPress", "AXScrollToVisible"], box: [302, 2_000, 200, 28] }),
+    );
+    const [ref] = await surface.locate({ by: "automationId", value: "record-gateway", score: 1 });
+    await expect(surface.act("scrollIntoView", ref)).resolves.toEqual({ ok: true });
+    expect(sent(bridge)).toEqual([
+      { kind: "action", path: expect.any(Array), action: "AXScrollToVisible" },
+    ]);
+  });
+
+  it("answers ok without an action only for an element already inside the window", async () => {
+    const { surface, bridge } = await open();
+    const [ref] = await surface.locate({ by: "automationId", value: "record-gateway", score: 1 });
+    // [302, 67, 200, 28] inside a 1280 by 860 window.
+    await expect(surface.act("scrollIntoView", ref)).resolves.toEqual({ ok: true });
+    expect(sent(bridge)).toEqual([]);
+  });
+
+  it("refuses an element outside the window it has no way to scroll to", async () => {
+    const { surface, bridge } = await openWith(gateway({ box: [302, 2_000, 200, 28] }));
+    const [ref] = await surface.locate({ by: "automationId", value: "record-gateway", score: 1 });
+    const failure = await surface.act("scrollIntoView", ref).catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(UnsupportedError);
+    expect((failure as Error).message).toMatch(/outside the window/);
+    expect(sent(bridge)).toEqual([]);
+
+    const boxless = await openWith(gateway({ box: undefined }));
+    const [again] = await boxless.surface.locate({
+      by: "automationId",
+      value: "record-gateway",
+      score: 1,
+    });
+    await expect(boxless.surface.act("scrollIntoView", again)).rejects.toThrow(/publishes no box/);
+  });
+
+  it("refuses keyDown and keyUp rather than sending a whole press", async () => {
+    const { surface, bridge } = await open();
+    const [ref] = await surface.locate({ by: "automationId", value: "record-gateway", score: 1 });
+    for (const action of ["keyDown", "keyUp"] as const) {
+      await expect(surface.act(action, ref, { key: "Shift" })).rejects.toThrow(UnsupportedError);
+    }
+    // Refused before anything was focused, too.
+    expect(sent(bridge)).toEqual([]);
+    // `press` is still a press.
+    await surface.act("press", undefined, { key: "Enter" });
+    expect(sent(bridge)).toEqual([{ kind: "keycode", code: 36 }]);
+  });
+});
+
+/**
+ * The title of an application with no window open (SF-16).
+ *
+ * `read("title")` reads the window now, and a macOS application whose last
+ * window closed — still running, still the session — made it throw where the
+ * cached read used to answer.
+ */
+describe("the title when no window is open", () => {
+  async function closing(reason: "no-window" | "no-process"): Promise<AxSurface> {
+    const recorded = recordedBridge({ screen: "record" });
+    let open = true;
+    const bridge: RecordedBridge = {
+      ...recorded,
+      async window(request) {
+        if (!open) {
+          throw new AxBridgeError(
+            reason === "no-window"
+              ? 'The process "Yam" has no window. Is it running, and not minimised?'
+              : 'No application process is named "Yam". Is it running?',
+            undefined,
+            reason,
+          );
+        }
+        return await recorded.window(request);
+      },
+    };
+    const surface = new AxSurface({ processName: "Yam", bridge });
+    await surface.open({ kind: "desktop", processName: "Yam" } as never);
+    open = false;
+    return surface;
+  }
+
+  it("answers with the last title it saw while the application is running", async () => {
+    const surface = await closing("no-window");
+    expect(await surface.read("title")).toBe("Yam");
+  });
+
+  it("still throws for an application that has quit", async () => {
+    const surface = await closing("no-process");
+    await expect(surface.read("title")).rejects.toThrow(SessionError);
+    await expect(surface.read("title")).rejects.toThrow(/No application process is named "Yam"/);
+  });
+});
+
+describe("a page wait's default is the configured step timeout", () => {
+  it("waits as long as `timeoutMs` says when the step does not", async () => {
+    const surface = new AxSurface({
+      processName: "Yam",
+      bridge: recordedBridge({ screen: "record" }),
+      timeoutMs: 250,
+    });
+    await surface.open({ kind: "desktop", processName: "Yam" } as never);
+    const started = Date.now();
+    const failure = await surface
+      .act("waitFor", undefined, { text: "No such words" })
+      .catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(TimeoutError);
+    expect((failure as Error).message).toMatch(/Waited 250 ms/);
+    expect(Date.now() - started).toBeLessThan(3_000);
+  });
+});
+
+/**
+ * A reference wait waits for the state it was asked for (pattern 19).
+ *
+ * The executor sends the step's predicate as `args.state`, and this adapter
+ * ignored it: it re-read the window until some node sat at the reference's
+ * index, which is at once — so `to be hidden` returned while the element was
+ * showing and `to be enabled` returned on a disabled one.
+ */
+describe("waiting for an element to be in a state", () => {
+  /** Drop nodes, and everything under them, and renumber the parents that remain. */
+  function without(nodes: readonly AxNode[], gone: (node: AxNode) => boolean): AxNode[] {
+    const dropped = new Set<number>();
+    nodes.forEach((node, at) => {
+      if (gone(node) || dropped.has(node.parent)) dropped.add(at);
+    });
+    const renumbered = new Map<number, number>();
+    let next = 0;
+    nodes.forEach((_, at) => {
+      if (!dropped.has(at)) renumbered.set(at, next++);
+    });
+    return nodes
+      .filter((_, at) => !dropped.has(at))
+      .map((node) => ({ ...node, parent: node.parent < 0 ? -1 : renumbered.get(node.parent)! }));
+  }
+  const isGateway = (node: AxNode): boolean => node.domIdentifier === "record-gateway";
+  const gatewayWith = (change: Partial<AxNode>) => (nodes: AxNode[]) =>
+    nodes.map((node) => (isGateway(node) ? ({ ...node, ...change } as AxNode) : node));
+
+  /** The Record screen, through a window a test can change while a wait is running. */
+  async function changing(
+    initial: (nodes: AxNode[]) => AxNode[] = (nodes) => nodes,
+    options: { timeoutMs?: number } = {},
+  ) {
+    const recorded = recordedBridge({ screen: "record" });
+    let shape = initial;
+    const bridge: RecordedBridge = {
+      ...recorded,
+      async window(request) {
+        const window = await recorded.window(request);
+        return { ...window, nodes: shape([...window.nodes]) };
+      },
+    };
+    const surface = new AxSurface({ processName: "Yam", bridge, ...options });
+    await surface.open({ kind: "desktop", processName: "Yam" } as never);
+    const [gateway] = await surface.locate({ by: "automationId", value: "record-gateway", score: 1 });
+    return {
+      surface,
+      gateway: gateway!,
+      show: (next: (nodes: AxNode[]) => AxNode[]) => {
+        shape = next;
+      },
+    };
+  }
+  const later = (then: () => void): void => {
+    setTimeout(then, 150);
+  };
+
+  it("waits for hidden, and does not return while the element is showing", async () => {
+    const { surface, gateway, show } = await changing();
+    const failure = await surface
+      .act("waitFor", gateway, { state: "hidden", timeoutMs: 300 })
+      .catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(TimeoutError);
+    expect((failure as Error).message).toMatch(/to be hidden, and it is showing and enabled/);
+
+    later(() => show(gatewayWith({ box: [302, 67, 0, 0] })));
+    await expect(surface.act("waitFor", gateway, { state: "hidden", timeoutMs: 3_000 })).resolves.toEqual({
+      ok: true,
+    });
+  });
+
+  it("waits for visible on an element that has no area yet", async () => {
+    const { surface, gateway, show } = await changing(gatewayWith({ box: [302, 67, 0, 0] }));
+    later(() => show((nodes) => nodes));
+    await expect(surface.act("waitFor", gateway, { state: "visible", timeoutMs: 3_000 })).resolves.toEqual({
+      ok: true,
+    });
+  });
+
+  it("waits for enabled and for disabled from the element's own state", async () => {
+    const { surface, gateway, show } = await changing(gatewayWith({ enabled: false }));
+    await expect(
+      surface.act("waitFor", gateway, { state: "enabled", timeoutMs: 300 }),
+    ).rejects.toThrow(/to be enabled, and it is showing and disabled/);
+    await expect(surface.act("waitFor", gateway, { state: "disabled", timeoutMs: 300 })).resolves.toEqual({
+      ok: true,
+    });
+    later(() => show((nodes) => nodes));
+    await expect(surface.act("waitFor", gateway, { state: "enabled", timeoutMs: 3_000 })).resolves.toEqual({
+      ok: true,
+    });
+  });
+
+  it("waits for detached and attached by what the element is, not by its index", async () => {
+    const { surface, gateway, show } = await changing();
+    // A heading ahead of it goes: every index after it moves, and the gateway is still there.
+    show((nodes) =>
+      without(nodes, (node) => node.role === "AXHeading" && node.description === "Record review"),
+    );
+    await expect(
+      surface.act("waitFor", gateway, { state: "detached", timeoutMs: 300 }),
+    ).rejects.toThrow(TimeoutError);
+
+    const going = await changing();
+    later(() => going.show((nodes) => without(nodes, isGateway)));
+    await expect(
+      going.surface.act("waitFor", going.gateway, { state: "detached", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+
+    // Gone when the wait starts, and back while it runs.
+    const coming = await changing();
+    coming.show((nodes) => without(nodes, isGateway));
+    later(() => coming.show((nodes) => nodes));
+    await expect(
+      coming.surface.act("waitFor", coming.gateway, { state: "attached", timeoutMs: 3_000 }),
+    ).resolves.toEqual({ ok: true });
+
+    const never = await changing();
+    never.show((nodes) => without(nodes, isGateway));
+    await expect(
+      never.surface.act("waitFor", never.gateway, { state: "attached", timeoutMs: 300 }),
+    ).rejects.toThrow(/is not in the window/);
+  });
+
+  it("refuses to answer about a deleted element with a look-alike that moved into its place", async () => {
+    // Two "Accept" buttons with no DOM id: only their position tells them apart.
+    const twins = (nodes: AxNode[]) =>
+      nodes.map((node) =>
+        node.domIdentifier === "action-record-accept" || node.domIdentifier === "action-record-repick"
+          ? ({ ...node, domIdentifier: undefined, description: "Accept" } as AxNode)
+          : node,
+      );
+    const { surface, show } = await changing(twins);
+    const snapshot = await surface.snapshot();
+    const first = snapshot.nodes.find((node) => node.role === "button" && node.name === "Accept")!;
+    let removed = false;
+    show((nodes) =>
+      without(twins(nodes), (node) => {
+        if (removed || node.description !== "Accept") return false;
+        removed = true;
+        return true;
+      }),
+    );
+    await expect(
+      surface.act("waitFor", first.ref, { state: "detached", timeoutMs: 3_000 }),
+    ).rejects.toThrow(LocateError);
+  });
+
+  it("refuses a state it does not know, naming the six, before reading anything", async () => {
+    const { surface, gateway } = await changing();
+    await expect(surface.act("waitFor", gateway, { state: "checked" })).rejects.toThrow(DataError);
+    await expect(surface.act("waitFor", gateway, { state: "checked" })).rejects.toThrow(
+      /attached, detached, visible, hidden, enabled or disabled/,
+    );
+  });
+
+  it("waits for the step's timeoutMs, else the session's timeout", async () => {
+    const { surface, gateway } = await changing(undefined, { timeoutMs: 250 });
+    await expect(surface.act("waitFor", gateway, { state: "hidden" })).rejects.toThrow(/Waited 250 ms/);
+    const started = Date.now();
+    await expect(
+      surface.act("waitFor", gateway, { state: "hidden", timeoutMs: 100 }),
+    ).rejects.toThrow(/Waited 100 ms/);
+    expect(Date.now() - started).toBeLessThan(1_500);
   });
 });

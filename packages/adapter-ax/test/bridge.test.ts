@@ -75,7 +75,13 @@ describe("the permission check (REQ-ADP-7, `yam surface doctor`)", () => {
 
   it("reads a timeout as the unanswered prompt, and says where to grant it", async () => {
     const run: Run = async () => ({ code: null, stdout: "", stderr: "", timedOut: true });
-    const permission = await osascriptBridge({ process: "Yam", run, platform: "darwin" }).permission();
+    // macOS's own trust check agrees the program is not trusted: this is the prompt.
+    const permission = await osascriptBridge({
+      process: "Yam",
+      run,
+      platform: "darwin",
+      trusted: () => false,
+    }).permission();
     expect(permission.state).toBe("prompt-pending");
     expect(permission.advice).toContain("System Settings → Privacy & Security → Accessibility");
     // The part people get wrong: the grant is per application, so one granted
@@ -85,6 +91,59 @@ describe("the permission check (REQ-ADP-7, `yam surface doctor`)", () => {
     expect(permission.advice).toContain("never Yam itself");
     // And it names the way to be asked rather than only the settings pane.
     expect(permission.advice).toContain("yam surface grant");
+  });
+
+  /*
+   * A check that did not answer is not a permission to grant (SF-14).
+   *
+   * A timeout, and a failure with no refusal code, were both `prompt-pending`,
+   * so a session on a machine where the permission had long been granted, and
+   * System Events was merely slow, was refused as a missing permission.
+   */
+  it("reads a timeout as a check that failed when macOS says the program is trusted", async () => {
+    const run: Run = async () => ({ code: null, stdout: "", stderr: "", timedOut: true });
+    const permission = await osascriptBridge({
+      process: "Yam",
+      run,
+      platform: "darwin",
+      trusted: () => true,
+    }).permission();
+    expect(permission.state).toBe("unknown");
+    expect(permission.detail).toMatch(/did not answer within 5000 ms/);
+    expect(permission.detail).toMatch(/Accessibility permission is granted/);
+    expect(permission.advice).toMatch(/Automation/);
+  });
+
+  it("reads a failure with no refusal code as unknown when the trust check cannot be asked", async () => {
+    const run: Run = async () => ({
+      code: 1,
+      stdout: "",
+      stderr: "execution error: System Events got an error: Connection is invalid. (-609)",
+      timedOut: false,
+    });
+    const permission = await osascriptBridge({
+      process: "Yam",
+      run,
+      platform: "darwin",
+      trusted: () => undefined,
+    }).permission();
+    expect(permission.state).toBe("unknown");
+    expect(permission.detail).toMatch(/failed without a refusal code: .*-609/);
+    expect(permission.detail).toMatch(/could not be asked/);
+  });
+
+  it("asks macOS's trust check only when the answer was neither granted nor refused", async () => {
+    const trusted = vi.fn(() => false);
+    const { run } = answering('{"ok":true}');
+    await osascriptBridge({ process: "Yam", run, platform: "darwin", trusted }).permission();
+    const refused: Run = async () => ({
+      code: 1,
+      stdout: "",
+      stderr: "execution error: osascript is not allowed assistive access. (-25211)",
+      timedOut: false,
+    });
+    await osascriptBridge({ process: "Yam", run: refused, platform: "darwin", trusted }).permission();
+    expect(trusted).not.toHaveBeenCalled();
   });
 
   it("uses a short deadline, because a blocked prompt takes two minutes", async () => {

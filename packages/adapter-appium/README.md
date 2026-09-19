@@ -96,6 +96,19 @@ refuses a plan whose actions need a missing capability at start, not mid-run.
 | `upload` | **no** | There is no file picker to drive |
 | `trace` | **no** | Appium has no tracing |
 
+Some actions are refused the same way, as `UnsupportedError`, rather than sent as
+something that half works. `keyDown` and `keyUp` have no held-key primitive: a W3C
+key action sequence releases its keys when it ends. `press` sends one character
+as itself or a named key — Enter, Tab, Escape, Backspace, Delete, the four arrows,
+Home, End, PageUp, PageDown, Space — as its W3C codepoint, and refuses any other
+name. In a native context `waitFor` with a `url` is refused at once, because a
+native screen has no URL. A reference `waitFor` waits for the step's `timeoutMs`
+when it gives one, and for the state `args.state` names: `attached` and
+`detached` (the driver finds it, or answers that it is stale or gone),
+`visible` and `hidden` (`isDisplayed`), `enabled` and `disabled` (`isEnabled`);
+any other state is a `DataError`. `scrollToTop` and `scrollToBottom` in a native context swipe
+four tenths of the screen's height from its centre.
+
 ## Masking a screenshot
 
 The web adapters mask before the picture is taken — Playwright takes a mask

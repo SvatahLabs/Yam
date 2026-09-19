@@ -150,7 +150,13 @@ export async function connectWebdriverIo(options: AppiumConnectOptions): Promise
       path: url.pathname === "/" ? "/" : url.pathname,
       logLevel: "error",
       connectionRetryTimeout: options.connectionTimeoutMs ?? 120_000,
-      capabilities: options.capabilities,
+      /*
+       * WebDriver Classic unless the caller asks otherwise. WebdriverIO 9 adds
+       * `webSocketUrl: true` to every session to open WebDriver BiDi, and
+       * Appium's UiAutomator2 driver and Android's ChromeDriver can refuse a
+       * session that asks for it — every command this adapter sends is Classic.
+       */
+      capabilities: { "wdio:enforceWebDriverClassic": true, ...options.capabilities },
     });
   } catch (cause) {
     throw appiumUnreachable(appiumServerUrl(options.serverUrl), cause);

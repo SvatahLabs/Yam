@@ -9,9 +9,15 @@
  * `false`. `the URL should contain "/booking"` against a native window is not a
  * failed assertion, it is a question with no meaning here — and reporting it as
  * a failure would send whoever reads the run looking at the application.
+ *
+ * The refusal is an `UnsupportedError` (SF-11). It was a `CheckError` or a
+ * `NavigationError` depending on the predicate, which a caller is told as
+ * `CHECK_FAILED` — the very "failed assertion" the paragraph above says it is
+ * not — or as `CONNECT_FAILED`, which sends them to the application's process.
+ * Nothing was asked of the window, and nothing asked later will answer it.
  */
 import type { CheckResult, CheckSubject, Predicate, Ref, ValueRef } from "@svatah/yam-schema";
-import { CheckError, DataError, NavigationError } from "@svatah/yam-surface";
+import { CheckError, DataError, UnsupportedError } from "@svatah/yam-surface";
 import { saidBy, type AxSnapshotNode } from "./tree.js";
 
 /** The literal a `ValueRef` names; an unresolved one is a caller mistake (LLD §8.2). */
@@ -47,6 +53,21 @@ export interface AxCheckContext {
 }
 
 const norm = (text: string | undefined): string => (text ?? "").replace(/\s+/g, " ").trim();
+
+/**
+ * Every name and value in the window, which for a desktop app is its text.
+ *
+ * One function for the two questions that mean the same thing: the `page`
+ * subject of `text`/`textContains`, and a `waitFor` that waits for words to
+ * appear (SF-16). Two spellings of "the window's text" would let an assertion
+ * hold one step after the wait for it had timed out.
+ */
+export function pageTextOf(nodes: readonly AxSnapshotNode[]): string {
+  return nodes
+    .map((node) => `${norm(node.name)} ${norm(node.value)}`.trim())
+    .filter((text) => text !== "")
+    .join(" ");
+}
 
 /**
  * The words an element puts on the screen, its descendants included (T12.7).
@@ -98,7 +119,7 @@ export function evaluateAxPredicate(
      * driver hands you separately. `capabilities().dialogs` is false for that
      * reason, and a check that got here anyway is told plainly.
      */
-    throw new CheckError(
+    throw new UnsupportedError(
       "The AX adapter has no separate dialog surface: a sheet or alert is an element of the " +
         "window's own tree (`AXSheet`), so address it as an element (LLD §2.4).",
       { adapter: "ax" },
@@ -106,7 +127,7 @@ export function evaluateAxPredicate(
   }
 
   if (predicate.kind === "url" || predicate.kind === "urlContains") {
-    throw new NavigationError(
+    throw new UnsupportedError(
       "A desktop window has no URL. Check the window title instead " +
         '(`the page title should contain "…"`), which the AX adapter answers from `AXTitle`.',
       { adapter: "ax" },
@@ -121,11 +142,7 @@ export function evaluateAxPredicate(
   }
 
   if (subject === "page" && (predicate.kind === "text" || predicate.kind === "textContains")) {
-    // Every name and value in the window, which for a desktop app is its text.
-    const actual = context.nodes
-      .map((node) => `${norm(node.name)} ${norm(node.value)}`.trim())
-      .filter((text) => text !== "")
-      .join(" ");
+    const actual = pageTextOf(context.nodes);
     const expected = literalValue(predicate.value);
     const ok = predicate.kind === "text" ? actual === expected : actual.includes(expected);
     return negated(result(ok, actual, expected), predicate.negate);
@@ -205,7 +222,7 @@ export function evaluateAxPredicate(
        * answered: `false` here would read as "this list is single-select",
        * which is a claim this adapter cannot make.
        */
-      throw new CheckError(
+      throw new UnsupportedError(
         "The AX adapter cannot tell whether a list allows multiple selection: macOS carries " +
           "it on `AXSelectedChildren` and System Events does not expose it.",
         { adapter: "ax" },
@@ -239,7 +256,7 @@ export function evaluateAxPredicate(
       return negated(result(actual === expected, actual ?? null, expected), predicate.negate);
     }
     case "css":
-      throw new CheckError(
+      throw new UnsupportedError(
         "A desktop element has no CSS. Ask about a state, a value, or the role instead.",
         { adapter: "ax" },
       );
@@ -261,7 +278,7 @@ export function evaluateAxPredicate(
     }
     default: {
       const exhaustive = predicate as { kind: string };
-      throw new CheckError(`The AX adapter has no rule for "${exhaustive.kind}".`, {
+      throw new UnsupportedError(`The AX adapter has no rule for "${exhaustive.kind}".`, {
         adapter: "ax",
       });
     }

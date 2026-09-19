@@ -67,6 +67,7 @@ import type {
 import type { AgentSurface } from "@svatah/yam-surface";
 import {
   ActionabilityError,
+  UnsupportedError,
   CheckError,
   DataError,
   LocateError,
@@ -218,9 +219,11 @@ export class ProcessSurface implements AgentSurface {
       args,
       cwd: root,
       env: {
-        ...(Object.fromEntries(
-          Object.entries(process.env).filter(([, value]) => value !== undefined),
-        ) as Record<string, string>),
+        ...(session.launch?.inheritEnv === false
+          ? shellEnvironment()
+          : (Object.fromEntries(
+              Object.entries(process.env).filter(([, value]) => value !== undefined),
+            ) as Record<string, string>)),
         ...(session.launch?.env ?? {}),
         COLUMNS: String(columns),
         LINES: String(rows),
@@ -416,7 +419,7 @@ export class ProcessSurface implements AgentSurface {
          * to resize, and pretending otherwise is what SF-09 calls an adapter's
          * presence in a dropdown standing in for evidence.
          */
-        throw new DataError(
+        throw new UnsupportedError(
           `A terminal has no "${action}". It takes type, press, clear, waitFor, sleep, ` +
             "screenshot and quit. A flow that clicks, hovers or navigates needs a web, mobile " +
             "or desktop adapter (REQ-SURF-5).",
@@ -712,3 +715,23 @@ export function createProcessSurface(config: Config): ProcessSurface {
   const cwd = (config as { root?: string }).root;
   return new ProcessSurface(cwd === undefined ? {} : { root: cwd });
 }
+
+/**
+ * What a shell needs to find programs and draw a screen, and nothing else (SF-15).
+ *
+ * `launch.inheritEnv: false` starts a program with this plus `launch.env`. The
+ * whole environment was always passed through, and the process doing the
+ * passing is the broker — started by whichever client needed it first, so it
+ * can carry a model credential, a service token or a cloud key that a program
+ * an agent launched could print to the screen the agent then reads.
+ */
+export function shellEnvironment(from: NodeJS.ProcessEnv = process.env): Record<string, string> {
+  const kept: Record<string, string> = {};
+  for (const [name, value] of Object.entries(from)) {
+    if (value === undefined) continue;
+    if (SHELL_VARIABLES.has(name) || name.startsWith("LC_")) kept[name] = value;
+  }
+  return kept;
+}
+
+const SHELL_VARIABLES = new Set(["PATH", "HOME", "USER", "LOGNAME", "SHELL", "TERM", "LANG", "LANGUAGE", "TMPDIR", "TZ"]);

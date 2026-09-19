@@ -51,17 +51,21 @@ import type { AgentSurface } from "@svatah/yam-surface";
 import {
   ActionabilityError,
   buildSnapshot,
+  DataError,
   executableOf,
   launchApplication,
   locateDeadline,
   LocateError,
-  NavigationError,
+  PermissionError,
   quitApplication,
   ScriptError,
   SessionError,
   stableClassesOf,
   structuralHash,
+  TimeoutError,
+  UnsupportedError,
   waitFor,
+  waitForPage,
   type LaunchConfig,
   type QuitConfig,
   type SnapshotNode,
@@ -73,11 +77,19 @@ import {
   type AxSnapshotCost,
   type AxWindow,
 } from "./bridge.js";
+import { screenRecordingGranted } from "./grant.js";
 import { matchNodes, synthesise } from "./locate.js";
-import { evaluateAxPredicate } from "./predicates.js";
+import { evaluateAxPredicate, pageTextOf } from "./predicates.js";
 import { convertTree, nameOf, saidBy, type AxSnapshotNode } from "./tree.js";
 
 const DEFAULT_MAX_NODES = 1_500;
+
+/**
+ * What `screencapture` prints when the program running it has no Screen
+ * Recording grant — the same words `yam surface doctor`'s check is written
+ * around.
+ */
+const SCREEN_RECORDING_REFUSED = /could not create image from display/i;
 
 /**
  * How far a window's measured size may sit from the one asked for and still
@@ -142,6 +154,12 @@ export interface AxAdapterOptions {
   readonly timeoutMs?: number;
   /** Injected by the tests, so the whole adapter runs against a recorded tree. */
   readonly bridge?: AxBridge;
+  /**
+   * Whether Screen Recording is granted: `screenRecordingGranted` from
+   * `grant.ts` unless given, which asks macOS without a prompt. `undefined` is
+   * "could not ask". Injected by the tests.
+   */
+  readonly screenRecordingGranted?: () => boolean | undefined;
 }
 
 export class AxSurface implements AgentSurface {
@@ -170,6 +188,12 @@ export class AxSurface implements AgentSurface {
    * the budget is about.
    */
   private worstCost: AxSnapshotCost | undefined;
+  /**
+   * How the tree was last read, so a wait re-reads it the same way: a
+   * controls-only tree and a whole one index their elements differently, and a
+   * wait compares the tree its reference came from with the tree as it is now.
+   */
+  private lastRead: { interactiveOnly?: boolean; maxNodes?: number } = {};
 
   constructor(private readonly options: AxAdapterOptions = {}) {}
 
@@ -197,6 +221,28 @@ export class AxSurface implements AgentSurface {
      * problem, and the process name would not fix it.
      */
     const permission = await this.bridge.permission();
+    /*
+     * Three answers that are not "granted", and only one of them is a
+     * permission to go and grant (SF-14).
+     *
+     * `unsupported` is a host that is not macOS: it was a `PermissionError`
+     * that sent a person on Linux to look for System Settings. It is refused as
+     * unsupported, in the bridge's words about which adapter to use instead.
+     * `unknown` is a check that did not answer — System Events timed out, or
+     * failed without a refusal code, while macOS's own trust check did not say
+     * the permission is missing — and is a `SessionError` that says what
+     * failed. `denied` and a genuinely unanswered prompt stay `PermissionError`.
+     */
+    if (permission.state === "unsupported") {
+      throw new UnsupportedError(permission.advice, { adapter: "ax" });
+    }
+    if (permission.state === "unknown") {
+      throw new SessionError(
+        "The macOS Accessibility permission could not be checked, so the session was not " +
+          `opened: ${permission.detail ?? "the check did not answer"}. ${permission.advice}`,
+        { adapter: "ax" },
+      );
+    }
     if (permission.state !== "granted") {
       /*
        * Name the program the grant is actually about (T18, SF-17).
@@ -214,9 +260,14 @@ export class AxSurface implements AgentSurface {
        * the same machine, a second apart. Both were true. Without the path
        * below there is no way to tell that from a bug, and nothing a person can
        * usefully do about it.
+       *
+       * A `PermissionError` rather than the plain `SessionError` it was (SF-14):
+       * the broker told the caller `CONNECT_FAILED`, which sends a person to the
+       * application, and the application is fine. `PERMISSION_REQUIRED` sends
+       * them to System Settings, which is the only place the fix is.
        */
       const program = process.argv[1] ?? process.execPath;
-      throw new SessionError(
+      throw new PermissionError(
         `The macOS Accessibility permission is not granted (${permission.state}) to the ` +
           `program that is driving: ${program}. ${permission.advice} ` +
           "Grant it to that program — `yam surface doctor` reports the permission of whatever " +
@@ -425,7 +476,7 @@ export class AxSurface implements AgentSurface {
       if (error instanceof AxBridgeError) {
         throw new SessionError(
           `${error.message}${error.detail === undefined ? "" : ` (${error.detail})`}`,
-          { adapter: "ax" },
+          { adapter: "ax", cause: error },
         );
       }
       throw error;
@@ -435,6 +486,7 @@ export class AxSurface implements AgentSurface {
   /** Re-read the window and rebuild every reference. */
   private async refresh(options: { interactiveOnly?: boolean; maxNodes?: number } = {}): Promise<void> {
     const window = await this.readWindow(options.maxNodes ?? this.options.maxNodes ?? DEFAULT_MAX_NODES);
+    this.lastRead = options;
     if (
       this.worstCost === undefined ||
       window.cost.nodes > this.worstCost.nodes ||
@@ -610,11 +662,17 @@ export class AxSurface implements AgentSurface {
     };
 
     switch (action) {
+      /*
+       * Refused as unsupported, not as a navigation that failed (SF-11). A
+       * `NavigationError` is told to a caller as `CONNECT_FAILED`, which reads
+       * as "the application went away"; nothing was sent to it, and no amount
+       * of waiting gives a desktop window an address bar.
+       */
       case "navigate":
       case "back":
       case "forward":
       case "refresh":
-        throw new NavigationError(
+        throw new UnsupportedError(
           `A desktop application has no "${action}". Drive its own controls instead: the ` +
             "AX adapter has no address bar to type into.",
           { adapter: "ax" },
@@ -729,16 +787,57 @@ export class AxSurface implements AgentSurface {
       }
 
       case "hover":
-      case "scrollIntoView":
         /*
-         * There is no accessible hover and no accessible scroll-to on macOS:
-         * `AXScrollToVisible` exists but System Events does not expose it, and
-         * a pointer move is not an accessibility call. Both are treated as
-         * satisfied — the element is in the tree, so it is reachable — rather
-         * than failing a step over a gesture the surface cannot make.
+         * Refused, where it answered `{ok: true}` and did nothing (SF-11).
+         *
+         * A hover is a pointer resting over an element, and this bridge has no
+         * pointer move: System Events clicks at a point, and a click is not a
+         * hover — it presses whatever is there. So a "hover to open the menu"
+         * step passed with the menu shut, and the failure surfaced one step
+         * later as a missing menu item. Refused before the reference is
+         * resolved, because no element makes it possible.
          */
-        need(ref);
-        return { ok: true };
+        throw new UnsupportedError(
+          "The AX adapter cannot hover: System Events can click at a point but cannot move the " +
+            "pointer without pressing, and an accessibility call has no hover. Click the element " +
+            "if pressing it is what is meant.",
+          { adapter: "ax" },
+        );
+
+      case "scrollIntoView": {
+        const node = need(ref);
+        /*
+         * Performed when the element can be scrolled to, and confirmed when it
+         * cannot (SF-11).
+         *
+         * This answered `{ok: true}` for every element, on the grounds that an
+         * element in the tree is reachable — which says nothing about whether
+         * it is on screen, and a click at the centre of an off-screen box lands
+         * on something else. `AXScrollToVisible` is an ordinary AX action: an
+         * element that lists it is performed on by name, as `AXPress` is. One
+         * that does not is only "in view" if its box is inside the window's;
+         * outside it, there is nothing this bridge can do, and it says so.
+         */
+        if (node.source.actions?.includes("AXScrollToVisible") === true) {
+          await bridge.perform({ kind: "action", path: node.path, action: "AXScrollToVisible" });
+          await this.refresh();
+          return { ok: true };
+        }
+        const window = this.nodes.find((one) => one.depth === 0)?.box;
+        if (node.box !== undefined && window !== undefined && boxInside(node.box, window)) {
+          return { ok: true };
+        }
+        throw new UnsupportedError(
+          `${node.role}${node.name === undefined ? "" : ` "${node.name}"`} declares no ` +
+            "`AXScrollToVisible` and " +
+            (node.box === undefined || window === undefined
+              ? "publishes no box to show it is inside the window"
+              : `is outside the window (its box is ${node.box.join(", ")}; the window's is ` +
+                `${window.join(", ")})`) +
+            ". System Events has no scroll gesture to bring it into view.",
+          { adapter: "ax" },
+        );
+      }
 
       case "type": {
         const node = need(ref);
@@ -797,9 +896,23 @@ export class AxSurface implements AgentSurface {
         return { ok: true };
       }
 
-      case "press":
       case "keyDown":
-      case "keyUp": {
+      case "keyUp":
+        /*
+         * Refused, where both sent a whole key press (SF-11). `key code` and
+         * `keystroke` press and release in one Apple event; System Events has
+         * no way to hold a key down, so a `keyDown` of Shift followed by a click
+         * clicked unshifted — and typed nothing a `keyUp` could end. Refused
+         * before anything is focused, because nothing was going to be sent.
+         */
+        throw new UnsupportedError(
+          `The AX adapter has no "${action}": System Events sends a key as one press and ` +
+            "release and cannot hold a key down. Press the chord in one step instead " +
+            '(`press "Shift+Tab"`).',
+          { adapter: "ax" },
+        );
+
+      case "press": {
         if (ref !== undefined) await bridge.perform({ kind: "focus", path: need(ref).path });
         const key = str("key");
         const chord = keyChord(key);
@@ -831,8 +944,28 @@ export class AxSurface implements AgentSurface {
         return { ok: true };
       }
 
-      case "selectOption":
-      case "deselectOption": {
+      case "deselectOption":
+        /*
+         * Refused, where it used to share `selectOption`'s code and therefore
+         * *select* the option it was asked to deselect (SF-11).
+         *
+         * The control `selectOption` drives here is a pop-up button, and a
+         * pop-up menu has no deselected state: choosing an item replaces the
+         * previous choice, and there is no item-less choice to go back to. The
+         * one macOS control that does hold several selections — a list's
+         * `AXSelectedChildren` — is not something System Events will write, so
+         * there is no accessible call to make either way. Doing the opposite of
+         * what was asked and answering `{ok: true}` is the worst of the three
+         * outcomes; saying so before touching the window is the honest one.
+         */
+        throw new UnsupportedError(
+          "The AX adapter cannot deselect an option: a macOS pop-up menu has no deselected " +
+            "state — choosing an item replaces the last choice — and System Events cannot " +
+            "write a list's `AXSelectedChildren`. Select the option that should be chosen instead.",
+          { adapter: "ax" },
+        );
+
+      case "selectOption": {
         /*
          * A macOS pop-up button opens a menu and the option is a menu item, so
          * "select the option named X" is: press the control, then press the
@@ -884,19 +1017,17 @@ export class AxSurface implements AgentSurface {
       }
 
       case "waitFor": {
-        // Re-read until the reference resolves again, or the timeout passes.
-        const timeoutMs = Number(args["timeoutMs"] ?? 5_000);
-        const until = Date.now() + (Number.isFinite(timeoutMs) ? timeoutMs : 5_000);
-        for (;;) {
-          await this.refresh();
-          if (ref !== undefined && this.nodes.some((one) => one.ref === ref)) return { ok: true };
-          if (Date.now() >= until) {
-            throw new ActionabilityError(`Waiting for ${ref ?? "the window"} timed out.`, {
-              adapter: "ax",
-            });
-          }
-          await new Promise((done) => setTimeout(done, 200));
-        }
+        /*
+         * No reference is a wait for the window rather than for an element
+         * (SF-16): its text, or its title. This loop used to run for those too,
+         * and it could only ever succeed when given a reference — so `wait for
+         * "Saved"` re-read the window for five seconds and then timed out on a
+         * window that had said "Saved" from the first read. With neither a
+         * reference nor anything to wait for, `waitForPage` refuses at once as
+         * a missing argument, rather than timing out on a question never asked.
+         */
+        if (ref === undefined) return await this.waitForWindow(args);
+        return await this.waitForElement(ref, args);
       }
 
       case "screenshot": {
@@ -904,20 +1035,23 @@ export class AxSurface implements AgentSurface {
         return { ok: true };
       }
 
-      case "dragTo": {
-        const from = need(ref);
-        const to = need(ref2);
-        void from;
-        void to;
-        throw new ActionabilityError(
+      case "dragTo":
+        /*
+         * Refused before either reference is resolved (SF-11): a drag is
+         * impossible here whatever the two elements are, so a stale reference
+         * must not turn "this adapter cannot drag" into "the element is gone".
+         * It was an `ActionabilityError`, which a caller is told as `TIMEOUT` —
+         * an invitation to try again that could never succeed.
+         */
+        void ref2;
+        throw new UnsupportedError(
           "The AX adapter cannot drag: `capabilities().drag` is false, because a drag is a " +
             "sequence of pointer events and System Events has no press-move-release (LLD §2.4).",
           { adapter: "ax" },
         );
-      }
 
       default:
-        throw new ActionabilityError(
+        throw new UnsupportedError(
           `The AX adapter has no "${action}". See \`capabilities()\` for what a desktop window ` +
             "supports (LLD §2.4).",
           { adapter: "ax" },
@@ -926,9 +1060,78 @@ export class AxSurface implements AgentSurface {
   }
 
   /**
-   * `AXPress` if the element declares it, a click at the box centre if not
-   * (LLD §7.5's "with a mouse/keyboard fallback at the element's box centre").
+   * `waitFor` with no reference: the window's text or its title (SF-16).
+   *
+   * Through `waitForPage`, so "wait for the text" means on a desktop what it
+   * means on every other adapter. Two things are this adapter's own. The text
+   * is `pageTextOf` over a fresh read — the words a `textContains` on the page
+   * answers from — rather than the rendered snapshot, whose lines truncate a
+   * long name and quote every one. And a URL is refused before anything waits:
+   * `read("url")` throws, `waitForPage` treats a read that throws as "not yet",
+   * and a wait for an address a window will never have would otherwise spend
+   * its whole timeout finding that out.
    */
+  private async waitForWindow(args: ActArgs): Promise<ActResult> {
+    if (typeof args["url"] === "string") {
+      throw new UnsupportedError(
+        "A desktop window has no URL to wait for. Wait for its title or its text instead.",
+        { adapter: "ax" },
+      );
+    }
+    return await waitForPage(this, args, {
+      adapter: "ax",
+      textOf: async () => {
+        await this.refresh();
+        return pageTextOf(this.nodes);
+      },
+      // The step timeout this session was configured with, when the step does not say.
+      ...(this.options.timeoutMs === undefined ? {} : { defaultTimeoutMs: this.options.timeoutMs }),
+    });
+  }
+
+  /**
+   * `waitFor` with a reference: the element in the state `args.state` names
+   * (pattern 19).
+   *
+   * This ignored the state. It re-read the window until *some* node sat at the
+   * reference's index — which, a reference being an index, is almost always at
+   * once — so `Wait for the toast to be hidden` returned while the toast was on
+   * screen, `to be enabled` returned on a disabled button, and `to be detached`
+   * could only succeed on a window that had shrunk. The executor now sends the
+   * step's predicate as `args.state`, and each of the six means here what it
+   * means on every adapter: `attached` is in a fresh read, `detached` is not,
+   * `visible` is there and not `hidden`, `hidden` is gone or `hidden`, and
+   * `enabled` and `disabled` are there with or without the `disabled` state.
+   *
+   * The element is found again by what identifies it (`findWaitedElement`),
+   * not by its index, because the index is exactly what a deletion moves. The
+   * wait's budget is `args.timeoutMs`, else the session's configured timeout;
+   * running out is a `TimeoutError` that says where the element is.
+   */
+  private async waitForElement(ref: Ref, args: ActArgs): Promise<ActResult> {
+    const state = waitStateOf(args, "ax");
+    const was = this.nodeFor(ref);
+    const then = { nodes: this.nodes, title: this.windowTitle };
+    const read = this.lastRead;
+    const fallback = this.options.timeoutMs ?? 5_000;
+    const asked = Number(args["timeoutMs"] ?? fallback);
+    const timeoutMs = Number.isFinite(asked) && asked >= 0 ? asked : fallback;
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+      await this.refresh(read);
+      const found = findWaitedElement(ref, was, then, { nodes: this.nodes, title: this.windowTitle });
+      if (waitStateHolds(state, found?.states)) return { ok: true };
+      if (Date.now() >= deadline) {
+        throw new TimeoutError(
+          `Waited ${timeoutMs} ms for ${was.role}${was.name === undefined ? "" : ` "${was.name}"`} ` +
+            `(${ref}) to be ${state}, and it ${whereItIs(found?.states)}.`,
+          { adapter: "ax", timeoutMs },
+        );
+      }
+      await new Promise((done) => setTimeout(done, 200));
+    }
+  }
+
   /**
    * How long a control is given to stop moving (T20).
    *
@@ -940,6 +1143,10 @@ export class AxSurface implements AgentSurface {
    */
   private static readonly STALE_PATH_BUDGET_MS = 6_000;
 
+  /**
+   * `AXPress` if the element declares it, a click at the box centre if not
+   * (LLD §7.5's "with a mouse/keyboard fallback at the element's box centre").
+   */
   private async press(node: AxSnapshotNode): Promise<void> {
     if (node.states.includes("disabled")) {
       throw new ActionabilityError(
@@ -1031,15 +1238,47 @@ export class AxSurface implements AgentSurface {
 
   async read(kind: ReadKind, ref?: Ref, name?: string): Promise<unknown> {
     switch (kind) {
-      case "title":
+      case "title": {
+        /*
+         * The title *now*, not the one the last snapshot saw (SF-16).
+         *
+         * `check` re-reads before answering a title predicate, and `read` gave
+         * whatever the last refresh left behind — so a wait for a title, which
+         * asks `read("title")` until it matches, could never see the window
+         * change. One node is enough to learn it: the title comes with the
+         * window, and the snapshot the references belong to is left alone.
+         */
+        /*
+         * An application with every window closed is still a live session
+         * (SF-16). A macOS application does not quit when its last window
+         * closes, and reading the title live turned that into a `SessionError`
+         * where the cached read used to answer. So `no-window` — the process
+         * is running and owns no window — answers with the last title this
+         * session saw; a wait for a new title keeps waiting, and the next
+         * window's title is read when it opens. `no-process` is an application
+         * that has quit, and that still throws.
+         */
+        try {
+          const window = await this.readWindow(1);
+          this.windowTitle = window.title;
+        } catch (error) {
+          const said = error instanceof SessionError ? error.cause : undefined;
+          if (!(said instanceof AxBridgeError && said.reason === "no-window")) throw error;
+        }
         return this.windowTitle;
+      }
+      /*
+       * Unsupported, not a navigation or a script that failed (SF-11): the
+       * broker told the first as `CONNECT_FAILED` and the second as
+       * `OUTCOME_UNKNOWN`, and neither is about something that happened.
+       */
       case "url":
-        throw new NavigationError(
+        throw new UnsupportedError(
           "A desktop window has no URL. Read its title instead.",
           { adapter: "ax" },
         );
       case "result":
-        throw new ScriptError("The AX adapter runs no scripts, so there is no result to read.", {
+        throw new UnsupportedError("The AX adapter runs no scripts, so there is no result to read.", {
           adapter: "ax",
         });
       default: {
@@ -1122,10 +1361,41 @@ export class AxSurface implements AgentSurface {
       await this.live().screenshot(path);
     } catch (error) {
       if (error instanceof AxBridgeError) {
-        throw new SessionError(
-          `${error.message}${error.detail === undefined ? "" : ` (${error.detail})`}`,
-          { adapter: "ax", cause: error },
-        );
+        const said = `${error.message}${error.detail === undefined ? "" : ` (${error.detail})`}`;
+        /*
+         * A missing Screen Recording grant is a `PermissionError` (SF-14).
+         *
+         * `screencapture` says so in its own words — "could not create image
+         * from display", exit 1, nothing written — and that is the only failure
+         * here whose fix is in System Settings. A timeout, a spawn failure or an
+         * unwritable path stays a `SessionError`: telling someone to grant a
+         * permission they already have would be the wrong advice twice over.
+         */
+        /*
+         * But only when macOS agrees the grant is missing (SF-14). The same
+         * words come from a host with no display to capture — a locked screen,
+         * an SSH login, a session with no WindowServer — where Screen Recording
+         * may be granted and System Settings is the wrong place to send anyone.
+         * So the grant is asked for directly: missing is a `PermissionError`;
+         * granted, or not askable, is a `SessionError` that says which.
+         */
+        if (SCREEN_RECORDING_REFUSED.test(said)) {
+          const granted = (this.options.screenRecordingGranted ?? (() => screenRecordingGranted()))();
+          if (granted === false) {
+            throw new PermissionError(said, { adapter: "ax", cause: error });
+          }
+          throw new SessionError(
+            `${said}. ` +
+              (granted === true
+                ? "Screen Recording is granted to this program, so this is the display: a locked " +
+                  "screen, an SSH login or a session with no WindowServer answers the same way — " +
+                  "`yam surface doctor --adapter ax` reports `ax/session`."
+                : "Whether Screen Recording is granted could not be asked, so this is not " +
+                  "reported as a missing permission — `yam surface doctor --adapter ax` checks both."),
+            { adapter: "ax", cause: error },
+          );
+        }
+        throw new SessionError(said, { adapter: "ax", cause: error });
       }
       throw error;
     }
@@ -1146,6 +1416,122 @@ export class AxSurface implements AgentSurface {
   controlPathFor(ref: Ref): string {
     return this.nodeFor(ref).controlPath;
   }
+}
+
+/** The six states a reference `waitFor` waits for (pattern 19). */
+const WAIT_STATES = ["attached", "detached", "visible", "hidden", "enabled", "disabled"] as const;
+type WaitState = (typeof WAIT_STATES)[number];
+
+/** `args.state`, `visible` when there is none; anything else is a caller's mistake. */
+function waitStateOf(args: ActArgs, adapter: string): WaitState {
+  const asked = args["state"] ?? "visible";
+  if (typeof asked === "string" && (WAIT_STATES as readonly string[]).includes(asked)) {
+    return asked as WaitState;
+  }
+  throw new DataError(
+    `waitFor cannot wait for ${JSON.stringify(asked)}; it waits for attached, detached, visible, ` +
+      "hidden, enabled or disabled.",
+    { adapter },
+  );
+}
+
+/** Whether an element found in a fresh read (its states), or not found, is in the state. */
+function waitStateHolds(state: WaitState, states: readonly string[] | undefined): boolean {
+  const present = states !== undefined;
+  const has = (one: string): boolean => states?.includes(one) === true;
+  switch (state) {
+    case "attached":
+      return present;
+    case "detached":
+      return !present;
+    case "visible":
+      return present && !has("hidden");
+    case "hidden":
+      return !present || has("hidden");
+    case "enabled":
+      return present && !has("disabled");
+    case "disabled":
+      return present && has("disabled");
+  }
+}
+
+/** Where a waited-for element is, for the timeout's message. */
+function whereItIs(states: readonly string[] | undefined): string {
+  if (states === undefined) return "is not in the window";
+  const said = [states.includes("hidden") ? "hidden" : "showing"];
+  said.push(states.includes("disabled") ? "disabled" : "enabled");
+  return `is ${said.join(" and ")}`;
+}
+
+/** A `controlPath` without its window segment, so a retitled window does not move every element. */
+function withinWindow(node: AxSnapshotNode, title: string): string {
+  const root = `Window[${title}]`;
+  return node.controlPath.startsWith(root) ? node.controlPath.slice(root.length) : node.controlPath;
+}
+
+/**
+ * The element a reference named, in a fresh read of the window (pattern 19).
+ *
+ * What it is like: its automation id and role when it has an id, its role and
+ * name when it has a name, and otherwise its role among the same-role siblings
+ * under the same parent. Then:
+ *
+ * - nothing like it now: it has gone;
+ * - one element like it then and now, with an id or a name: that one, wherever
+ *   it moved;
+ * - otherwise only the one at the same `controlPath`, and only if as many
+ *   elements are like it as were — a deletion ahead of it moves a look-alike
+ *   into its place, and an answer about that neighbour is worse than none.
+ *
+ * Anything else is a `LocateError`: the element cannot be told apart from the
+ * elements that look like it, which a flow fixes by giving it a name or an id.
+ */
+function findWaitedElement(
+  ref: Ref,
+  was: AxSnapshotNode,
+  then: { readonly nodes: readonly AxSnapshotNode[]; readonly title: string },
+  now: { readonly nodes: readonly AxSnapshotNode[]; readonly title: string },
+): AxSnapshotNode | undefined {
+  const idOf = (node: AxSnapshotNode): string | undefined => {
+    const id = node.native?.["automationId"];
+    return typeof id === "string" && id !== "" ? id : undefined;
+  };
+  const id = idOf(was);
+  const name = was.name ?? "";
+  const place = withinWindow(was, then.title);
+  const parent = `${place.slice(0, place.lastIndexOf("/"))}/`;
+  const alike = (title: string) => (one: AxSnapshotNode): boolean =>
+    one.role === was.role &&
+    (id !== undefined
+      ? idOf(one) === id
+      : name !== ""
+        ? (one.name ?? "") === name
+        : one.depth === was.depth && withinWindow(one, title).startsWith(parent));
+  const before = then.nodes.filter(alike(then.title));
+  const after = now.nodes.filter(alike(now.title));
+  if (after.length === 0) return undefined;
+  if ((id !== undefined || name !== "") && before.length === 1 && after.length === 1) return after[0];
+  const inPlace = after.filter((one) => withinWindow(one, now.title) === place);
+  if (before.length === after.length && inPlace.length === 1) return inPlace[0];
+  throw new LocateError(
+    `${ref} (${was.role}${name === "" ? "" : ` "${name}"`}) cannot be told apart from the ` +
+      `${after.length} element(s) like it in the window now (${before.length} when the reference ` +
+      "was issued). Give it an automation id or a name, or wait on something that has one.",
+    { adapter: "ax" },
+  );
+}
+
+/** Whether a box lies wholly inside another: `[x, y, width, height]` each. */
+function boxInside(
+  inner: readonly [number, number, number, number],
+  outer: readonly [number, number, number, number],
+): boolean {
+  return (
+    inner[0] >= outer[0] &&
+    inner[1] >= outer[1] &&
+    inner[0] + inner[2] <= outer[0] + outer[2] &&
+    inner[1] + inner[3] <= outer[1] + outer[3]
+  );
 }
 
 /**

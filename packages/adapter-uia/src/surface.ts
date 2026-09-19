@@ -46,17 +46,20 @@ import type { AgentSurface } from "@svatah/yam-surface";
 import {
   ActionabilityError,
   buildSnapshot,
+  DataError,
   executableOf,
   launchApplication,
   locateDeadline,
   LocateError,
-  NavigationError,
   quitApplication,
   ScriptError,
   SessionError,
   stableClassesOf,
   structuralHash,
+  TimeoutError,
+  UnsupportedError,
   waitFor,
+  waitForPage,
   type LaunchConfig,
   type QuitConfig,
   type SnapshotNode,
@@ -69,7 +72,7 @@ import {
   type UiaWindow,
 } from "./bridge.js";
 import { matchNodes, synthesise } from "./locate.js";
-import { evaluateUiaPredicate } from "./predicates.js";
+import { evaluateUiaPredicate, pageTextOf } from "./predicates.js";
 import { convertTree, nameOf, saidBy, type UiaSnapshotNode } from "./tree.js";
 
 const DEFAULT_MAX_NODES = 1_500;
@@ -134,6 +137,11 @@ export class UiaSurface implements AgentSurface {
    * ten-second budget is about, and a mean over small reads would hide it.
    */
   private worstCost: UiaSnapshotCost | undefined;
+  /**
+   * How the tree was last read, so a wait re-reads it the same way: a
+   * controls-only tree and a whole one are different trees to compare.
+   */
+  private lastRead: { interactiveOnly?: boolean; maxNodes?: number } = {};
 
   constructor(private readonly options: UiaAdapterOptions = {}) {}
 
@@ -289,6 +297,7 @@ export class UiaSurface implements AgentSurface {
   ): Promise<void> {
     const budget = options.maxNodes ?? this.options.maxNodes ?? DEFAULT_MAX_NODES;
     const window = await this.readWindow(budget);
+    this.lastRead = options;
     if (
       this.worstCost === undefined ||
       window.cost.nodes > this.worstCost.nodes ||
@@ -470,11 +479,16 @@ export class UiaSurface implements AgentSurface {
     };
 
     switch (action) {
+      /*
+       * Refused as unsupported, not as a navigation that failed (SF-11): a
+       * `NavigationError` is told to a caller as `CONNECT_FAILED`, and nothing
+       * was sent to the application for it to have failed at.
+       */
       case "navigate":
       case "back":
       case "forward":
       case "refresh":
-        throw new NavigationError(
+        throw new UnsupportedError(
           `A desktop application has no "${action}". Drive its own controls instead: the ` +
             "UIA adapter has no address bar to type into.",
           { adapter: "uia" },
@@ -512,8 +526,21 @@ export class UiaSurface implements AgentSurface {
       }
 
       case "hover":
-        need(ref);
-        return { ok: true };
+        /*
+         * Refused, where it answered `{ok: true}` and did nothing (SF-11).
+         *
+         * The bridge has no pointer move: its only pointer command is a click
+         * at a point, which presses what is there, and UI Automation has no
+         * hover pattern. A "hover to reveal the menu" step passed with the menu
+         * never shown. Refused before the reference is resolved, because no
+         * element makes it possible.
+         */
+        throw new UnsupportedError(
+          "The UIA adapter cannot hover: its bridge can click at a point but cannot move the " +
+            "pointer without pressing, and UI Automation has no hover pattern. Click the element " +
+            "if pressing it is what is meant.",
+          { adapter: "uia" },
+        );
 
       case "scrollIntoView": {
         const node = need(ref);
@@ -524,10 +551,31 @@ export class UiaSurface implements AgentSurface {
             pattern: "Scroll",
             method: "ScrollIntoView",
           });
+          await this.refresh();
+          return { ok: true };
         }
-        // No pattern and no failure: the element is in the tree, so it is
-        // addressable, and a step must not fail over a gesture with no meaning.
-        return { ok: true };
+        /*
+         * No `ScrollItem` pattern: `ok` only for an element already in view
+         * (SF-11). This answered `{ok: true}` for any element in the tree, which
+         * says nothing about whether it is on screen — and a click at the centre
+         * of an off-screen rectangle lands on whatever is there instead. Inside
+         * the window's rectangle is in view; outside it, or with no rectangle to
+         * tell, there is nothing this bridge can do about it, and it says so.
+         */
+        const window = this.nodes.find((one) => one.depth === 0)?.box;
+        if (node.box !== undefined && window !== undefined && boxInside(node.box, window)) {
+          return { ok: true };
+        }
+        throw new UnsupportedError(
+          `${node.role}${node.name === undefined ? "" : ` "${node.name}"`} supports no ` +
+            "`ScrollItemPattern` and " +
+            (node.box === undefined || window === undefined
+              ? "publishes no bounding rectangle to show it is inside the window"
+              : `is outside the window (its rectangle is ${node.box.join(", ")}; the window's is ` +
+                `${window.join(", ")})`) +
+            ". The UIA adapter has no other way to scroll it into view.",
+          { adapter: "uia" },
+        );
       }
 
       case "type": {
@@ -567,9 +615,21 @@ export class UiaSurface implements AgentSurface {
         return { ok: true };
       }
 
-      case "press":
       case "keyDown":
-      case "keyUp": {
+      case "keyUp":
+        /*
+         * Refused, where both sent a whole key press (SF-11). `SendKeys` presses
+         * and releases every key it is given; the bridge has no way to hold one
+         * down, so `keyDown "Shift"` then a click clicked unshifted. Refused
+         * before anything is focused, because nothing was going to be sent.
+         */
+        throw new UnsupportedError(
+          `The UIA adapter has no "${action}": SendKeys sends a key as one press and release and ` +
+            'cannot hold a key down. Press the chord in one step instead (`press "Shift+Tab"`).',
+          { adapter: "uia" },
+        );
+
+      case "press": {
         if (ref !== undefined) await bridge.perform({ kind: "focus", path: need(ref).path });
         await bridge.perform({ kind: "keys", text: sendKeysFor(str("key")) });
         await this.refresh();
@@ -594,8 +654,30 @@ export class UiaSurface implements AgentSurface {
         return { ok: true };
       }
 
-      case "selectOption":
-      case "deselectOption": {
+      case "deselectOption":
+        /*
+         * Refused, where it used to share `selectOption`'s code and so *select*
+         * the option it was asked to deselect (SF-11).
+         *
+         * UIA does have the call — `SelectionItemPattern.RemoveFromSelection` —
+         * but the bridge's `SelectionItem` branch only ever sends `Select()`,
+         * and teaching it a second method is PowerShell that no runner here can
+         * execute. It would also only mean something on a multiple-selection
+         * list: the combo box `selectOption` expands holds one choice at a time,
+         * and a single-selection container that requires a selection answers
+         * `RemoveFromSelection` with `InvalidOperationException` rather than
+         * leaving the box empty. A refusal that says so is better than an
+         * untested call, and far better than the opposite of what was asked.
+         */
+        throw new UnsupportedError(
+          "The UIA adapter cannot deselect an option: its bridge sends " +
+            "`SelectionItemPattern.Select` and never `RemoveFromSelection`, and a combo box holds " +
+            "exactly one choice, so it has no deselected state. Select the option that should be " +
+            "chosen instead.",
+          { adapter: "uia" },
+        );
+
+      case "selectOption": {
         const node = need(ref);
         // `value`, `values` or `label`, as every other adapter reads them (T20).
         const wanted = str(
@@ -708,18 +790,16 @@ export class UiaSurface implements AgentSurface {
       }
 
       case "waitFor": {
-        const timeoutMs = Number(args["timeoutMs"] ?? 5_000);
-        const until = Date.now() + (Number.isFinite(timeoutMs) ? timeoutMs : 5_000);
-        for (;;) {
-          await this.refresh();
-          if (ref !== undefined && this.nodes.some((one) => one.ref === ref)) return { ok: true };
-          if (Date.now() >= until) {
-            throw new ActionabilityError(`Waiting for ${ref ?? "the window"} timed out.`, {
-              adapter: "uia",
-            });
-          }
-          await new Promise((done) => setTimeout(done, 200));
-        }
+        /*
+         * No reference is a wait for the window — its text or its title — and
+         * not for an element (SF-16). The loop below used to take that case too,
+         * and it only ever returned when it had a reference to find: a wait for
+         * "Saved" re-read the window until the timeout and failed, however early
+         * the word appeared. With nothing to wait for at all, `waitForPage`
+         * refuses at once as a missing argument.
+         */
+        if (ref === undefined) return await this.waitForWindow(args);
+        return await this.waitForElement(ref, args);
       }
 
       case "screenshot": {
@@ -727,23 +807,93 @@ export class UiaSurface implements AgentSurface {
         return { ok: true };
       }
 
-      case "dragTo": {
-        void need(ref);
-        void need(ref2);
-        throw new ActionabilityError(
+      case "dragTo":
+        /*
+         * Refused before either reference is resolved (SF-11): no pair of
+         * elements makes a drag possible here, so a stale reference must not
+         * turn the refusal into a locator failure. It was an
+         * `ActionabilityError`, told as `TIMEOUT` — "try again", which never helps.
+         */
+        void ref2;
+        throw new UnsupportedError(
           "The UIA adapter cannot drag: `capabilities().drag` is false. `mouse_event` gives " +
             "press, move and release, but a drag also needs the timing a real pointer has, " +
             "and a drag that silently did nothing would be worse than one that says so.",
           { adapter: "uia" },
         );
-      }
 
       default:
-        throw new ActionabilityError(
+        throw new UnsupportedError(
           `The UIA adapter has no "${action}". See \`capabilities()\` for what a desktop ` +
             "window supports (LLD §2.4).",
           { adapter: "uia" },
         );
+    }
+  }
+
+  /**
+   * `waitFor` with no reference: the window's text or its title (SF-16).
+   *
+   * `waitForPage`, so the words mean what they mean on every adapter, with the
+   * text read as `pageTextOf` over a fresh tree — what a page `textContains`
+   * answers from. A URL is refused first: `read("url")` throws, a page wait
+   * reads a throw as "not yet", and it would spend its whole timeout learning
+   * that a window has no address.
+   */
+  private async waitForWindow(args: ActArgs): Promise<ActResult> {
+    if (typeof args["url"] === "string") {
+      throw new UnsupportedError(
+        "A desktop window has no URL to wait for. Wait for its title or its text instead.",
+        { adapter: "uia" },
+      );
+    }
+    return await waitForPage(this, args, {
+      adapter: "uia",
+      textOf: async () => {
+        await this.refresh();
+        return pageTextOf(this.nodes);
+      },
+      // The step timeout this session was configured with, when the step does not say.
+      ...(this.options.timeoutMs === undefined ? {} : { defaultTimeoutMs: this.options.timeoutMs }),
+    });
+  }
+
+  /**
+   * `waitFor` with a reference: the element in the state `args.state` names
+   * (pattern 19).
+   *
+   * This ignored the state and re-read the window until some node sat at the
+   * reference's index — at once, a reference being an index — so `to be
+   * hidden` returned on a showing element, `to be enabled` on a disabled one,
+   * and `to be detached` only on a window that had shrunk. Each of the six
+   * states now means what it means on every adapter: `attached` is in a fresh
+   * read, `detached` is not, `visible` is there and not `hidden` (UIA's
+   * `IsOffscreen`, or no area), `hidden` is gone or `hidden`, and `enabled` and
+   * `disabled` are there with or without `IsEnabled`. The element is found
+   * again by what identifies it, not by the index a deletion moves; the budget
+   * is `args.timeoutMs`, else the session's timeout.
+   */
+  private async waitForElement(ref: Ref, args: ActArgs): Promise<ActResult> {
+    const state = waitStateOf(args);
+    const was = this.nodeFor(ref);
+    const then = { nodes: this.nodes, title: this.windowTitle };
+    const read = this.lastRead;
+    const fallback = this.options.timeoutMs ?? 5_000;
+    const asked = Number(args["timeoutMs"] ?? fallback);
+    const timeoutMs = Number.isFinite(asked) && asked >= 0 ? asked : fallback;
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+      await this.refresh(read);
+      const found = findWaitedElement(ref, was, then, { nodes: this.nodes, title: this.windowTitle });
+      if (waitStateHolds(state, found?.states)) return { ok: true };
+      if (Date.now() >= deadline) {
+        throw new TimeoutError(
+          `Waited ${timeoutMs} ms for ${was.role}${was.name === undefined ? "" : ` "${was.name}"`} ` +
+            `(${ref}) to be ${state}, and it ${whereItIs(found?.states)}.`,
+          { adapter: "uia", timeoutMs },
+        );
+      }
+      await new Promise((done) => setTimeout(done, 200));
     }
   }
 
@@ -806,14 +956,37 @@ export class UiaSurface implements AgentSurface {
 
   async read(kind: ReadKind, ref?: Ref, name?: string): Promise<unknown> {
     switch (kind) {
-      case "title":
+      case "title": {
+        /*
+         * The title now (SF-16). `check` re-reads before a title predicate and
+         * this answered from the last refresh, so a title wait — which asks this
+         * until it matches — could not see the window change. One node is
+         * enough, and the snapshot the references index is left as it was.
+         */
+        /*
+         * A window that cannot be read throws here, where the cached read used
+         * to answer — and unlike the AX adapter, that includes a process with
+         * no window open. The bridge's `no-window` is also its answer for a
+         * process that has quit: the script looks only at processes that own a
+         * main window, so "running with none" and "not running" arrive as the
+         * same word, and answering the last title for it would call a quit
+         * application alive. (On Windows closing the last window usually ends
+         * the process anyway.)
+         */
+        const window = await this.readWindow(1);
+        this.windowTitle = window.title;
         return this.windowTitle;
+      }
+      /*
+       * Unsupported rather than a failed navigation or script (SF-11), which
+       * the broker told as `CONNECT_FAILED` and `OUTCOME_UNKNOWN`.
+       */
       case "url":
-        throw new NavigationError("A desktop window has no URL. Read its title instead.", {
+        throw new UnsupportedError("A desktop window has no URL. Read its title instead.", {
           adapter: "uia",
         });
       case "result":
-        throw new ScriptError("The UIA adapter runs no scripts, so there is no result to read.", {
+        throw new UnsupportedError("The UIA adapter runs no scripts, so there is no result to read.", {
           adapter: "uia",
         });
       default: {
@@ -973,4 +1146,116 @@ export function createUiaSurface(config: {
       ? {}
       : { candidateTimeoutMs: config.run.candidateTimeoutMs }),
   });
+}
+
+/** The six states a reference `waitFor` waits for (pattern 19). */
+const WAIT_STATES = ["attached", "detached", "visible", "hidden", "enabled", "disabled"] as const;
+type WaitState = (typeof WAIT_STATES)[number];
+
+/** `args.state`, `visible` when there is none; anything else is a caller's mistake. */
+function waitStateOf(args: ActArgs): WaitState {
+  const asked = args["state"] ?? "visible";
+  if (typeof asked === "string" && (WAIT_STATES as readonly string[]).includes(asked)) {
+    return asked as WaitState;
+  }
+  throw new DataError(
+    `waitFor cannot wait for ${JSON.stringify(asked)}; it waits for attached, detached, visible, ` +
+      "hidden, enabled or disabled.",
+    { adapter: "uia" },
+  );
+}
+
+/** Whether an element found in a fresh read (its states), or not found, is in the state. */
+function waitStateHolds(state: WaitState, states: readonly string[] | undefined): boolean {
+  const present = states !== undefined;
+  const has = (one: string): boolean => states?.includes(one) === true;
+  switch (state) {
+    case "attached":
+      return present;
+    case "detached":
+      return !present;
+    case "visible":
+      return present && !has("hidden");
+    case "hidden":
+      return !present || has("hidden");
+    case "enabled":
+      return present && !has("disabled");
+    case "disabled":
+      return present && has("disabled");
+  }
+}
+
+/** Where a waited-for element is, for the timeout's message. */
+function whereItIs(states: readonly string[] | undefined): string {
+  if (states === undefined) return "is not in the window";
+  return (
+    `is ${states.includes("hidden") ? "hidden" : "showing"} and ` +
+    `${states.includes("disabled") ? "disabled" : "enabled"}`
+  );
+}
+
+/** A `controlPath` without its window segment, so a retitled window does not move every element. */
+function withinWindow(node: UiaSnapshotNode, title: string): string {
+  const root = `Window[${title}]`;
+  return node.controlPath.startsWith(root) ? node.controlPath.slice(root.length) : node.controlPath;
+}
+
+/**
+ * The element a reference named, in a fresh read of the window (pattern 19) —
+ * the AX adapter's rule.
+ *
+ * What it is like: its automation id and role when it has an id, its role and
+ * name when it has a name, and otherwise its role among the same-role siblings
+ * under the same parent. Nothing like it now is gone; one like it then and now,
+ * with an id or a name, is that one wherever it moved; otherwise only the one at
+ * the same `controlPath`, and only if as many are like it as were — a deletion
+ * ahead of it moves a look-alike into its place. Anything else is a
+ * `LocateError`, because an answer about the neighbour is worse than none.
+ */
+function findWaitedElement(
+  ref: Ref,
+  was: UiaSnapshotNode,
+  then: { readonly nodes: readonly UiaSnapshotNode[]; readonly title: string },
+  now: { readonly nodes: readonly UiaSnapshotNode[]; readonly title: string },
+): UiaSnapshotNode | undefined {
+  const idOf = (node: UiaSnapshotNode): string | undefined => {
+    const id = node.native?.["automationId"];
+    return typeof id === "string" && id !== "" ? id : undefined;
+  };
+  const id = idOf(was);
+  const name = was.name ?? "";
+  const place = withinWindow(was, then.title);
+  const parent = `${place.slice(0, place.lastIndexOf("/"))}/`;
+  const alike = (title: string) => (one: UiaSnapshotNode): boolean =>
+    one.role === was.role &&
+    (id !== undefined
+      ? idOf(one) === id
+      : name !== ""
+        ? (one.name ?? "") === name
+        : one.depth === was.depth && withinWindow(one, title).startsWith(parent));
+  const before = then.nodes.filter(alike(then.title));
+  const after = now.nodes.filter(alike(now.title));
+  if (after.length === 0) return undefined;
+  if ((id !== undefined || name !== "") && before.length === 1 && after.length === 1) return after[0];
+  const inPlace = after.filter((one) => withinWindow(one, now.title) === place);
+  if (before.length === after.length && inPlace.length === 1) return inPlace[0];
+  throw new LocateError(
+    `${ref} (${was.role}${name === "" ? "" : ` "${name}"`}) cannot be told apart from the ` +
+      `${after.length} element(s) like it in the window now (${before.length} when the reference ` +
+      "was issued). Give it an automation id or a name, or wait on something that has one.",
+    { adapter: "uia" },
+  );
+}
+
+/** Whether a rectangle lies wholly inside another: `[x, y, width, height]` each. */
+function boxInside(
+  inner: readonly [number, number, number, number],
+  outer: readonly [number, number, number, number],
+): boolean {
+  return (
+    inner[0] >= outer[0] &&
+    inner[1] >= outer[1] &&
+    inner[0] + inner[2] <= outer[0] + outer[2] &&
+    inner[1] + inner[3] <= outer[1] + outer[3]
+  );
 }

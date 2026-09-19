@@ -170,23 +170,25 @@ async function runCase(
         });
       },
       async throws(description, run, expectedName) {
+        const names: readonly string[] = typeof expectedName === "string" ? [expectedName] : expectedName;
+        const expected = names.join(" or ");
         try {
           const value = await run();
           checks.push({
             description,
             ok: false,
-            expected: `${expectedName} thrown`,
+            expected: `${expected} thrown`,
             actual: `returned ${JSON.stringify(value)}`,
           });
         } catch (error) {
           const name = errorName(error);
           // `Error` means "anything, so long as it threw" — the suite requires a
           // named type only where the surface contract names one.
-          const ok = expectedName === "Error" ? error instanceof Error : name === expectedName;
+          const ok = names.includes("Error") ? error instanceof Error : names.includes(name);
           checks.push({
             description,
             ok,
-            expected: expectedName,
+            expected,
             actual: `${name}: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`,
           });
         }
