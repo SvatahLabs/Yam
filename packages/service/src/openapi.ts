@@ -526,6 +526,44 @@ export function openApiDocument(version: string): Record<string, unknown> {
           responses: { 200: { description: "The connected clients", ...json({ type: "object" }) } },
         },
       },
+      "/agents/test": {
+        post: {
+          summary: "Start the MCP server an agent is told to use, and complete a handshake with it",
+          description:
+            "Starts `npx -y @svatah/yam-mcp` — the command the agent configuration names — or " +
+            "`YAM_MCP_TEST_COMMAND` from the service's own environment, and speaks JSON-RPC over its " +
+            "stdio: `initialize`, `notifications/initialized`, `tools/list`. Then it stops the process. " +
+            "No tool is called, so a completed handshake says the server starts, speaks MCP and " +
+            "publishes its tools, and nothing about a surface. The command is fixed in the service and " +
+            "never read from the request (SF-15); the whole exchange has a deadline of 60 s, because " +
+            "`npx -y` may be downloading the package (T16, SF-07).\n\n" +
+            "Always 200: whether the handshake completed is `ok`, and when it did not, `stage` and " +
+            "`message` say where it stopped and why.",
+          security: bearer,
+          responses: {
+            200: {
+              description: "What the handshake came to",
+              ...json({
+                type: "object",
+                properties: {
+                  ok: { type: "boolean" },
+                  command: { type: "string", description: "The command that was started, as one line." },
+                  server: {
+                    type: "object",
+                    properties: { name: { type: "string" }, version: { type: "string" } },
+                  },
+                  protocolVersion: { type: "string" },
+                  tools: { type: "integer", description: "How many tools `tools/list` published." },
+                  ms: { type: "integer" },
+                  stage: { type: "string", enum: ["start", "initialize", "tools/list"] },
+                  message: { type: "string" },
+                },
+                required: ["ok", "command", "ms"],
+              }),
+            },
+          },
+        },
+      },
       "/tools": {
         get: {
           summary: "The tools this project exposes, and every invocation served",
@@ -694,6 +732,38 @@ export function openApiDocument(version: string): Record<string, unknown> {
           parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
           requestBody: json({ type: "object" }),
           responses: { 200: { description: "The artifact metadata", ...json({ type: "object" }) } },
+        },
+      },
+      /*
+       * Not a catalogue operation: the operation above answers with where the
+       * broker wrote a file, and this is the picture itself, for a client that
+       * draws it (T15). It is not in the catalogue because the CLI and MCP each
+       * have their own answer — a file path, and an image content block.
+       */
+      "/sessions/{session}/screenshot.png": {
+        get: {
+          summary: "A picture of the surface, as PNG bytes, for the desktop's preview",
+          description:
+            "Taken through the broker's `screenshot` operation into a directory of its own under the " +
+            "OS temporary directory, sent, and deleted (T15). 200 is always `image/png`. A client " +
+            "generated from this document parses answers as JSON or text, so reading the bytes is the " +
+            "caller's own `fetch` — the desktop's `sessionScreenshot`.",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          responses: {
+            200: {
+              description: "The image",
+              content: { "image/png": { schema: { type: "string", format: "binary" } } },
+            },
+            404: { description: "The broker has no such session; the body is its envelope", ...json({ type: "object" }) },
+            422: {
+              description:
+                "The broker refused or failed — a permission not granted, an adapter with nothing to show; the body is its envelope",
+              ...json({ type: "object" }),
+            },
+            501: { description: "This service was started without the surface operations", ...json({ type: "object" }) },
+            502: { description: "The broker could not be reached", ...json({ type: "object" }) },
+          },
         },
       },
       /*

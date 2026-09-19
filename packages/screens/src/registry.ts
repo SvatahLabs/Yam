@@ -34,6 +34,7 @@ import type { Action, ActionArgs, ActionOutcome, ScreenId, ScreenStateBase } fro
 import { SCREEN_IDS } from "./types.js";
 import type { ScreenService } from "./service.js";
 import { DESKTOP_HOLDER } from "./holder.js";
+import { agentTestView } from "./screens/surfaces.js";
 
 /** Most actions are available whenever their screen loaded at all. */
 const loaded = (state: ScreenStateBase): boolean => state.error === undefined;
@@ -505,6 +506,53 @@ const ACTIONS_ONLY: readonly Action[] = [
       });
     },
   },
+  {
+    id: "surface.preview",
+    label: "Show or hide the preview",
+    group: "Actions",
+    screen: "session",
+    cli: "yam surface screenshot --session <id> --path <file.png>",
+    /* a picture of what the Do mode's tree is a tree of. */
+    modes: ["do"],
+    /*
+     * Only where a picture can be both taken and drawn (T15): a session that is
+     * not an HTTP one, which has nothing to look at, and a client that can
+     * fetch bytes. The cockpit's cannot, so there this is greyed with a reason
+     * rather than a key that changes nothing on the screen.
+     */
+    availableWhen: both(inMode("do"), (state) => {
+      const surface = half(state, "surface");
+      return (
+        surface["session"] !== undefined && surface["httpSurface"] !== true && surface["previewable"] === true
+      );
+    }),
+    async run(service, args): Promise<ActionOutcome> {
+      const session = typeof args.selected === "string" ? args.selected : undefined;
+      if (session === undefined) return refused("Choose a surface first.");
+      if (service.sessionScreenshot === undefined) {
+        return refused(
+          "This client cannot draw a picture of the surface. `yam surface screenshot --session <id> --path <file.png>` writes one to a file.",
+        );
+      }
+      /*
+       * `show` when a control says which, else the other of what is showing:
+       * the palette row is one row for both, and the app's checkbox knows the
+       * state it is asking for.
+       */
+      const show = typeof args["show"] === "boolean" ? args["show"] : args.preview !== true;
+      /*
+       * The load takes the picture, not this: straight after the snapshot its
+       * boxes are hit-tested against, and again on every load after, so what is
+       * drawn is never older than the tree beside it.
+       */
+      return ok(
+        show
+          ? "Showing a picture of the surface beside the tree. Pointing at a control selects it; nothing is clicked in the application."
+          : "Preview hidden. The tree is the whole surface.",
+        { goTo: "session", params: { selected: session, preview: show } },
+      );
+    },
+  },
   /* ── T16: shared control, and the agent that shares it (SF-05, SF-13) ────── */
   {
     id: "surface.take-control",
@@ -573,22 +621,43 @@ const ACTIONS_ONLY: readonly Action[] = [
     availableWhen: loaded,
     async run(service): Promise<ActionOutcome> {
       /*
-       * What this can honestly check is the broker an agent would share, which
-       * is what makes the copied configuration reach the same sessions. It does
-       * not speak MCP — that would need a process this renderer cannot spawn —
-       * and the panel says exactly that rather than showing a green tick for
-       * something it did not do.
+       * Two things, each checked for what it is (T16, SF-07).
+       *
+       * The broker an agent would share, which is what makes the copied
+       * configuration reach the same sessions. And the server that
+       * configuration names, spoken to over MCP: the service starts it —
+       * a renderer cannot spawn a process — completes `initialize`, sends
+       * `notifications/initialized`, lists its tools and stops it. The command
+       * is fixed in the service and never taken from here (SF-15), and no tool
+       * is called, so the answer says nothing about a surface it did not touch.
        */
-      const answer = await service.getTargets();
-      const { ok: succeeded, result, message } = envelopeOf(answer);
-      if (!succeeded) {
-        return refused(message ?? "The surface broker did not answer.");
+      const broker = await service.getTargets();
+      const brokerAnswer = envelopeOf(broker);
+      if (service.postAgentsTest === undefined) {
+        if (!brokerAnswer.ok) return refused(brokerAnswer.message ?? "The surface broker did not answer.");
+        const adapters = Array.isArray(brokerAnswer.result["adapters"]) ? brokerAnswer.result["adapters"] : [];
+        return ok(
+          `The broker answered with ${adapters.length} adapters. An agent using this configuration reaches the same sessions. This service cannot start an MCP server, so no handshake was tried.`,
+          { value: { broker } },
+        );
       }
-      const adapters = Array.isArray(result["adapters"]) ? result["adapters"] : [];
-      return ok(
-        `The broker answered with ${adapters.length} adapters. An agent using this configuration reaches the same sessions.`,
-        { value: answer },
-      );
+      let handshake: unknown;
+      try {
+        handshake = await service.postAgentsTest();
+      } catch (cause) {
+        // The route itself failing is a handshake that was never attempted.
+        handshake = {
+          ok: false,
+          stage: "request",
+          message: cause instanceof Error ? cause.message : String(cause),
+        };
+      }
+      const view = agentTestView({ broker, handshake });
+      return {
+        ok: view?.ok === true,
+        message: (view?.checks ?? ["The connection test answered with nothing."]).join(" "),
+        value: { broker, handshake },
+      };
     },
   },
   {

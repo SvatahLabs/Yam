@@ -27,11 +27,15 @@ import {
   Table,
 } from "@svatah/yam-ui";
 import {
+  actionCommands,
+  agentTestView,
+  refAt,
   surfaceOutcomeView,
   type ScreenStateBase,
   type SurfaceLoad,
   type SurfaceAdapterRow,
   type SurfaceActionOffer,
+  type SurfaceTreeLine,
 } from "@svatah/yam-screens";
 import { Toolbar, EmptyInspector, actionId } from "./parts.js";
 import type { ScreenProps } from "./Secondary.js";
@@ -155,6 +159,8 @@ export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.
     "surface.test-agent",
     "surface.read",
     "surface.save-automation",
+    // Beside the tree it is a picture of (T15).
+    "surface.preview",
   ]);
   const toolbarActions = props.actions.filter((one) => !PLACED_BY_THE_SCREEN.has(one.id));
   const doConnect = (): void =>
@@ -408,6 +414,7 @@ function Discovery(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
  */
 function SurfaceBody(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
   const { state } = props;
+  const preview = props.actions.find((one) => one.id === "surface.preview");
 
   if (state.httpSurface) return <HttpForm {...props} />;
 
@@ -416,9 +423,24 @@ function SurfaceBody(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
       <div className="sv-panel-head">
         <span>Current surface</span>
         <span className="sv-spacer" />
+        {preview === undefined ? null : (
+          /*
+           * A checkbox, because it is a state and not a verb: the preview is on
+           * or off, and a screen reader says which. It runs the registry's
+           * action, so the palette's row and this are one thing (T15).
+           */
+          <Checkbox
+            id="surfaces-preview-toggle"
+            label="Preview"
+            checked={props.params.preview === true}
+            disabled={!preview.availableWhen(state as never)}
+            onChange={(show) => props.onAction("surface.preview", { show })}
+          />
+        )}
         {state.truncated ? <Pill tone="abort" label="truncated" /> : null}
         <span className="sv-chip">{state.tree.length} controls</span>
       </div>
+      <Preview {...props} />
       {state.tree.length === 0 ? (
         <p className="sv-empty">
           Nothing to act on here yet. Press <b>Refresh and select again</b> to take a fresh
@@ -450,6 +472,91 @@ function SurfaceBody(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * A picture of the surface, above the tree it is a picture of (T15).
+ *
+ * Pointing at it draws the box of the control under the pointer — the model's
+ * `refAt`, over the boxes the tree came with — and clicking selects that
+ * control exactly as its row in the tree would. Nothing is sent to the
+ * application: this is a way of *finding* a control, and the inspector is still
+ * where anything is done to it. The picture is not focusable and has no
+ * keyboard of its own on purpose; the tree below is the same selection, and it
+ * is the one a keyboard or a screen reader uses.
+ */
+function Preview(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element | null {
+  const { state } = props;
+  const [hover, setHover] = useState<(SurfaceTreeLine & { readonly box: readonly number[] }) | undefined>(
+    undefined,
+  );
+  const preview = state.preview;
+  if (preview === undefined) return null;
+  if (!preview.shown) {
+    return (
+      <p className="sv-empty" id="surfaces-preview-unavailable">
+        No picture: {preview.message}
+        {preview.problem === undefined ? "" : ` ${preview.problem.nextAction}.`} The tree below is the
+        whole surface either way.
+      </p>
+    );
+  }
+
+  /** The control under a pointer event, in the picture's own pixels. */
+  const under = (event: React.MouseEvent<HTMLElement>): (SurfaceTreeLine & { readonly box: readonly number[] }) | undefined => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (rect.width === 0) return undefined;
+    const pixels = preview.width / rect.width;
+    return refAt(state.tree, (event.clientX - rect.left) * pixels, (event.clientY - rect.top) * pixels, preview.scale);
+  };
+  /** A box as percentages of the picture, so it stays put however the picture is scaled to fit. */
+  const placed = (box: readonly number[]): React.CSSProperties => ({
+    left: `${((box[0]! * preview.scale) / preview.width) * 100}%`,
+    top: `${((box[1]! * preview.scale) / preview.height) * 100}%`,
+    width: `${((box[2]! * preview.scale) / preview.width) * 100}%`,
+    height: `${((box[3]! * preview.scale) / preview.height) * 100}%`,
+  });
+  const selected = state.tree.find((line) => line.selected && line.box !== undefined);
+
+  return (
+    <figure className="sv-preview" id="surfaces-preview">
+      <div
+        className={preview.selectable ? "sv-preview-frame sv-preview-live" : "sv-preview-frame"}
+        onMouseMove={(event) => setHover(preview.selectable ? under(event) : undefined)}
+        onMouseLeave={() => setHover(undefined)}
+        onClick={(event) => {
+          const hit = preview.selectable ? under(event) : undefined;
+          // The same selection a row of the tree makes, with its snapshot (SF-10).
+          if (hit !== undefined) props.onParams({ ...props.params, ref: hit.ref, snapshot: state.snapshotId });
+        }}
+      >
+        <img
+          id="surfaces-preview-image"
+          src={preview.src}
+          width={preview.width}
+          height={preview.height}
+          alt="A picture of the surface. Choose a control from the tree below to select it without a pointer."
+          draggable={false}
+        />
+        {selected?.box === undefined ? null : (
+          <span className="sv-preview-box sv-preview-selected" aria-hidden="true" style={placed(selected.box)} />
+        )}
+        {hover === undefined ? null : (
+          <span className="sv-preview-box sv-preview-hover" aria-hidden="true" style={placed(hover.box)} />
+        )}
+      </div>
+      <figcaption className="sv-preview-caption" id="surfaces-preview-caption">
+        <span className="sv-mono" id="surfaces-preview-hover">
+          {!preview.selectable
+            ? "Nothing on this picture can be selected; choose from the tree."
+            : hover === undefined
+              ? "Point at a control to see its box; click to select it. Nothing is clicked in the application."
+              : `${hover.role}${hover.name === undefined ? "" : ` "${hover.name}"`} · ${hover.ref}`}
+        </span>
+        <span className="sv-muted">{preview.basis}</span>
+      </figcaption>
+    </figure>
   );
 }
 
@@ -579,9 +686,19 @@ export function SurfacesInspector(props: ScreenProps<DrawnSurfaceLoad>): React.J
   const [verifyKind, setVerifyKind] = useState("");
   const [verifyValue, setVerifyValue] = useState("");
   const [ref2, setRef2] = useState("");
+  /** Which of the two copies was just made, until the form changes under it. */
+  const [copied, setCopied] = useState<"cli" | "mcp" | undefined>(undefined);
   useEffect(() => {
     setValues({});
   }, [state.ref, state.action]);
+  /*
+   * "Copied" is about the lines as they were when copied: a keystroke in the
+   * form makes new ones, and the button says Copy again.
+   */
+  const form = JSON.stringify([state.ref, state.action, values, ref2, verifyKind, state.snapshotId, props.params.snapshot]);
+  useEffect(() => {
+    setCopied(undefined);
+  }, [form]);
 
   if (session === undefined) {
     return (
@@ -605,6 +722,31 @@ export function SurfacesInspector(props: ScreenProps<DrawnSurfaceLoad>): React.J
   }
 
   const offer = state.offers.find((one) => one.chosen);
+  const snapshot = props.params.snapshot ?? state.snapshotId;
+  /*
+   * Copy command and Copy MCP call (T15): what Act would send, from the form as
+   * it is now. The model writes both lines and says what to know about them;
+   * this only decides what goes on the clipboard.
+   */
+  const commands =
+    offer === undefined
+      ? undefined
+      : actionCommands({
+          session: session.sessionId,
+          action: offer.action,
+          ...(offer.needsRef && state.ref !== undefined ? { ref: state.ref } : {}),
+          ...(offer.needsRef2 && ref2 !== "" ? { ref2 } : {}),
+          args: values,
+          ...(snapshot === undefined ? {} : { snapshotId: snapshot }),
+          secret: state.element?.secret === true,
+          ...(session.controller === undefined ? {} : { holder: session.controller }),
+          verify: verifyKind !== "",
+        });
+  const copy = (which: "cli" | "mcp"): void => {
+    if (commands === undefined) return;
+    void navigator.clipboard?.writeText(commands[which]).catch(() => undefined);
+    setCopied(which);
+  };
 
   return (
     <>
@@ -748,7 +890,40 @@ export function SurfacesInspector(props: ScreenProps<DrawnSurfaceLoad>): React.J
                 label="Read a value"
                 onPress={() => props.onAction("surface.read", { kind: "text" })}
               />
+              <Button
+                id="surfaces-copy-command"
+                label={copied === "cli" && commands !== undefined ? "Copied" : "Copy command"}
+                disabled={commands === undefined}
+                onPress={() => copy("cli")}
+              />
+              <Button
+                id="surfaces-copy-mcp"
+                label={copied === "mcp" && commands !== undefined ? "Copied" : "Copy MCP call"}
+                disabled={commands === undefined}
+                onPress={() => copy("mcp")}
+              />
             </div>
+            {commands === undefined ? null : (
+              /*
+               * What is being copied, readable before it is pasted anywhere: a
+               * person can see that a password is not in it, and that the
+               * reference expires, without running either.
+               */
+              <details className="sv-disclosure" id="surfaces-copy-details">
+                <summary id="surfaces-copy-summary">What Copy command and Copy MCP call copy</summary>
+                <pre className="sv-block" id="surfaces-copy-cli" aria-label="The command">
+                  {commands.cli}
+                </pre>
+                <pre className="sv-block" id="surfaces-copy-mcp-call" aria-label="The MCP call">
+                  {commands.mcp}
+                </pre>
+                <ul className="sv-notes" id="surfaces-copy-notes">
+                  {commands.notes.map((note) => (
+                    <li key={note}>{note}</li>
+                  ))}
+                </ul>
+              </details>
+            )}
           </InspectorSection>
         </>
       )}
@@ -793,6 +968,14 @@ function AgentPanel(
 ): React.JSX.Element {
   const { agent } = props.state;
   const [copied, setCopied] = useState(false);
+  /*
+   * What the last test verified, when there has been one; until then, what
+   * loading checked and what it did not (T16). The words are the model's.
+   */
+  const tested =
+    props.lastOutcome?.id === "surface.test-agent" ? agentTestView(props.lastOutcome.value) : undefined;
+  const checks = tested?.checks ?? agent.checks;
+  const handshake = tested?.handshake ?? agent.handshake;
   /*
    * Shut, before there is anything to connect an agent *to* (`AX-06`, `B20`).
    *
@@ -847,7 +1030,11 @@ function AgentPanel(
               />
             ),
           },
-          ...agent.checks.map((one, at) => ({ key: at === 0 ? "Checked" : " ", value: one })),
+          {
+            key: "MCP server",
+            value: <Pill tone={handshake.tone} label={handshake.label} />,
+          },
+          ...checks.map((one, at) => ({ key: at === 0 ? "Checked" : " ", value: one })),
         ]}
       />
     </Section>

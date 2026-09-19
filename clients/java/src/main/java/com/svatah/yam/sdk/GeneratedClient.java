@@ -48,8 +48,10 @@ public class GeneratedClient {
       "GET /sessions",
       "GET /sessions/{session}/capabilities",
       "GET /sessions/{session}/events",
+      "GET /sessions/{session}/screenshot.png",
       "GET /targets",
       "GET /tools",
+      "POST /agents/test",
       "POST /api/request",
       "POST /bindings/verify",
       "POST /capture",
@@ -271,6 +273,11 @@ public class GeneratedClient {
     return call("get", "/sessions/" + segment(session) + "/events", null, "application/json");
   }
 
+  /** {@code GET /sessions/{session}/screenshot.png} — A picture of the surface, as PNG bytes, for the desktop's preview */
+  public String getSessionsBySessionScreenshotpng(String session) {
+    return call("get", "/sessions/" + segment(session) + "/screenshot.png", null, "application/json");
+  }
+
   /** {@code GET /targets} — Discover available targets and adapter readiness (SF-04) */
   public String getTargets() {
     return call("get", "/targets", null, "application/json");
@@ -279,6 +286,11 @@ public class GeneratedClient {
   /** {@code GET /tools} — The tools this project exposes, and every invocation served */
   public String getTools() {
     return call("get", "/tools", null, "application/json");
+  }
+
+  /** {@code POST /agents/test} — Start the MCP server an agent is told to use, and complete a handshake with it */
+  public String postAgentsTest() {
+    return call("post", "/agents/test", null, "application/json");
   }
 
   /** {@code POST /api/request} — Execute one API request ad hoc */

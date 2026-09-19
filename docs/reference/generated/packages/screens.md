@@ -15,11 +15,17 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `Action` | interface | `export interface Action` | One action (LLD §13.7). |
 | `ActionArgs` | interface | `export interface ActionArgs extends ScreenParams` | What an action was given: the screen's params, plus whatever the row supplied. |
 | `actionById` | function | `export function actionById(id: string): Action \| undefined` | One action by id, or `undefined`. The renderers and the SDK both use this. |
+| `ActionCommandInput` | interface | `export interface ActionCommandInput` | What the inspector's form holds at the moment Copy is pressed. |
+| `actionCommands` | function | `export function actionCommands(input: ActionCommandInput): ActionCommands` | The command line and the MCP call for one act, and what to know about them. |
+| `ActionCommands` | interface | `export interface ActionCommands` |  |
 | `ActionInput` | interface | `export interface ActionInput` | One thing an action must be given before it runs. |
 | `ActionOutcome` | interface | `export interface ActionOutcome` | What an action answered with. Renderers show `message`; agents read the rest. |
 | `ACTIONS` | variable | `ACTIONS: readonly Action[] = [...ACTIONS_ONLY, ...GO_TO]` | Every action, in palette order: Actions first, then Go to (LLD §13.7). |
 | `actionsForScreen` | function | `export function actionsForScreen(screen: ScreenId): readonly Action[]` | The actions a screen offers, in registry order. |
+| `AGENT_SERVER` | variable | `AGENT_SERVER = { command: "npx", args: ["-y", "@svatah/yam-mcp"] } as const` | The server command an agent is told to use (SF-07, PK-05). |
 | `AgentsState` | interface | `export interface AgentsState extends ScreenStateBase` |  |
+| `agentTestView` | function | `export function agentTestView(value: unknown): AgentTestView \| undefined` | `surface.test-agent`'s value → what the panel says was verified. |
+| `AgentTestView` | interface | `export interface AgentTestView` | What a connection test came to, for the agent panel (T16, SF-07). |
 | `ago` | function | `export function ago(at: string \| undefined, now: number): string \| undefined` | `"run 22 min ago"`, from an ISO timestamp and the moment now. |
 | `ApiRequestResponse` | interface | `export interface ApiRequestResponse` |  |
 | `ApiRequestRow` | interface | `export interface ApiRequestRow` |  |
@@ -32,6 +38,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `AuditResponse` | interface | `export interface AuditResponse` | One `audit.jsonl` line (LLD §3.4, REQ-AUTO-6). |
 | `AuditRow` | interface | `export interface AuditRow` |  |
 | `AUTHORING_SCREENS` | variable | `AUTHORING_SCREENS = [` |  |
+| `base64` | function | `export function base64(bytes: Uint8Array): string` | Bytes as base64, without `Buffer` or `btoa`: the model runs in a renderer and in Node. |
 | `BindingCandidate` | interface | `export interface BindingCandidate` |  |
 | `BindingFileResponse` | interface | `export interface BindingFileResponse` | `GET /bindings/:id`, parsed: the YAML `yam bindings show` prints. |
 | `BindingInspector` | interface | `export interface BindingInspector` | What the inspector shows about the selected binding (the `Bindings` artboard). |
@@ -73,13 +80,19 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `PlanStory` | interface | `export interface PlanStory` |  |
 | `platformGroups` | function | `export function platformGroups(` | Adapters and targets → the platform-family groups the screen draws. |
 | `plural` | variable | `plural = (n: number, one: string, many = `${one}s`): string =>` | `1`/`2` → `"1 story"`/`"2 stories"`. |
+| `pngDataUrl` | function | `export function pngDataUrl(bytes: Uint8Array): string` | A PNG as a `data:` URL. |
+| `pngInfo` | function | `export function pngInfo(bytes: Uint8Array): PngInfo \| undefined` | The width, height and density of a PNG, read from its chunks — or |
+| `PngInfo` | interface | `export interface PngInfo` | What the PNG's own header says about it. |
 | `policyText` | function | `export function policyText(policy: string \| { compensate?: string } \| undefined): string \| undefined` | An `onFailure` policy as one phrase (REQ-AUTO-4). |
+| `previewScale` | function | `export function previewScale(input:` | Infer the scale between a snapshot's boxes and a picture of the same surface. |
+| `PreviewScale` | interface | `export interface PreviewScale` | How many picture pixels one box unit is, and why that number. |
 | `problemFor` | function | `export function problemFor(code: string \| undefined, message: string): SurfaceProblem \| undefined` | A domain error code → the state it puts the inspector in, and the way out. |
 | `ProjectResponse` | interface | `export interface ProjectResponse` | What the service's answers look like, as far as a screen reads them. |
 | `RAIL` | variable | `RAIL: ReadonlyArray<` |  |
 | `RecordDecision` | interface | `export interface RecordDecision` | One grounding waiting on a reviewer (REQ-ADE-4, the `record.decision` event). |
 | `RecordLoad` | typealias | `export type RecordLoad = RecordView & Omit<ScreenStateBase, "screen">;` | The view, plus the provenance the loader collected for it. |
 | `RecordView` | interface | `export interface RecordView` | What the **record** mode of Session is about (TV-M04). |
+| `refAt` | function | `export function refAt(` | The control under a point of the picture: the smallest box that contains it. |
 | `RunInspector` | interface | `export interface RunInspector` |  |
 | `runScreen` | variable | `runScreen: Screen<RunState> ` |  |
 | `RunsFilters` | interface | `export interface RunsFilters` | The filter chips the artboard shows. `all` is not a filter. |
@@ -101,6 +114,9 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `ScreenService` | interface | `export interface ScreenService` | A screen asks for what it renders and gets `unknown`; it parses with `@svatah/yam-schema`. |
 | `ScreenStateBase` | interface | `export interface ScreenStateBase` | Every screen's state carries these, so a renderer's chrome is written once. |
 | `SECONDARY_SCREENS` | variable | `SECONDARY_SCREENS = [` |  |
+| `SECRET_PLACEHOLDER` | variable | `SECRET_PLACEHOLDER = `<${SECRET_VARIABLE}>`` | What stands for the secret in a copied MCP call, in `args` and in `secrets`. |
+| `SECRET_VARIABLE` | variable | `SECRET_VARIABLE = "YAM_SECRET"` | The environment variable a copied command reads a secret from. |
+| `secretField` | function | `export function secretField(described: Record<string, unknown> \| undefined): boolean` | Whether a described control takes a secret (SF-15). |
 | `Section` | interface | `export interface Section` |  |
 | `SectionId` | typealias | `export type SectionId = "session" \| "automations" \| "activity" \| "settings";` | The four destinations (`SF-16`, `REQ-ADE-11`). |
 | `sectionOf` | function | `export function sectionOf(screen: ScreenId): SectionId` |  |
@@ -112,6 +128,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `sessionScreen` | variable | `sessionScreen: Screen<SessionState> ` |  |
 | `SessionState` | interface | `export interface SessionState extends ScreenStateBase` |  |
 | `SettingsState` | interface | `export interface SettingsState extends ScreenStateBase` |  |
+| `shellWord` | function | `export function shellWord(value: string): string` | One shell word, single-quoted when it needs to be. |
 | `Sources` | class | `export class Sources` | Collects the endpoints a load touched and the first thing that went wrong. |
 | `stamp` | function | `export function stamp(at: string \| undefined, startedAt: string \| undefined): string` | `2026-09-05T09:13:42.896Z` and the run's start → `08.451`, the mockup's stamp. |
 | `StatusTone` | typealias | `export type StatusTone = "pass" \| "fail" \| "skip" \| "healed" \| "abort" \| "info" \| "neutral";` | A status word with the colour token beside it (LLD §13.7: never colour alone). |
@@ -122,11 +139,13 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `SurfaceActionOffer` | interface | `export interface SurfaceActionOffer` | One action this surface can perform, with what it needs. |
 | `SurfaceAdapterRow` | interface | `export interface SurfaceAdapterRow` | One adapter the service reported, with its readiness and, when not, why. |
 | `SurfaceAgentSetup` | interface | `export interface SurfaceAgentSetup` | What a generic MCP client needs to reach the same sessions (SF-07, T16). |
+| `SurfaceBox` | typealias | `export type SurfaceBox = readonly [number, number, number, number];` | `[x, y, width, height]`, in the adapter's own units. |
 | `SurfaceElementView` | interface | `export interface SurfaceElementView` | What `describe` said about the selected control. |
 | `SurfaceLoad` | typealias | `export type SurfaceLoad = SurfaceView & Omit<ScreenStateBase, "screen">;` | The view, plus the provenance the loader collected for it. |
 | `surfaceOutcomeView` | function | `export function surfaceOutcomeView(value: unknown): SurfaceOutcomeView \| undefined` | What an act and its postcondition came to (SF-11, T15). |
 | `SurfaceOutcomeView` | interface | `export interface SurfaceOutcomeView` | What an act (and its optional postcondition) came to (SF-11). |
 | `SurfacePlatformGroup` | interface | `export interface SurfacePlatformGroup` | A platform family, with its adapters and any targets discovered under it. |
+| `SurfacePreview` | typealias | `export type SurfacePreview ` | A picture of the surface beside its tree (T15), or why there is none. |
 | `SurfaceProblem` | interface | `export interface SurfaceProblem` |  |
 | `SurfaceProblemKind` | typealias | `export type SurfaceProblemKind ` | A state the inspector is in that is not "ready" (SF-17). |
 | `SurfaceSessionRow` | interface | `export interface SurfaceSessionRow` | One open session, an agent's or a person's (SF-05, SF-13). |

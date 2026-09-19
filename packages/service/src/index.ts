@@ -22,3 +22,13 @@ export {
 export type { CompileOutcome, ProjectHandle, RunOutcome, ServiceApi } from "./api.js";
 export { EventBus, SERVICE_EVENT_KINDS, type ServiceEvent } from "./events.js";
 export { openApiDocument, OPENAPI_VERSION } from "./openapi.js";
+export {
+  MCP_TEST_COMMAND,
+  MCP_TEST_PROTOCOL,
+  MCP_TEST_TIMEOUT_MS,
+  mcpTestCommand,
+  mcpTestTimeout,
+  testMcpServer,
+  type McpTestResult,
+  type McpTestStage,
+} from "./agent-test.js";

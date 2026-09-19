@@ -108,6 +108,25 @@ export class ServiceClient extends GeneratedServiceClient {
     if (!response.ok) throw new ServiceError(response.status, path, await response.text());
     return await response.blob();
   }
+
+  /**
+   * A picture of a connected surface, as the PNG's bytes (T15).
+   *
+   * `GET /sessions/:session/screenshot.png`, for Surfaces' preview. The
+   * generated `getSessionsBySessionScreenshotpng` would parse the image as JSON,
+   * for the same reason `screenshot` above exists. A refusal throws
+   * `ServiceError` with the broker's envelope as its `body`, which the model
+   * reads its words and its code from; the bytes become a `data:` URL there,
+   * which `img-src` allows and which nothing has to revoke.
+   */
+  async sessionScreenshot(session: string): Promise<Uint8Array> {
+    const path = `/sessions/${encodeURIComponent(session)}/screenshot.png`;
+    const response = await fetch(`${this.connection.url}${path}`, {
+      headers: { authorization: `Bearer ${this.connection.token}` },
+    });
+    if (!response.ok) throw new ServiceError(response.status, path, await response.text());
+    return new Uint8Array(await response.arrayBuffer());
+  }
 }
 
 /**

@@ -70,6 +70,13 @@
       "cli": "yam surface snapshot --session <id>"
     },
     {
+      "id": "surface.preview",
+      "label": "Show or hide the preview",
+      "group": "Actions",
+      "screen": "session",
+      "cli": "yam surface screenshot --session <id> --path <file.png>"
+    },
+    {
       "id": "surface.take-control",
       "label": "Take control",
       "group": "Actions",

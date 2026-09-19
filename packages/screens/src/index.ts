@@ -67,12 +67,24 @@ export { DESKTOP_HOLDER } from "./holder.js";
 export {
   loadSurface,
   TREE_MAX_NODES,
+  AGENT_SERVER,
+  agentTestView,
   envelopeError,
   platformGroups,
   problemFor,
+  secretField,
   surfaceOutcomeView,
   treeLines,
 } from "./screens/surfaces.js";
+export {
+  actionCommands,
+  shellWord,
+  SECRET_PLACEHOLDER,
+  SECRET_VARIABLE,
+} from "./screens/equivalents.js";
+export type { ActionCommandInput, ActionCommands } from "./screens/equivalents.js";
+export { base64, pngDataUrl, pngInfo, previewScale, refAt } from "./screens/preview.js";
+export type { PngInfo, PreviewScale, SurfaceBox } from "./screens/preview.js";
 export type {
   SurfaceView,
   SurfaceAdapterRow,
@@ -88,6 +100,8 @@ export type {
   SurfaceProblemKind,
   SurfaceOutcomeView,
   SurfaceAgentSetup,
+  SurfacePreview,
+  AgentTestView,
 } from "./screens/surfaces.js";
 
 export {

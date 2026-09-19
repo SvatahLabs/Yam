@@ -45,14 +45,16 @@ const screens = shell.filter(
   (one) => !["Shell.tsx", "parts.tsx", "Welcome.tsx"].includes(one.name),
 );
 
-/** Everything the generated client offers, plus the two hand-written additions. */
+/** Everything the generated client offers, plus the three hand-written additions. */
 const CALLABLE = new Set([
   ...ENDPOINTS.map((one) => one.id),
   // `subscribe` is `GET /events/sse` — a stream rather than a request, which a
-  // generator over paths cannot express — and `screenshot` is the one route
-  // whose answer is bytes rather than JSON.
+  // generator over paths cannot express — and `screenshot` and
+  // `sessionScreenshot` are the two routes whose answer is bytes rather than
+  // JSON: a run's picture, and a connected surface's for the preview (T15).
   "subscribe",
   "screenshot",
+  "sessionScreenshot",
 ]);
 
 describe("the app renders the model and nothing else (T3.7, T10.1, T10.2)", () => {

@@ -42,8 +42,10 @@ ENDPOINTS = [
     {"id": "getSessions", "verb": "get", "path": "/sessions"},
     {"id": "getSessionsBySessionCapabilities", "verb": "get", "path": "/sessions/{session}/capabilities"},
     {"id": "getSessionsBySessionEvents", "verb": "get", "path": "/sessions/{session}/events"},
+    {"id": "getSessionsBySessionScreenshotpng", "verb": "get", "path": "/sessions/{session}/screenshot.png"},
     {"id": "getTargets", "verb": "get", "path": "/targets"},
     {"id": "getTools", "verb": "get", "path": "/tools"},
+    {"id": "postAgentsTest", "verb": "post", "path": "/agents/test"},
     {"id": "postApiRequest", "verb": "post", "path": "/api/request"},
     {"id": "postBindingsVerify", "verb": "post", "path": "/bindings/verify"},
     {"id": "postCapture", "verb": "post", "path": "/capture"},
@@ -215,6 +217,10 @@ class GeneratedClient:
         """`GET /sessions/{session}/events` — What this session did, and the steps a proposal compiles from (T17, SF-19)"""
         return self._call("get", f"/sessions/{session}/events")
 
+    def get_sessions_by_session_screenshotpng(self, session) -> Any:
+        """`GET /sessions/{session}/screenshot.png` — A picture of the surface, as PNG bytes, for the desktop's preview"""
+        return self._call("get", f"/sessions/{session}/screenshot.png")
+
     def get_targets(self) -> Any:
         """`GET /targets` — Discover available targets and adapter readiness (SF-04)"""
         return self._call("get", f"/targets")
@@ -222,6 +228,10 @@ class GeneratedClient:
     def get_tools(self) -> Any:
         """`GET /tools` — The tools this project exposes, and every invocation served"""
         return self._call("get", f"/tools")
+
+    def post_agents_test(self) -> Any:
+        """`POST /agents/test` — Start the MCP server an agent is told to use, and complete a handshake with it"""
+        return self._call("post", f"/agents/test")
 
     def post_api_request(self, body: Any = None) -> Any:
         """`POST /api/request` — Execute one API request ad hoc"""

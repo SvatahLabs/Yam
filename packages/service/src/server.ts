@@ -24,7 +24,8 @@
  * users, and REQ-ADE-7 says it never becomes one.
  */
 import { randomBytes } from "node:crypto";
-import { mkdirSync, readFileSync, readdirSync, writeFileSync, existsSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, normalize, relative, resolve, sep } from "node:path";
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
 import websocket from "@fastify/websocket";
@@ -33,6 +34,7 @@ import type { ProjectHandle, ServiceApi } from "./api.js";
 import { readClients } from "@svatah/yam-surface-control";
 import { EventBus, type ServiceEvent } from "./events.js";
 import { openApiDocument } from "./openapi.js";
+import { mcpTestCommand, mcpTestTimeout, testMcpServer, type McpTestResult } from "./agent-test.js";
 
 export interface ServeOptions {
   /** The project directory. Everything the service reads and writes is under it. */
@@ -947,6 +949,68 @@ export async function createService(options: ServeOptions): Promise<RunningServi
 
 
 
+  /**
+   * A picture of a session's surface, as PNG bytes (T15).
+   *
+   * The desktop's preview draws it beside the tree. The catalogue's own
+   * `POST /sessions/:session/screenshot` answers with *where the broker wrote a
+   * file*, which is a path on this machine a renderer cannot read and should
+   * not be handed — so this takes the screenshot through that same operation
+   * into a directory of its own under the OS temporary directory, sends the
+   * bytes, and deletes the directory whatever happened.
+   *
+   * The status carries what a client needs to know without parsing an image as
+   * JSON: 200 is always `image/png`; 404 is a session the broker does not have;
+   * 422 is any other refusal or failure, with the broker's envelope as the body
+   * — a Screen Recording grant that is missing, an adapter with nothing to
+   * show. Behind the bearer token like every route but two.
+   */
+  fastify.get<{ Params: { session: string } }>("/sessions/:session/screenshot.png", async (request, reply) => {
+    const operation = (api.surfaceOperations ?? []).find((one) => one.name === "screenshot");
+    if (operation === undefined) {
+      return await reply.code(501).send({
+        error: "not-available",
+        message: "This service was started without the surface operations, so it cannot take a screenshot.",
+      });
+    }
+    // A directory rather than a file name: created owner-only, and nothing
+    // else can be at the path the broker is told to write.
+    const dir = mkdtempSync(join(tmpdir(), "yam-preview-"));
+    const path = join(dir, "screenshot.png");
+    try {
+      let envelope: unknown;
+      try {
+        envelope = await operation.run({ session: request.params.session, path });
+      } catch (error) {
+        return await reply.code(502).send({
+          error: "broker-unreachable",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+      const answer = (envelope ?? {}) as { status?: unknown; error?: { code?: unknown } };
+      if (answer.status !== "succeeded") {
+        const code = answer.error?.code;
+        const missing = code === "SESSION_NOT_FOUND" || code === "SESSION_CLOSED";
+        return await reply.code(missing ? 404 : 422).send(envelope);
+      }
+      if (!existsSync(path)) {
+        return await reply.code(422).send({
+          schemaVersion: "1.0",
+          status: "failed",
+          error: {
+            code: "INTERNAL_ERROR",
+            message: "The adapter said it took a screenshot and no file was written.",
+            retryable: true,
+          },
+        });
+      }
+      const bytes = readFileSync(path);
+      return await reply.code(200).type("image/png").header("cache-control", "no-store").send(bytes);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   fastify.post<{ Body?: { path?: string; lines?: unknown[]; name?: string } }>(
     "/trajectory/compile",
     async (request, reply) => {
@@ -991,6 +1055,29 @@ export async function createService(options: ServeOptions): Promise<RunningServi
    * hand control to.
    */
   fastify.get("/agents/clients", async () => ({ clients: readClients() }));
+
+  /**
+   * Start the MCP server an agent is told to use, and complete a handshake
+   * with it (T16, SF-07, SF-15).
+   *
+   * The command is `agent-test.ts`'s, or `YAM_MCP_TEST_COMMAND` in this
+   * service's environment; the request carries nothing, so nothing a caller
+   * sends reaches `spawn`. One test at a time: a second press while one is
+   * running waits for the same answer rather than starting a second `npx`.
+   * The answer is a 200 either way — whether the handshake completed is the
+   * body's `ok`, and when it did not, `stage` and `message` say where and why.
+   */
+  let agentTest: Promise<McpTestResult> | undefined;
+  fastify.post("/agents/test", async () => {
+    agentTest ??= testMcpServer({
+      command: mcpTestCommand(process.env),
+      timeoutMs: mcpTestTimeout(process.env),
+      cwd: root,
+    }).finally(() => {
+      agentTest = undefined;
+    });
+    return await agentTest;
+  });
 
   fastify.get<{ Querystring: { expose?: string } }>("/tools", async (request) => {
     const loaded = await load();

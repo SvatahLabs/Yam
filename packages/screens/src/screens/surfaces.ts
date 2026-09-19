@@ -35,6 +35,7 @@ import { DESKTOP_HOLDER } from "../holder.js";
 import { Sources, dotted, plural } from "../load.js";
 import type { Pill, ScreenParams, ScreenStateBase } from "../types.js";
 import type { ScreenService } from "../service.js";
+import { pngDataUrl, pngInfo, previewScale, type SurfaceBox } from "./preview.js";
 
 /** How a person reads an adapter's home: "a browser, an app, a device or an API". */
 const FAMILY: Readonly<Record<string, string>> = {
@@ -117,6 +118,13 @@ export interface SurfaceTreeLine {
   readonly depth: number;
   readonly states: readonly string[];
   readonly selected: boolean;
+  /**
+   * Where the control is, in the adapter's units, when the adapter said (T15).
+   *
+   * What the preview hit-tests against (`refAt`): CSS pixels for a page, screen
+   * coordinates for a desktop application, device points for a phone.
+   */
+  readonly box?: SurfaceBox;
 }
 
 /** What `describe` said about the selected control. */
@@ -129,6 +137,13 @@ export interface SurfaceElementView {
   readonly states: readonly string[];
   /** "Text field · Enabled", the subtitle the mockup puts under the name. */
   readonly summary: string;
+  /**
+   * Whether what is typed into this control is a secret (SF-15).
+   *
+   * The same evidence the broker withholds on, so Copy command and Copy MCP
+   * call never write down a value the broker would have redacted.
+   */
+  readonly secret: boolean;
 }
 
 /** One field of an action's form, as the catalogue describes it. */
@@ -168,11 +183,44 @@ export interface SurfaceSessionView {
 export interface SurfaceAgentSetup {
   /** The configuration, ready to copy into a client. */
   readonly config: string;
+  /** The server command in that configuration, as one line: what the connection test starts. */
+  readonly command: string;
   /** Whether the broker an agent would share answered just now. */
   readonly brokerReady: boolean;
+  /** Whether the MCP handshake has been tried, and how it went. */
+  readonly handshake: Pill;
   /** Exactly what a connection test checked, so the panel claims no more. */
   readonly checks: readonly string[];
 }
+
+/**
+ * A picture of the surface beside its tree (T15), or why there is none.
+ *
+ * Taken when the view is loaded with `preview`, straight after the snapshot the
+ * tree is drawn from, so a box and the pixels under it are from the same
+ * load. Selecting on it is the tree's own selection; nothing here acts.
+ */
+export type SurfacePreview =
+  | {
+      readonly shown: true;
+      /** A `data:image/png` URL: allowed by the desktop's `img-src`, and nothing to revoke. */
+      readonly src: string;
+      readonly width: number;
+      readonly height: number;
+      /** Picture pixels per box unit (`previewScale`). */
+      readonly scale: number;
+      /** How the scale was arrived at, in a sentence the picture can be checked against. */
+      readonly basis: string;
+      /** Whether a click can select anything: false when no box lands on the picture. */
+      readonly selectable: boolean;
+    }
+  | {
+      readonly shown: false;
+      /** Why not, in the service's or the adapter's own words. */
+      readonly message: string;
+      /** The SF-17 state that refusal is, when it is one. */
+      readonly problem?: SurfaceProblem;
+    };
 
 /**
  * A state the inspector is in that is not "ready" (SF-17).
@@ -288,6 +336,17 @@ export interface SurfaceView {
   readonly problem?: SurfaceProblem;
   /** What a generic MCP client needs to share these sessions (SF-07, T16). */
   readonly agent: SurfaceAgentSetup;
+  /**
+   * Whether this client can fetch a picture of a surface at all (T15).
+   *
+   * `ScreenService.sessionScreenshot` is optional: the desktop has it, and a
+   * client that parses every answer as JSON or text — the cockpit's — does
+   * not, so `surface.preview` is unavailable there rather than a key that
+   * shows nothing.
+   */
+  readonly previewable: boolean;
+  /** The picture, when the view was loaded with `preview` (T15). */
+  readonly preview?: SurfacePreview;
 }
 
 const NEUTRAL: Pill = { tone: "neutral", label: "—" };
@@ -486,9 +545,45 @@ export function treeLines(
       depth: typeof node["depth"] === "number" ? node["depth"] : 0,
       states: Array.isArray(node["states"]) ? (node["states"] as string[]) : [],
       selected: ref === selectedRef,
+      ...(boxOf(node["box"]) === undefined ? {} : { box: boxOf(node["box"])! }),
     };
   });
 }
+
+/** A snapshot node's `box`, when it is four finite numbers. */
+function boxOf(value: unknown): SurfaceBox | undefined {
+  if (!Array.isArray(value) || value.length !== 4) return undefined;
+  if (!value.every((one) => typeof one === "number" && Number.isFinite(one))) return undefined;
+  return [value[0] as number, value[1] as number, value[2] as number, value[3] as number];
+}
+
+/**
+ * Whether a described control takes a secret (SF-15).
+ *
+ * `@svatah/yam-schema`'s `isSecretField`, restated: that function is in the
+ * schema's bundled barrel, which carries `node:crypto` and cannot be imported
+ * into a renderer (T18). `test/equivalents.test.ts` holds the two to the same
+ * answers. A value the broker already redacted is the same evidence read from
+ * the other side: it would not have been redacted if it were not a secret.
+ */
+export function secretField(described: Record<string, unknown> | undefined): boolean {
+  if (described === undefined) return false;
+  const attrs = (typeof described["attrs"] === "object" && described["attrs"] !== null
+    ? described["attrs"]
+    : {}) as Record<string, unknown>;
+  const tag = typeof described["tag"] === "string" ? described["tag"] : "";
+  return (
+    (typeof attrs["type"] === "string" && attrs["type"].toLowerCase() === "password") ||
+    attrs["password"] === "true" ||
+    attrs["AXSubrole"] === "AXSecureTextField" ||
+    tag === "AXSecureTextField" ||
+    tag.endsWith("SecureTextField") ||
+    described["value"] === REDACTED_VALUE
+  );
+}
+
+/** What a withheld secret reads as (`@svatah/yam-schema`'s `REDACTED_VALUE`). */
+const REDACTED_VALUE = "[REDACTED]";
 
 /** "Text field · Enabled" — the role and states in the words the mockup uses. */
 function elementSummary(role: string, states: readonly string[]): string {
@@ -523,6 +618,7 @@ function elementView(
     ...(typeof result["description"] === "string" ? { description: result["description"] } : {}),
     states,
     summary: elementSummary(role, states),
+    secret: secretField(result),
   };
 }
 
@@ -621,6 +717,87 @@ export function surfaceOutcomeView(value: unknown): SurfaceOutcomeView | undefin
   };
 }
 
+/**
+ * The server command an agent is told to use (SF-07, PK-05).
+ *
+ * `@svatah/yam-mcp`, its own package since PK-05: the MCP SDK is six megabytes
+ * against six for everything Yam wrote, so a CLI install no longer carries it.
+ * `npx -y` fetches on demand and installs nothing. The service's connection
+ * test starts exactly this (`MCP_TEST_COMMAND` in `@svatah/yam-service`), so
+ * what is tested is what is copied.
+ */
+export const AGENT_SERVER = { command: "npx", args: ["-y", "@svatah/yam-mcp"] } as const;
+
+/** What a connection test came to, for the agent panel (T16, SF-07). */
+export interface AgentTestView {
+  /** Both halves held: the broker answered and the handshake completed. */
+  readonly ok: boolean;
+  readonly handshake: Pill;
+  /** What was checked, one sentence each, in the order it was checked. */
+  readonly checks: readonly string[];
+}
+
+/**
+ * `surface.test-agent`'s value → what the panel says was verified.
+ *
+ * Two answers, kept apart: the broker an agent would share, and an MCP
+ * handshake with the server the configuration names. A handshake is
+ * `initialize`, `notifications/initialized` and `tools/list` — the server
+ * started, spoke the protocol and published its tools. It calls no tool, so it
+ * says nothing about a surface, and the sentence does not either.
+ */
+export function agentTestView(value: unknown): AgentTestView | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const both = value as { broker?: unknown; handshake?: unknown };
+  if (both.broker === undefined && both.handshake === undefined) return undefined;
+
+  const checks: string[] = [];
+  let handshakeOk = false;
+  let handshake: Pill = { tone: "neutral", label: "not tried" };
+  const shake = both.handshake as
+    | {
+        ok?: unknown;
+        server?: { name?: unknown; version?: unknown };
+        protocolVersion?: unknown;
+        tools?: unknown;
+        ms?: unknown;
+        stage?: unknown;
+        message?: unknown;
+        command?: unknown;
+      }
+    | undefined;
+  if (shake === undefined) {
+    checks.push("This service has no MCP connection test, so no handshake was tried.");
+  } else if (shake.ok === true) {
+    handshakeOk = true;
+    handshake = { tone: "pass", label: "handshake completed" };
+    const seconds = typeof shake.ms === "number" ? ` in ${(shake.ms / 1000).toFixed(1)} s` : "";
+    const name = typeof shake.server?.name === "string" ? shake.server.name : "an unnamed server";
+    const version = typeof shake.server?.version === "string" ? ` ${shake.server.version}` : "";
+    const tools = typeof shake.tools === "number" ? plural(shake.tools, "tool") : "its tools";
+    const protocol =
+      typeof shake.protocolVersion === "string" ? ` over protocol ${shake.protocolVersion}` : "";
+    checks.push(`MCP handshake: ${name}${version}, ${tools}${seconds}${protocol}. No tool was called.`);
+  } else {
+    handshake = { tone: "fail", label: "handshake failed" };
+    const stage = typeof shake.stage === "string" ? ` at ${shake.stage}` : "";
+    const message = typeof shake.message === "string" ? shake.message : "no reason was given";
+    checks.push(`MCP handshake failed${stage}: ${message}`);
+  }
+
+  const brokerResult = succeededResult(both.broker);
+  const brokerOk = brokerResult !== undefined;
+  if (both.broker !== undefined) {
+    const adapters = Array.isArray(brokerResult?.["adapters"]) ? (brokerResult["adapters"] as unknown[]) : [];
+    checks.push(
+      brokerOk
+        ? `The surface broker answered with ${plural(adapters.length, "adapter")}, so an agent using this configuration reaches the same sessions.`
+        : `The surface broker did not answer: ${envelopeError(both.broker) ?? "no reason was given"}.`,
+    );
+  }
+  return { ok: brokerOk && (shake === undefined || handshakeOk), handshake, checks };
+}
+
 /** Adapters and targets → the platform-family groups the screen draws. */
 export function platformGroups(
   adapters: readonly SurfaceAdapterRow[],
@@ -712,6 +889,7 @@ export async function loadSurface(
     let action: string | undefined;
     let httpSurface = false;
     let problem: SurfaceProblem | undefined;
+    let preview: SurfacePreview | undefined;
 
     if (params.selected !== undefined && chosen !== undefined) {
       const caps = await sources.optional<unknown>(
@@ -774,6 +952,18 @@ export async function loadSurface(
           typeof snapResult?.["snapshotId"] === "string" ? snapResult["snapshotId"] : undefined;
         truncated = snapResult?.["truncated"] === true;
         problem ??= problemFor(envelopeCode(snap), envelopeError(snap) ?? "");
+
+        /*
+         * The picture, straight after the tree it is hit-tested against (T15).
+         *
+         * Taken by the load rather than by `surface.preview`: that action only
+         * turns it on. A picture an action took would be of a moment the tree
+         * has already moved on from by the next load — and every selection is a
+         * load — so its boxes would be drawn over somebody else's pixels.
+         */
+        if (params.preview === true) {
+          preview = await loadPreview(service, sources, params.selected, kind, tree);
+        }
       }
 
       if (params.ref !== undefined && !httpSurface) {
@@ -860,20 +1050,23 @@ export async function loadSurface(
          * package rather than a path out of this checkout.
          */
         config: JSON.stringify(
-          /*
-           * `@svatah/yam-mcp`, its own package since PK-05: the MCP SDK is six
-           * megabytes against six for everything Yam wrote, so a CLI install no
-           * longer carries it. `npx -y` fetches on demand and installs nothing.
-           */
-          { mcpServers: { yam: { command: "npx", args: ["-y", "@svatah/yam-mcp"] } } },
+          { mcpServers: { yam: { command: AGENT_SERVER.command, args: [...AGENT_SERVER.args] } } },
           null,
           2,
         ),
+        command: [AGENT_SERVER.command, ...AGENT_SERVER.args].join(" "),
         brokerReady: discovery === "ready",
+        handshake: { tone: "neutral", label: "not tried" },
         checks: [
           discovery === "ready"
             ? "The surface broker answered, so an agent using this configuration reaches the same sessions."
             : "The surface broker did not answer; an agent would start one on its first call.",
+          /*
+           * What loading did *not* check, said as plainly as what it did. The
+           * handshake starts a process, which is a thing a person asks for with
+           * Test the connection rather than a side effect of opening a screen.
+           */
+          `No MCP handshake has been tried. Test the connection starts \`${[AGENT_SERVER.command, ...AGENT_SERVER.args].join(" ")}\` as a client would, completes the handshake and counts its tools; it calls none of them.`,
         ],
       },
       ...(session === undefined ? {} : { session }),
@@ -886,5 +1079,86 @@ export async function loadSurface(
       ...(action === undefined ? {} : { action }),
       httpSurface,
       ...(problem === undefined ? {} : { problem }),
+      previewable: service.sessionScreenshot !== undefined,
+      ...(preview === undefined ? {} : { preview }),
     };
+}
+
+/**
+ * Fetch the picture and say how it maps onto the tree (T15).
+ *
+ * A failure is a state of the preview, not of the surface: an adapter that
+ * cannot take a screenshot — no Screen Recording grant, an HTTP target, a
+ * terminal — still has a tree that works, so the refusal is drawn where the
+ * picture would be and the SF-17 alert is left to what affects acting.
+ */
+async function loadPreview(
+  service: ScreenService,
+  sources: Sources,
+  session: string,
+  kind: string,
+  tree: readonly SurfaceTreeLine[],
+): Promise<SurfacePreview> {
+  if (service.sessionScreenshot === undefined) {
+    return {
+      shown: false,
+      message:
+        "This client cannot fetch a picture. `yam surface screenshot --session <id> --path <file.png>` writes one to a file.",
+    };
+  }
+  sources.note("GET /sessions/:session/screenshot.png");
+  let bytes: Uint8Array;
+  try {
+    bytes = await service.sessionScreenshot(session);
+  } catch (cause) {
+    const refusal = refusalOf(cause);
+    const problem = problemFor(refusal.code, refusal.message);
+    return { shown: false, message: refusal.message, ...(problem === undefined ? {} : { problem }) };
+  }
+  const info = pngInfo(bytes);
+  if (info === undefined) {
+    return { shown: false, message: "The screenshot the service returned is not a PNG image." };
+  }
+  const scale = previewScale({
+    kind,
+    lines: tree,
+    width: info.width,
+    height: info.height,
+    ...(info.pixelsPerInch === undefined ? {} : { pixelsPerInch: info.pixelsPerInch }),
+  });
+  return {
+    shown: true,
+    src: pngDataUrl(bytes),
+    width: info.width,
+    height: info.height,
+    scale: scale.scale,
+    basis: scale.basis,
+    selectable: scale.selectable,
+  };
+}
+
+/**
+ * What a failed picture request said, in the broker's words.
+ *
+ * A generated client throws with the answer's body attached (`ServiceError`),
+ * and for this route that body is the broker's envelope; anything else is a
+ * transport failure and its own message is the best account there is.
+ */
+function refusalOf(cause: unknown): { message: string; code?: string } {
+  const body = (cause as { body?: unknown } | undefined)?.body;
+  if (typeof body === "string" && body.trim().startsWith("{")) {
+    try {
+      const parsed = JSON.parse(body) as unknown;
+      const message =
+        envelopeError(parsed) ??
+        (typeof (parsed as { message?: unknown }).message === "string"
+          ? (parsed as { message: string }).message
+          : undefined);
+      const code = envelopeCode(parsed);
+      if (message !== undefined) return { message, ...(code === undefined ? {} : { code }) };
+    } catch {
+      // Not JSON after all; fall through to the error's own message.
+    }
+  }
+  return { message: cause instanceof Error ? cause.message : String(cause) };
 }

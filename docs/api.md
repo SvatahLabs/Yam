@@ -88,10 +88,10 @@ These need no project. They are what an agent uses to drive something.
 | `surface_connect` | Open a session on a URL, an app name, or an endpoint. |
 | `surface_snapshot` | The elements on screen, each with a stable reference. |
 | `surface_describe` | Everything known about one element. |
-| `surface_act` | Click, type, press, navigate, and the rest. |
+| `surface_act` | Click, type, press, navigate, and the rest. Name passwords in `secrets`. |
 | `surface_read` | The title, the URL, an element's text or value. |
 | `surface_check` | Test a postcondition. Returns what it observed. |
-| `surface_screenshot` | A picture of the current surface. |
+| `surface_screenshot` | A picture of the current surface, returned as an image. |
 | `surface_capabilities` | What this adapter can and cannot do. |
 | `surface_events` | What has happened in this session. |
 | `surface_control` | Take a target or give it back. |
@@ -129,8 +129,9 @@ it. That is what makes a session compile into a proposal later.
 ### Sharing a session with a person
 
 You and an agent share one broker, so a session either of you opens is one both
-can see. `surface_control` decides who is driving. The app shows who holds a
-target and lets you take it back.
+can see. `surface_control` decides who is driving. The agent drives under its
+client's name and cannot force a handoff; the app shows who holds a target and
+lets you take it back.
 
 Read [Yam and MCP](mcp.md) for the profiles and the transport options.
 

@@ -157,6 +157,23 @@ export interface ScreenService {
   subscribe(listener: (event: ServiceEventLike) => void): () => void;
   /** Who is connected over MCP (TV-M05, SF-13). Optional: an older service has none. */
   getAgentsClients?(): Promise<unknown>;
+  /**
+   * `GET /sessions/{session}/screenshot.png`, as the PNG's bytes (T15).
+   *
+   * Not the generated name, and optional, for the reason `subscribe` is not
+   * generated either: a generated client parses every answer as JSON or text,
+   * which is right for every route but the two whose answer is an image. The
+   * desktop's client adds this beside its run-screenshot fetch; a client
+   * without it — the cockpit's — cannot draw a picture anyway, and
+   * `SurfaceView.previewable` says so. A refusal throws with the broker's
+   * envelope as the error's `body`, as a generated method's `ServiceError` does.
+   */
+  sessionScreenshot?(session: string): Promise<Uint8Array>;
+  /**
+   * `POST /agents/test` — start the MCP server the agent panel names and complete
+   * a handshake with it (T16, SF-07). Optional: an older service has no such route.
+   */
+  postAgentsTest?(): Promise<unknown>;
 }
 
 /**

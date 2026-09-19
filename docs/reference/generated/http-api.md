@@ -38,6 +38,7 @@ OpenAPI 3.1.0, service version 0.1.0. The document itself is `openApiDocument()`
 | `POST` | `/surface/{session}/snapshot` | The driven session's snapshot, for the picker and the explorer |
 | `POST` | `/trajectory/compile` | Compile a captured trajectory into proposals/<date>/ |
 | `GET` | `/agents/clients` | Who is connected over MCP right now |
+| `POST` | `/agents/test` | Start the MCP server an agent is told to use, and complete a handshake with it |
 | `GET` | `/tools` | The tools this project exposes, and every invocation served |
 | `GET` | `/targets` | Discover available targets and adapter readiness (SF-04) |
 | `GET` | `/sessions` | List active surface sessions (SF-05) |
@@ -53,6 +54,7 @@ OpenAPI 3.1.0, service version 0.1.0. The document itself is `openApiDocument()`
 | `POST` | `/sessions/{session}/control` | Take, release or report who holds a target (T16, SF-13) |
 | `POST` | `/sessions/{session}/request` | Send an HTTP request on an HTTP surface (T15, SF-04) |
 | `POST` | `/sessions/{session}/screenshot` | Take a screenshot of the current surface (SF-11) |
+| `GET` | `/sessions/{session}/screenshot.png` | A picture of the surface, as PNG bytes, for the desktop's preview |
 | `GET` | `/events` | The event stream (WebSocket) |
 | `GET` | `/events/sse` | The event stream (server-sent events) |
 | `GET` | `/openapi.json` | This document |

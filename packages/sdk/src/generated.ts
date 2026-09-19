@@ -41,8 +41,10 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "getSessions", verb: "get", path: "/sessions", summary: "List active surface sessions (SF-05)" },
   { id: "getSessionsBySessionCapabilities", verb: "get", path: "/sessions/{session}/capabilities", summary: "A session's adapter capabilities (SF-09)" },
   { id: "getSessionsBySessionEvents", verb: "get", path: "/sessions/{session}/events", summary: "What this session did, and the steps a proposal compiles from (T17, SF-19)" },
+  { id: "getSessionsBySessionScreenshotpng", verb: "get", path: "/sessions/{session}/screenshot.png", summary: "A picture of the surface, as PNG bytes, for the desktop's preview" },
   { id: "getTargets", verb: "get", path: "/targets", summary: "Discover available targets and adapter readiness (SF-04)" },
   { id: "getTools", verb: "get", path: "/tools", summary: "The tools this project exposes, and every invocation served" },
+  { id: "postAgentsTest", verb: "post", path: "/agents/test", summary: "Start the MCP server an agent is told to use, and complete a handshake with it" },
   { id: "postApiRequest", verb: "post", path: "/api/request", summary: "Execute one API request ad hoc" },
   { id: "postBindingsVerify", verb: "post", path: "/bindings/verify", summary: "Dry-resolve the store, or one binding" },
   { id: "postCapture", verb: "post", path: "/capture", summary: "Record a flow from what a person does; sentences arrive on the stream" },
@@ -228,6 +230,11 @@ export class GeneratedClient {
     return await this.call("get", `/sessions/${encodeURIComponent(session)}/events`, { });
   }
 
+  /** `GET /sessions/{session}/screenshot.png` — A picture of the surface, as PNG bytes, for the desktop's preview */
+  async getSessionsBySessionScreenshotpng(session: string): Promise<unknown> {
+    return await this.call("get", `/sessions/${encodeURIComponent(session)}/screenshot.png`, { });
+  }
+
   /** `GET /targets` — Discover available targets and adapter readiness (SF-04) */
   async getTargets(): Promise<unknown> {
     return await this.call("get", `/targets`, { });
@@ -236,6 +243,11 @@ export class GeneratedClient {
   /** `GET /tools` — The tools this project exposes, and every invocation served */
   async getTools(): Promise<unknown> {
     return await this.call("get", `/tools`, { });
+  }
+
+  /** `POST /agents/test` — Start the MCP server an agent is told to use, and complete a handshake with it */
+  async postAgentsTest(): Promise<unknown> {
+    return await this.call("post", `/agents/test`, { });
   }
 
   /** `POST /api/request` — Execute one API request ad hoc */

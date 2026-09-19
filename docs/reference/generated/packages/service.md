@@ -16,6 +16,13 @@ Local HTTP and event-stream service (yam serve)
 | `createService` | function | `export async function createService(options: ServeOptions): Promise<RunningService>` |  |
 | `EventBus` | class | `export class EventBus` | Fan-out to whoever is listening. |
 | `keepRedacted` | function | `export function keepRedacted(` | Merge an edited data tree over the file's own, keeping every secret as it was. |
+| `MCP_TEST_COMMAND` | variable | `MCP_TEST_COMMAND: readonly string[] = ["npx", "-y", "@svatah/yam-mcp"]` | What the agent panel tells people to run (`AGENT_SERVER` in `@svatah/yam-screens`). |
+| `MCP_TEST_PROTOCOL` | variable | `MCP_TEST_PROTOCOL = "2025-11-25"` | The protocol this client asks for; the server answers with the one it speaks. |
+| `MCP_TEST_TIMEOUT_MS` | variable | `MCP_TEST_TIMEOUT_MS = 60_000` | Long enough for `npx -y` to fetch the package on a first run. |
+| `mcpTestCommand` | function | `export function mcpTestCommand(env: NodeJS.ProcessEnv = process.env): readonly string[]` | The command the service starts: the configuration's, unless its own |
+| `McpTestResult` | typealias | `export type McpTestResult ` |  |
+| `McpTestStage` | typealias | `export type McpTestStage = "start" \| "initialize" \| "tools/list";` | Where a failed test stopped. |
+| `mcpTestTimeout` | function | `export function mcpTestTimeout(env: NodeJS.ProcessEnv = process.env): number` | The deadline, from `YAM_MCP_TEST_TIMEOUT_MS` when the service's environment sets one. |
 | `MissingInput` | interface | `export interface MissingInput` | One input a story declared and the run did not supply. |
 | `missingInputs` | function | `export function missingInputs(` | The declared inputs with no default that the run did not supply. |
 | `OPENAPI_VERSION` | variable | `OPENAPI_VERSION = "3.1.0"` |  |
@@ -29,3 +36,4 @@ Local HTTP and event-stream service (yam serve)
 | `ServiceApi` | interface | `export interface ServiceApi` | The functions a handler may call. Every one of them is the CLI's own. |
 | `ServiceEvent` | typealias | `export type ServiceEvent ` |  |
 | `storiesInvokedDirectly` | function | `export function storiesInvokedDirectly(` | The stories a run invokes directly (Draft 2.4, LLD §13.5). |
+| `testMcpServer` | function | `export async function testMcpServer(options:` | Start an MCP server over stdio, complete a handshake and list its tools. |

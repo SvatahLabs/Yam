@@ -230,6 +230,71 @@
   margin-top: 8px;
 }
 
+/*
+ * The preview (T15): a picture of the surface above its tree.
+ *
+ * The frame is exactly the picture's size on screen, so a box placed in
+ * percentages of it lands on the pixels it names however the picture is scaled
+ * to fit. It is bounded and scrolls, because a whole-screen capture would
+ * otherwise push the tree — the half a keyboard uses — off the pane.
+ */
+.sv-preview {
+  margin: 0;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  max-height: 45%;
+  overflow: auto;
+  flex: none;
+}
+.sv-preview-frame {
+  position: relative;
+  line-height: 0;
+}
+.sv-preview-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* An outline, not a border: a border would move the pixels a box is placed over. */
+  outline: 1px solid var(--line);
+  user-select: none;
+}
+.sv-preview-live {
+  cursor: crosshair;
+}
+.sv-preview-box {
+  position: absolute;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+/* Never colour alone: the selected box is solid, the pointed-at one dashed. */
+.sv-preview-selected {
+  border: 2px solid var(--accent);
+  background: var(--accent-soft);
+}
+.sv-preview-hover {
+  border: 2px dashed var(--fg);
+}
+.sv-preview-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 6px;
+  font-size: 11.5px;
+  line-height: 16px;
+}
+.sv-preview-caption .sv-mono {
+  font-size: 11.5px;
+}
+
+/* What a copied command or MCP call assumes, one sentence each. */
+.sv-notes {
+  margin: 8px 16px 0;
+  padding-left: 16px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 16px;
+}
+
 /* A platform family on Surfaces: a heading and the adapters under it. */
 .sv-surface-group {
   margin-bottom: 14px;
@@ -653,6 +718,12 @@
 
 .sv-inspector-actions {
   display: flex;
+  /*
+   * Wrapped, not clipped (T15): Act, Read, Copy command and Copy MCP call are
+   * four buttons in an inspector a third of the window wide, and the fourth
+   * was drawn past the edge where nobody could press it.
+   */
+  flex-wrap: wrap;
   gap: 8px;
   padding: 14px 16px;
 }

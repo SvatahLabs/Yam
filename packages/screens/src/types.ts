@@ -130,6 +130,14 @@ export interface ScreenParams {
    */
   readonly action?: string;
   /**
+   * `session`: whether a picture of the surface is drawn beside its tree (T15).
+   *
+   * A parameter, because the picture is taken by the load — straight after the
+   * snapshot its boxes come from — and so is what the screen re-loads with.
+   * `surface.preview` turns it on and off.
+   */
+  readonly preview?: boolean;
+  /**
    * What a call is *for*, when a caller says (REQ-BEH-4, SF-12).
    *
    * Optional everywhere: direct control never requires a prose sentence. When

@@ -55,7 +55,19 @@ export interface FakeResponses {
     request?: unknown;
     control?: unknown;
     events?: unknown;
+    /**
+     * `GET /sessions/:session/screenshot.png` — the PNG's bytes, or an `Error`
+     * carrying the broker's envelope as `body`, which is how a client reports
+     * a refusal. Absent, the fake has no `sessionScreenshot` at all: a client
+     * that cannot fetch a picture is a state the model has to draw (T15).
+     */
+    image?: Uint8Array | Error;
   };
+  /**
+   * `POST /agents/test`'s answer (T16). Absent, the fake has no `postAgentsTest`,
+   * which is what an older service is.
+   */
+  readonly agentTest?: unknown;
 }
 
 /** What the fake was asked, in order. A test asserts on the screen rule with it. */
@@ -246,6 +258,26 @@ export function fakeService(responses: FakeResponses = {}): FakeService {
       record("postSessionsBySessionRequest", session, body);
       return responses.surface?.request ?? envelope({ response: { status: 200 } });
     },
+
+    /* ── the two optional ones: present only when the fixture says so ─────── */
+    ...(responses.surface?.image === undefined
+      ? {}
+      : {
+          async sessionScreenshot(session: string): Promise<Uint8Array> {
+            record("sessionScreenshot", session);
+            const image = responses.surface!.image!;
+            if (image instanceof Error) throw image;
+            return image;
+          },
+        }),
+    ...(responses.agentTest === undefined
+      ? {}
+      : {
+          async postAgentsTest(): Promise<unknown> {
+            record("postAgentsTest");
+            return responses.agentTest;
+          },
+        }),
   };
 }
 

@@ -15,6 +15,7 @@ import { describe, expect, it } from "vitest";
 import { DESKTOP_HOLDER } from "../src/holder.js";
 import {
   actionById,
+  agentTestView,
   fakeService,
   problemFor,
   surfaceOutcomeView,
@@ -818,5 +819,200 @@ describe("connect belongs to the mode that can show what it made", () => {
     });
     const outcome = await actionById("surface.connect")!.run(service, { target: "https://x.test" });
     expect(outcome.params?.["sessionId"]).toBeUndefined();
+  });
+});
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * T15 — the screenshot preview, and what the form copies
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/** The smallest bytes `pngInfo` reads as a PNG of this size. */
+function tinyPng(width: number, height: number): Uint8Array {
+  const u32 = (value: number): number[] => [(value >>> 24) & 0xff, (value >>> 16) & 0xff, (value >>> 8) & 0xff, value & 0xff];
+  return new Uint8Array([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    ...u32(13), ..."IHDR".split("").map((one) => one.charCodeAt(0)), ...u32(width), ...u32(height), 8, 6, 0, 0, 0, 0, 0, 0, 0,
+    ...u32(0), ..."IEND".split("").map((one) => one.charCodeAt(0)), 0, 0, 0, 0,
+  ]);
+}
+
+const BOXED_SNAP = ok({
+  snapshotId: "snap_1",
+  nodes: [
+    { ref: "r1", role: "textbox", name: "Username", depth: 0, states: [], box: [20, 40, 200, 30] },
+    { ref: "r2", role: "button", name: "Sign in", depth: 0, states: [], box: [20, 100, 80, 30] },
+    { ref: "r3", role: "link", name: "Help", depth: 0, states: [], box: ["x", 1, 2, 3] },
+  ],
+});
+
+describe("the tree carries each control's box, which the preview hit-tests (T15)", () => {
+  it("keeps a box of four numbers and drops one that is not", async () => {
+    const state = await connected({ snapshot: BOXED_SNAP });
+    expect(state.tree[0]!.box).toEqual([20, 40, 200, 30]);
+    expect(state.tree[2]!.box).toBeUndefined();
+  });
+});
+
+describe("the preview is taken by the load, beside the tree it maps onto (T15)", () => {
+  it("is not taken unless asked for", async () => {
+    const service = fakeService({
+      surface: { targets: ok({ adapters: ADAPTERS, targets: [] }), sessions: ONE_SESSION, capabilities: CAPS, snapshot: BOXED_SNAP, image: tinyPng(1280, 720) },
+    });
+    const state = await loadSurface(service, { selected: "s_1" });
+    expect(state.previewable).toBe(true);
+    expect(state.preview).toBeUndefined();
+    expect(service.calls.some((one) => one.method === "sessionScreenshot")).toBe(false);
+  });
+
+  it("draws the picture as a data URL, with its size and the scale it inferred", async () => {
+    const service = fakeService({
+      surface: { targets: ok({ adapters: ADAPTERS, targets: [] }), sessions: ONE_SESSION, capabilities: CAPS, snapshot: BOXED_SNAP, image: tinyPng(1280, 720) },
+    });
+    const state = await loadSurface(service, { selected: "s_1", preview: true });
+    expect(state.preview).toMatchObject({ shown: true, width: 1280, height: 720, scale: 1, selectable: true });
+    expect(state.preview?.shown === true && state.preview.src.startsWith("data:image/png;base64,iVBORw0KGgo")).toBe(true);
+    expect(state.sources).toContain("GET /sessions/:session/screenshot.png");
+    // After the snapshot, so the picture is never older than the boxes drawn on it.
+    const order = service.calls.map((one) => one.method);
+    expect(order.indexOf("sessionScreenshot")).toBeGreaterThan(order.indexOf("postSessionsBySessionSnapshot"));
+  });
+
+  it("draws a refusal where the picture would be, and leaves the surface usable", async () => {
+    const refusal = Object.assign(new Error("/sessions/s_1/screenshot.png answered 422"), {
+      body: JSON.stringify({
+        schemaVersion: "1.0",
+        requestId: "r",
+        status: "refused",
+        error: { code: "PERMISSION_REQUIRED", message: "Screen Recording is not granted to node.", retryable: false },
+      }),
+    });
+    const state = await connected({ snapshot: BOXED_SNAP, image: refusal }, { preview: true });
+    expect(state.preview).toMatchObject({ shown: false, message: "Screen Recording is not granted to node." });
+    expect(state.preview?.shown === false && state.preview.problem?.kind).toBe("permission");
+    // The tree still works, and the page is not put into a state by the picture.
+    expect(state.problem).toBeUndefined();
+    expect(state.tree).toHaveLength(3);
+  });
+
+  it("says so when the client cannot fetch a picture at all", async () => {
+    const state = await connected({ snapshot: BOXED_SNAP }, { preview: true });
+    expect(state.previewable).toBe(false);
+    expect(state.preview).toMatchObject({ shown: false });
+    expect(state.preview?.shown === false && state.preview.message).toContain("yam surface screenshot");
+  });
+
+  it("is not offered for an HTTP surface, which has nothing to look at", async () => {
+    const state = await connected(
+      { capabilities: ok({ adapter: "http", kind: "http", capabilities: {} }), image: tinyPng(1, 1) },
+      { preview: true },
+    );
+    expect(state.preview).toBeUndefined();
+    expect(actionById("surface.preview")!.availableWhen(state as never)).toBe(false);
+  });
+});
+
+describe("surface.preview turns the picture on and off (T15)", () => {
+  const withImage = fakeService({ surface: { image: tinyPng(1, 1) } });
+
+  it("is a Do-mode action, available only where a picture can be fetched", async () => {
+    expect(actionById("surface.preview")?.modes).toEqual(["do"]);
+    const can = await connected({ image: tinyPng(1, 1) });
+    const cannot = await connected();
+    expect(actionById("surface.preview")!.availableWhen(can as never)).toBe(true);
+    expect(actionById("surface.preview")!.availableWhen(cannot as never)).toBe(false);
+  });
+
+  it("toggles from the palette, and does what a control asks for", async () => {
+    const on = await actionById("surface.preview")!.run(withImage, { selected: "s_1" });
+    expect(on.params).toMatchObject({ selected: "s_1", preview: true });
+    expect(on.message).toContain("nothing is clicked in the application");
+    const off = await actionById("surface.preview")!.run(withImage, { selected: "s_1", preview: true });
+    expect(off.params).toMatchObject({ preview: false });
+    const asked = await actionById("surface.preview")!.run(withImage, { selected: "s_1", preview: true, show: true });
+    expect(asked.params).toMatchObject({ preview: true });
+  });
+
+  it("refuses, naming the command, on a client with no way to fetch one", async () => {
+    const outcome = await actionById("surface.preview")!.run(fakeService(), { selected: "s_1" });
+    expect(outcome.ok).toBe(false);
+    expect(outcome.message).toContain("yam surface screenshot");
+  });
+});
+
+describe("a password field is known to be one, so nothing copies its value (SF-15)", () => {
+  it("marks the described control secret from its attributes", async () => {
+    const state = await connected(
+      { describe: ok({ ref: "r1", role: "textbox", name: "Password", tag: "input", attrs: { type: "password" }, states: [] }) },
+      { ref: "r1" },
+    );
+    expect(state.element?.secret).toBe(true);
+  });
+
+  it("and not an ordinary field", async () => {
+    const state = await connected(
+      { describe: ok({ ref: "r1", role: "textbox", name: "Username", tag: "input", attrs: { type: "text" }, states: [] }) },
+      { ref: "r1" },
+    );
+    expect(state.element?.secret).toBe(false);
+  });
+});
+
+describe("the connection test speaks MCP, and says what it verified (T16, SF-07)", () => {
+  const targets = ok({ adapters: ADAPTERS, targets: [] });
+
+  it("says on load that no handshake has been tried, and names the command a test would start", async () => {
+    const state = await load({ targets, sessions: ok({ sessions: [] }) });
+    expect(state.agent.command).toBe("npx -y @svatah/yam-mcp");
+    expect(state.agent.handshake.label).toBe("not tried");
+    expect(state.agent.checks.join(" ")).toContain("No MCP handshake has been tried");
+  });
+
+  it("reports the server, its tool count and how long it took", async () => {
+    const service = fakeService({
+      surface: { targets },
+      agentTest: {
+        ok: true,
+        command: "npx -y @svatah/yam-mcp",
+        server: { name: "yam", version: "0.1.0" },
+        protocolVersion: "2025-11-25",
+        tools: 14,
+        ms: 3200,
+      },
+    });
+    const outcome = await actionById("surface.test-agent")!.run(service, {});
+    expect(outcome.ok).toBe(true);
+    expect(outcome.message).toContain("MCP handshake: yam 0.1.0, 14 tools in 3.2 s");
+    expect(outcome.message).toContain("No tool was called");
+    expect(outcome.message).toContain("3 adapters");
+    expect(service.calls.map((one) => one.method)).toEqual(["getTargets", "postAgentsTest"]);
+
+    const view = agentTestView(outcome.value);
+    expect(view?.handshake).toEqual({ tone: "pass", label: "handshake completed" });
+    expect(view?.checks).toHaveLength(2);
+  });
+
+  it("fails honestly, naming the stage, when the server did not complete the handshake", async () => {
+    const service = fakeService({
+      surface: { targets },
+      agentTest: { ok: false, stage: "initialize", message: "No answer within 60 s.", ms: 60_000 },
+    });
+    const outcome = await actionById("surface.test-agent")!.run(service, {});
+    expect(outcome.ok).toBe(false);
+    expect(outcome.message).toContain("MCP handshake failed at initialize: No answer within 60 s.");
+    // The broker is still reported: one failing does not hide the other.
+    expect(outcome.message).toContain("The surface broker answered");
+    expect(agentTestView(outcome.value)?.handshake.tone).toBe("fail");
+  });
+
+  it("is not ok when the handshake held and the broker did not", async () => {
+    const service = fakeService({
+      surface: {
+        targets: { schemaVersion: "1.0", requestId: "r", status: "refused", error: { message: "no broker", retryable: true } },
+      },
+      agentTest: { ok: true, server: { name: "yam", version: "0.1.0" }, tools: 3, ms: 10 },
+    });
+    const outcome = await actionById("surface.test-agent")!.run(service, {});
+    expect(outcome.ok).toBe(false);
+    expect(outcome.message).toContain("did not answer: no broker");
   });
 });
