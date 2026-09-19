@@ -14,7 +14,7 @@
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { LocateError } from "@svatah/yam-surface";
+import { DataError, LocateError, TimeoutError, UnsupportedError } from "@svatah/yam-surface";
 import { bidiAvailable } from "../src/launch.js";
 import { BidiSurface } from "../src/surface.js";
 
@@ -238,6 +238,104 @@ describeWithBrowser("describe feeds synthesis and fingerprinting (LLD §3.3)", (
     expect(described.attrs["id"]).toBeUndefined();
     expect(described.attrs["data-yam-eval"]).toBeUndefined();
     expect(JSON.stringify(described.native)).not.toContain("data-yam-eval");
+  }, 120_000);
+});
+
+describeWithBrowser("waitFor, on the page and on an element (SF-11, SF-16)", () => {
+  /*
+   * Each change is made a moment after the wait starts, so a wait that
+   * answered from the page as it was when it was asked would fail.
+   */
+  it("waits for the page's text, URL and title when given no reference", async () => {
+    const surface = await open("/login");
+    await surface.act("evaluate", undefined, {
+      script:
+        "setTimeout(() => { const p = document.createElement('p'); p.textContent = 'Saved at noon'; " +
+        "document.body.append(p); }, 300);",
+    });
+    expect((await surface.act("waitFor", undefined, { text: "Saved at noon" })).ok).toBe(true);
+
+    await surface.act("evaluate", undefined, {
+      script: "setTimeout(() => history.pushState({}, '', '/login/after'), 300);",
+    });
+    expect((await surface.act("waitFor", undefined, { url: "/login/after" })).ok).toBe(true);
+
+    await surface.act("evaluate", undefined, {
+      script: "setTimeout(() => { document.title = 'Sign in, done'; }, 300);",
+    });
+    expect((await surface.act("waitFor", undefined, { title: "done" })).ok).toBe(true);
+  }, 120_000);
+
+  it("gives up at the caller's timeoutMs, and refuses a wait for nothing", async () => {
+    const surface = await open("/login");
+    await expect(
+      surface.act("waitFor", undefined, { text: "never on this page", timeoutMs: 400 }),
+    ).rejects.toBeInstanceOf(TimeoutError);
+    await expect(surface.act("waitFor", undefined, {})).rejects.toBeInstanceOf(DataError);
+  }, 120_000);
+
+  /*
+   * A page wait waited ten seconds whatever the adapter's own timeout said,
+   * and read the active context's text alone, so a "Saved" inside a
+   * same-origin frame on the page never arrived.
+   */
+  it("waits the adapter's own timeout by default, and reads same-origin frames", async () => {
+    const surface = await open("/widgets");
+    expect((await surface.act("waitFor", undefined, { text: "Inside the frame", timeoutMs: 5_000 })).ok).toBe(true);
+
+    const quick = new BidiSurface({ headless: true, timeoutMs: 300, testIdAttributes: ["data-testid"] });
+    opened.push(quick);
+    await quick.open({ baseUrl: app.origin });
+    await quick.act("navigate", undefined, { url: "/login" });
+    const error = await quick
+      .act("waitFor", undefined, { text: "never on this page" })
+      .catch((caught: unknown) => caught);
+    expect(error).toBeInstanceOf(TimeoutError);
+    expect((error as Error).message).toContain("Waited 300 ms");
+  }, 120_000);
+
+  it("waits for an element to leave the document, and to come back", async () => {
+    const surface = await open("/login");
+    const [field] = await surface.locate({ by: "id", value: "username", score: 1 });
+
+    await expect(
+      surface.act("waitFor", field!, { state: "detached", timeoutMs: 300 }),
+    ).rejects.toBeInstanceOf(TimeoutError);
+
+    await surface.act("evaluate", undefined, {
+      script:
+        "const field = document.getElementById('username'); const parent = field.parentElement; " +
+        "setTimeout(() => field.remove(), 300); " +
+        "setTimeout(() => { field.hidden = true; parent.append(field); }, 1200);",
+    });
+    expect((await surface.act("waitFor", field!, { state: "detached" })).ok).toBe(true);
+    // Put back hidden: attached holds, which the `visible` row it used to fall
+    // through to would not have said until its timeout.
+    expect((await surface.act("waitFor", field!, { state: "attached", timeoutMs: 5_000 })).ok).toBe(true);
+
+    await expect(surface.act("waitFor", field!, { state: "unheard-of" })).rejects.toBeInstanceOf(DataError);
+  }, 120_000);
+});
+
+describeWithBrowser("refusals are unsupported, not failures (SF-11)", () => {
+  it("refuses `quit` and `invoke` as actions it will never perform", async () => {
+    const surface = await open("/");
+    await expect(surface.act("quit")).rejects.toBeInstanceOf(UnsupportedError);
+    await expect(surface.act("invoke")).rejects.toBeInstanceOf(UnsupportedError);
+  }, 120_000);
+});
+
+describeWithBrowser("the session's cookies for a URL (REQ-ADP-3)", () => {
+  it("answers the cookies the browser would send to that URL, by name", async () => {
+    const surface = await open("/dashboard");
+    await surface.act("evaluate", undefined, {
+      script: 'document.cookie = "yam_session=abc123; path=/"; document.cookie = "admin_only=1; path=/admin";',
+    });
+
+    expect(await surface.cookies(`${app.origin}/api/bookings`)).toEqual({ yam_session: "abc123" });
+    expect(await surface.cookies(`${app.origin}/admin/users`)).toEqual({ yam_session: "abc123", admin_only: "1" });
+    expect(await surface.cookies("/api/bookings")).toEqual({ yam_session: "abc123" });
+    expect(await surface.cookies("http://elsewhere.invalid/api/bookings")).toEqual({});
   }, 120_000);
 });
 

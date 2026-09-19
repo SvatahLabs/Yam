@@ -7,11 +7,13 @@
 export {
   clearAdapters,
   createSurface,
+  DataError,
   listAdapters,
   LocateError,
   NavigationError,
   ScriptError,
   SessionError,
   TimeoutError,
+  UnsupportedError,
 } from "@svatah/yam-surface";
 export { DEFAULT_CONFIG } from "@svatah/yam-schema";

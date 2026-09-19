@@ -22,6 +22,7 @@ WebDriver BiDi adapter (independence proof)
 | `bidiAvailable` | function | `export function bidiAvailable(` | Whether this machine can run the BiDi adapter at all. |
 | `BidiClient` | class | `export class BidiClient` |  |
 | `BidiClientOptions` | interface | `export interface BidiClientOptions` |  |
+| `BidiCookie` | interface | `export interface BidiCookie` | A cookie as `storage.getCookies` answers it (WebDriver BiDi `network.Cookie`). |
 | `BidiEndpoint` | interface | `export interface BidiEndpoint` | Where a session is talking, and to what. |
 | `BidiError` | class | `export class BidiError extends Error` | A protocol-level refusal, before it becomes one of the surface's errors. |
 | `BidiEvent` | interface | `export interface BidiEvent` | One unsolicited message: `{ method, params }` with no `id`. |
@@ -29,6 +30,7 @@ WebDriver BiDi adapter (independence proof)
 | `BidiSession` | class | `export class BidiSession` |  |
 | `BidiSurface` | class | `export class BidiSurface implements AgentSurface` |  |
 | `ContextId` | typealias | `export type ContextId = string;` | A BiDi browsing context id: a top-level tab, or a frame inside one. |
+| `cookiesFor` | function | `export function cookiesFor(url: string, cookies: readonly BidiCookie[]): Record<string, string>` | The cookies a browser would send with a request to `url`, by name (RFC 6265 |
 | `createBidiSurface` | function | `export function createBidiSurface(` | Build a surface from a project config (LLD §2.4). |
 | `describeElement` | function | `export function describeElement(` |  |
 | `evaluateBidiPredicate` | function | `export async function evaluateBidiPredicate(` |  |

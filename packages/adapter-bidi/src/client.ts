@@ -27,6 +27,7 @@ import {
   ScriptError,
   SessionError,
   TimeoutError,
+  UnsupportedError,
 } from "@svatah/yam-surface";
 
 /** One unsolicited message: `{ method, params }` with no `id`. */
@@ -68,8 +69,13 @@ const ERROR_BY_CODE: Record<string, new (message: string, options?: { adapter?: 
   "no such history entry": NavigationError,
   "invalid argument": ScriptError,
   "javascript error": ScriptError,
-  "unsupported operation": ScriptError,
-  "unknown command": ScriptError,
+  /*
+   * The browser cannot do this command at all (SF-11). A `ScriptError` was
+   * told to a caller as `OUTCOME_UNKNOWN`, which sends them to check whether
+   * something happened; nothing did, and asking again gets the same answer.
+   */
+  "unsupported operation": UnsupportedError,
+  "unknown command": UnsupportedError,
   "no such user context": SessionError,
   "session not created": SessionError,
   "invalid session id": SessionError,

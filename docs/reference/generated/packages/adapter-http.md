@@ -12,17 +12,25 @@ HTTP/API adapter
 
 | Export | Kind | Signature | |
 |---|---|---|---|
+| `ALLOW_LINK_LOCAL_ENV` | variable | `ALLOW_LINK_LOCAL_ENV = "YAM_HTTP_ALLOW_LINK_LOCAL"` | Set to `1` to let requests reach link-local and metadata addresses. |
 | `ApiRequestError` | class | `export class ApiRequestError extends Error` |  |
+| `buildUrl` | function | `export function buildUrl(` | The absolute URL a request goes to: templated, path parameters filled, query added. |
 | `createHttpSurface` | function | `export function createHttpSurface(config: Config, overrides: HttpAdapterOptions = {}): HttpSurface` | Build an HTTP surface from a project config (LLD §2.4). |
 | `executeRequest` | function | `export async function executeRequest(` | Execute one request. |
 | `expand` | function | `export function expand(text: string, scope: TemplateScope): string` | Expand every `{…}` in a string. A reference with no value becomes empty. |
 | `expandRecord` | function | `export function expandRecord(` | Expand every string in a record. |
 | `fillPathParams` | function | `export function fillPathParams(` | Substitute `:name` and `{name}` in a URL path from `pathParams`. |
 | `HttpAdapterOptions` | interface | `export interface HttpAdapterOptions` |  |
+| `HttpRequestOptions` | typealias | `export type HttpRequestOptions ` | What `request()` takes beyond the request itself (REQ-ADP-3). |
 | `HttpSurface` | class | `export class HttpSurface implements AgentSurface` |  |
 | `JsonPathError` | class | `export class JsonPathError extends Error {}` | The JSON-path subset a capture uses (REQ-ADP-2: "responses are JSON-path |
 | `parseJsonPath` | function | `export function parseJsonPath(path: string): Segment[]` | Parse `$.a.b[0]` into segments. Throws on anything outside the subset. |
+| `parseSetCookie` | function | `export function parseSetCookie(line: string, url: string): ResponseCookie \| undefined` | One `Set-Cookie` line, as a browser would store it for the response from |
 | `readJsonPath` | function | `export function readJsonPath(body: unknown, path: string): unknown` | Read a path out of a parsed body. `undefined` when it is not there. |
+| `refusedDestination` | function | `export function refusedDestination(hostname: string): string \| undefined` | Why a hostname or address is refused, or `undefined` when it is not. |
 | `registerHttpAdapter` | function | `export function registerHttpAdapter(): void` |  |
 | `RequestOptions` | interface | `export interface RequestOptions` |  |
+| `ResponseCookie` | interface | `export interface ResponseCookie extends StoredCookie` | A cookie a response set: what a jar stores, and whether it was a deletion. |
+| `sendRequest` | function | `export async function sendRequest(request: ApiRequest, options: RequestOptions = {}): Promise<SentRequest>` | Execute one request, and say where it went. |
+| `SentRequest` | interface | `export interface SentRequest` | A request as it was sent: the response, the URL asked for, and where it ended. |
 | `TemplateScope` | interface | `export interface TemplateScope` | What a template can read. `{data.x}`, `{input.x}`, `{x}` and `{Story.x}`. |

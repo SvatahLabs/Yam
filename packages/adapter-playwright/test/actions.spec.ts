@@ -10,7 +10,15 @@
  */
 import { fileURLToPath } from "node:url";
 import { SURFACE_ACTIONS, type SurfaceAction } from "@svatah/yam-schema";
-import { LocateError, ScriptError, SessionError } from "@svatah/yam-surface";
+import {
+  DataError,
+  LocateError,
+  ScriptError,
+  SessionError,
+  TimeoutError,
+  UnsupportedError,
+} from "@svatah/yam-surface";
+import { PlaywrightSurface } from "../src/index.js";
 import { expect, MECHANISMS, refByTestId, test } from "./fixtures.js";
 
 /**
@@ -227,6 +235,116 @@ for (const mechanism of MECHANISMS) {
       expect((await surface.act("waitFor", heading, { state: "visible" })).ok).toBe(true);
     });
 
+    /*
+     * A wait with no reference is a wait for the page (SF-11, SF-16): the
+     * thing an agent most often waits for — a "Saved" that has not appeared,
+     * the URL after a sign-in — is not on the screen yet, so it has no
+     * reference to wait on. Each change is made a moment *after* the wait
+     * starts, so a wait that answered from the page as it was would fail.
+     */
+    test("waitFor with no reference waits for the page's text, URL and title", async ({ openSurface }) => {
+      const surface = await openSurface(mechanism, "/widgets");
+      await surface.act("evaluate", undefined, {
+        expression:
+          "setTimeout(() => { const p = document.createElement('p'); p.textContent = 'Saved at noon'; " +
+          "document.body.append(p); }, 300)",
+      });
+      expect((await surface.act("waitFor", undefined, { text: "Saved at noon" })).ok).toBe(true);
+
+      await surface.act("evaluate", undefined, {
+        expression: "setTimeout(() => history.pushState({}, '', '/widgets/after'), 300)",
+      });
+      expect((await surface.act("waitFor", undefined, { url: "/widgets/after" })).ok).toBe(true);
+
+      await surface.act("evaluate", undefined, {
+        expression: "setTimeout(() => { document.title = 'Widgets, done'; }, 300)",
+      });
+      expect((await surface.act("waitFor", undefined, { title: "done", timeoutMs: 5_000 })).ok).toBe(true);
+    });
+
+    test("waitFor on the page gives up at its timeoutMs, and refuses a wait for nothing", async ({ openSurface }) => {
+      const surface = await openSurface(mechanism, "/widgets");
+      const started = Date.now();
+      const error = await surface
+        .act("waitFor", undefined, { text: "never on this page", timeoutMs: 400 })
+        .catch((caught: unknown) => caught);
+      expect(error).toBeInstanceOf(TimeoutError);
+      // The caller's deadline, not the step timeout of ten seconds.
+      expect(Date.now() - started).toBeLessThan(5_000);
+
+      await expect(surface.act("waitFor", undefined, {})).rejects.toBeInstanceOf(DataError);
+    });
+
+    /*
+     * A page wait waited `DEFAULT_PAGE_WAIT_MS` (ten seconds) whatever the
+     * adapter's own timeout said, and read the active frame's text alone, so
+     * a "Saved" inside a same-origin frame on the page never arrived.
+     */
+    test("waitFor on the page waits the adapter's own timeout, and reads same-origin frames", async ({
+      openSurface,
+    }) => {
+      const surface = await openSurface(mechanism, "/widgets");
+      expect((await surface.act("waitFor", undefined, { text: "Inside the frame", timeoutMs: 5_000 })).ok).toBe(true);
+
+      const quick = new PlaywrightSurface({ headless: true, snapshotMechanism: mechanism, timeoutMs: 300 });
+      try {
+        await quick.open({});
+        const started = Date.now();
+        const error = await quick
+          .act("waitFor", undefined, { text: "never on this page" })
+          .catch((caught: unknown) => caught);
+        expect(error).toBeInstanceOf(TimeoutError);
+        expect((error as Error).message).toContain("Waited 300 ms");
+        expect(Date.now() - started).toBeLessThan(5_000);
+      } finally {
+        await quick.close();
+      }
+    });
+
+    /*
+     * `detached` and `attached` were both Playwright's "stable", so a wait for
+     * a toast to go away returned while the toast was still there. The element
+     * is removed (and put back) a moment after the wait starts, and a wait
+     * with a short deadline on an element that stays is shown to time out.
+     */
+    test("waitFor detached waits until the element has left the document", async ({ openSurface }) => {
+      const surface = await openSurface(mechanism, "/widgets");
+      const heading = await refByTestId(surface, "widgets-heading");
+
+      await expect(
+        surface.act("waitFor", heading, { state: "detached", timeoutMs: 300 }),
+      ).rejects.toBeInstanceOf(TimeoutError);
+
+      await surface.act("evaluate", undefined, {
+        expression:
+          "setTimeout(() => document.querySelector('[data-testid=\"widgets-heading\"]').remove(), 300)",
+      });
+      expect((await surface.act("waitFor", heading, { state: "detached" })).ok).toBe(true);
+      expect(
+        await surface.act("evaluate", undefined, {
+          expression: "document.querySelector('[data-testid=\"widgets-heading\"]') === null",
+        }),
+      ).toMatchObject({ value: true });
+    });
+
+    test("waitFor attached waits until the element is back in the document", async ({ openSurface }) => {
+      const surface = await openSurface(mechanism, "/widgets");
+      const heading = await refByTestId(surface, "widgets-heading");
+      await surface.act("evaluate", undefined, {
+        expression:
+          "(() => { const h = document.querySelector('[data-testid=\"widgets-heading\"]'); " +
+          "const parent = h.parentElement; h.remove(); setTimeout(() => parent.prepend(h), 300); })()",
+      });
+      expect((await surface.act("waitFor", heading, { state: "attached" })).ok).toBe(true);
+      expect(
+        await surface.act("evaluate", heading, { expression: "return element.isConnected" }),
+      ).toMatchObject({ value: true });
+
+      await expect(surface.act("waitFor", heading, { state: "unheard-of" })).rejects.toBeInstanceOf(
+        DataError,
+      );
+    });
+
     /* ── windows and frames ─────────────────────────────────────────────── */
 
     test("[switchWindow][closeOtherWindows] switchWindow and closeOtherWindows", async ({ openSurface }) => {
@@ -377,6 +495,9 @@ for (const mechanism of MECHANISMS) {
 test("[quit] quit is a desktop step and this adapter says so", async ({ openSurface }) => {
   const surface = await openSurface("own", "/");
   await expect(surface.act("quit", undefined)).rejects.toThrow(/desktop step/);
+  // Unsupported, not a navigation failure: a caller told `CONNECT_FAILED` goes
+  // to check a browser that is working (SF-11).
+  await expect(surface.act("quit", undefined)).rejects.toBeInstanceOf(UnsupportedError);
 });
 
 test("every surface action has a test (REQ-RUN-10)", async () => {
@@ -407,4 +528,5 @@ test("every surface action has a test (REQ-RUN-10)", async () => {
 test('"invoke" is refused by the adapter, being an executor concern', async ({ openSurface }) => {
   const surface = await openSurface("own", "/");
   await expect(surface.act("invoke")).rejects.toThrow(/executor concern/);
+  await expect(surface.act("invoke")).rejects.toBeInstanceOf(UnsupportedError);
 });

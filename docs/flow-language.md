@@ -1493,6 +1493,20 @@ Call the "create booking" API with the session cookies
 Call the "create booking" API and remember "$.id" as bookingId
 ```
 
+`with the session cookies` sends the run's browser cookies for the request's
+URL — the ones the browser would send there — beside any the request names, so
+an API call is made as the person the browser signed in. The plain form sends
+no browser cookie, and `without cookies` sends none at all, not even one an
+earlier API response set.
+
+A cookie an API response sets is kept and sent back where a browser would send
+it: to the host that set it, or to its domain and subdomains when it names a
+`Domain`; on its `Path` (the requested URL's directory when it names none); and
+over `https` only when it is `Secure`. `localhost`, `127.0.0.1` and `::1` count as
+one host. A request to a link-local or cloud metadata address
+(`169.254.0.0/16`, `fd00:ec2::/64`, `100.100.100.200`, `168.63.129.16`,
+`metadata.google.internal`) is refused unless `YAM_HTTP_ALLOW_LINK_LOCAL=1`.
+
 `Call the "active count" API and remember the response as activeCount` compiles to:
 
 ```json

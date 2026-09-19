@@ -271,6 +271,9 @@ export function walkDocument(options: {
       ) {
         return undefined;
       }
+      // A password is never read back out (SF-15): an agent that typed one would
+      // otherwise find it in its next snapshot, and so would the trajectory.
+      if (type === "password") return (el as HTMLInputElement).value === "" ? "" : "[REDACTED]";
       return (el as HTMLInputElement).value;
     }
     if (tag === "textarea") return (el as HTMLTextAreaElement).value;
@@ -783,7 +786,10 @@ export function describeElement(
   let value: string | undefined;
   const inputType = (el.getAttribute("type") ?? "").toLowerCase();
   const buttonLike = ["submit", "button", "reset", "image", "file"].includes(inputType);
-  if ((tag === "input" && !buttonLike) || tag === "textarea")
+  if (tag === "input" && inputType === "password")
+    // Filled or not, never the password itself (SF-15).
+    value = (el as HTMLInputElement).value === "" ? "" : "[REDACTED]";
+  else if ((tag === "input" && !buttonLike) || tag === "textarea")
     value = (el as HTMLInputElement).value;
   else if (tag === "select")
     value = Array.from((el as HTMLSelectElement).selectedOptions)

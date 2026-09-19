@@ -17,12 +17,14 @@ import { sessionStateSchema, CAPABILITY_FLAGS } from "@svatah/yam-schema";
 import {
   clearAdapters,
   createSurface,
+  DataError,
   DEFAULT_CONFIG,
   LocateError,
   NavigationError,
   ScriptError,
   SessionError,
   TimeoutError,
+  UnsupportedError,
   listAdapters,
 } from "./surface-imports.js";
 import {
@@ -303,6 +305,64 @@ test.describe("state and restore (REQ-AUTO-2)", () => {
   });
 });
 
+/*
+ * `cookies(url)` — what `Call the "x" API with the session cookies` sends
+ * (REQ-ADP-3). The browser's own rules decide, and the URL is the request's: a
+ * cookie scoped to a path is not offered outside it, and nothing the session
+ * holds for this host is offered to another.
+ */
+test.describe("the session's cookies for a URL (REQ-ADP-3)", () => {
+  test("answers the cookies the browser would send to that URL, by name", async ({ openSurface, origin }) => {
+    const surface = await openSurface("own", "/dashboard");
+    await surface.act("evaluate", undefined, {
+      expression:
+        'document.cookie = "yam_session=abc123; path=/"; document.cookie = "admin_only=1; path=/admin";',
+    });
+
+    expect(await surface.cookies(`${origin}/api/bookings`)).toEqual({ yam_session: "abc123" });
+    expect(await surface.cookies(`${origin}/admin/users`)).toEqual({ yam_session: "abc123", admin_only: "1" });
+    // A relative URL is the session's base URL's, as `navigate` reads one.
+    expect(await surface.cookies("/api/bookings")).toEqual({ yam_session: "abc123" });
+    expect(await surface.cookies("http://elsewhere.invalid/api/bookings")).toEqual({});
+  });
+
+  /*
+   * `context.cookies(url)` was taken to be the browser's rule and is looser:
+   * a host-only cookie went to every subdomain, a cookie on `/admin` to
+   * `/administrator`, and a `Secure` cookie over plain http to localhost. The
+   * cookies are put in the context directly, for hosts nothing needs to serve.
+   */
+  test("sends what a browser would, where Playwright's own filter sent more", async ({ openSurface }) => {
+    const surface = await openSurface("own", "/");
+    const dir = mkdtempSync(join(tmpdir(), "yam-cookies-"));
+    const path = join(dir, "storage.json");
+    writeFileSync(
+      path,
+      JSON.stringify({
+        cookies: [
+          { name: "host_only", value: "1", url: "http://app.test/" },
+          { name: "shared", value: "1", domain: ".app.test", path: "/" },
+          { name: "admin", value: "1", domain: ".app.test", path: "/admin" },
+          { name: "secure", value: "1", domain: "localhost", path: "/", secure: true },
+        ],
+        origins: [],
+      }),
+    );
+    await surface.restore({ kind: "web", storageState: path });
+
+    expect(await surface.cookies("http://app.test/")).toEqual({ host_only: "1", shared: "1" });
+    expect(await surface.cookies("http://api.app.test/")).toEqual({ shared: "1" });
+    expect(await surface.cookies("http://app.test/admin/users")).toEqual({ host_only: "1", shared: "1", admin: "1" });
+    expect(await surface.cookies("http://app.test/administrator")).toEqual({ host_only: "1", shared: "1" });
+    expect(await surface.cookies("http://localhost/")).toEqual({});
+    expect(await surface.cookies("https://localhost/")).toEqual({ secure: "1" });
+  });
+
+  test("says the session is not open rather than answering nothing", async () => {
+    await expect(new PlaywrightSurface({}).cookies("http://127.0.0.1/")).rejects.toBeInstanceOf(SessionError);
+  });
+});
+
 test.describe("screenshots and masking (REQ-NFR-6)", () => {
   test("a masked reference is painted over and the mark is removed again", async ({
     openSurface,
@@ -358,6 +418,11 @@ test.describe("error translation (LLD §8.4)", () => {
   test("passes an already-typed surface error through unchanged", () => {
     const original = new LocateError("already typed");
     expect(translate(original)).toBe(original);
+    // Not only the seven it once listed: a refusal or a data error `act` threw
+    // on purpose came out as an ActionabilityError (SF-11).
+    for (const typed of [new UnsupportedError("never"), new DataError("nothing to wait for")]) {
+      expect(translate(typed)).toBe(typed);
+    }
   });
 
   test("a non-Error value is returned as it came", () => {
@@ -511,5 +576,6 @@ test.describe("attaching over CDP (T11.2, LLD §13.9)", () => {
   test("refuses `Quit the app`, which is a desktop step (pattern 31)", async ({ openSurface }) => {
     const surface = await openSurface("own", "/");
     await expect(surface.act("quit", undefined)).rejects.toThrow(/desktop step/);
+    await expect(surface.act("quit", undefined)).rejects.toBeInstanceOf(UnsupportedError);
   });
 });

@@ -17,6 +17,7 @@ import {
   ScriptError,
   SessionError,
   TimeoutError,
+  UnsupportedError,
 } from "@svatah/yam-surface";
 import { BidiError } from "../src/client.js";
 import {
@@ -29,7 +30,8 @@ import {
 } from "../src/launch.js";
 import { BidiSession, fromRemoteValue, RefSpace, toLocalValue } from "../src/session.js";
 import { keyValue } from "../src/input.js";
-import { BIDI_CAPABILITIES } from "../src/surface.js";
+import { cookiesFor as sharedCookiesFor } from "@svatah/yam-surface";
+import { BIDI_CAPABILITIES, cookiesFor, type BidiCookie } from "../src/surface.js";
 
 describe("the value codec (LLD §7.3)", () => {
   it("round-trips every JSON shape through BiDi's tagged form", () => {
@@ -104,7 +106,10 @@ describe("BiDi errors become the surface's typed errors (LLD §2.3, §8.4)", () 
     ["no such frame or window", NavigationError],
     ["no such history entry", NavigationError],
     ["javascript error", ScriptError],
-    ["unsupported operation", ScriptError],
+    // The browser cannot do this at all, which is neither a script's failure
+    // nor something to retry (SF-11).
+    ["unsupported operation", UnsupportedError],
+    ["unknown command", UnsupportedError],
     ["session not created", SessionError],
     ["invalid session id", SessionError],
     ["timeout", TimeoutError],
@@ -125,6 +130,85 @@ describe("BiDi errors become the surface's typed errors (LLD §2.3, §8.4)", () 
     expect(new BidiError("a code from a future draft", "…").asSurfaceError()).toBeInstanceOf(
       ScriptError,
     );
+  });
+});
+
+/*
+ * `cookiesFor` is the rule a browser applies when it sends a request, applied
+ * to the jar `storage.getCookies` answers (REQ-ADP-3). It decides what an API
+ * call "with the session cookies" carries, so a cookie offered to the wrong
+ * host or path is a credential sent somewhere it was never meant to go.
+ */
+describe("the cookies a browser would send to a URL (REQ-ADP-3)", () => {
+  const cookie = (name: string, domain: string, extra: Partial<BidiCookie> = {}): BidiCookie => ({
+    name,
+    value: { type: "string", value: `${name}-value` },
+    domain,
+    path: "/",
+    ...extra,
+  });
+
+  it("sends a host-only cookie to its host alone, and a domain cookie to subdomains too", () => {
+    const jar = [cookie("host", "app.example.com"), cookie("domain", ".example.com")];
+    expect(cookiesFor("https://app.example.com/", jar)).toEqual({ host: "host-value", domain: "domain-value" });
+    expect(cookiesFor("https://example.com/", jar)).toEqual({ domain: "domain-value" });
+    expect(cookiesFor("https://api.app.example.com/", jar)).toEqual({ domain: "domain-value" });
+    expect(cookiesFor("https://example.org/", jar)).toEqual({});
+    // A suffix that is not at a dot is another domain.
+    expect(cookiesFor("https://notexample.com/", jar)).toEqual({});
+  });
+
+  it("sends a cookie only under its path, at a slash", () => {
+    const jar = [cookie("admin", "127.0.0.1", { path: "/admin" })];
+    expect(cookiesFor("http://127.0.0.1/admin", jar)).toEqual({ admin: "admin-value" });
+    expect(cookiesFor("http://127.0.0.1/admin/users?x=1", jar)).toEqual({ admin: "admin-value" });
+    expect(cookiesFor("http://127.0.0.1/administrator", jar)).toEqual({});
+    expect(cookiesFor("http://127.0.0.1/", jar)).toEqual({});
+  });
+
+  it("sends a Secure cookie only over https", () => {
+    const jar = [cookie("secret", "example.com", { secure: true })];
+    expect(cookiesFor("http://example.com/", jar)).toEqual({});
+    expect(cookiesFor("https://example.com/", jar)).toEqual({ secret: "secret-value" });
+  });
+
+  it("lets the longer path win a name both paths set, and decodes a base64 value", () => {
+    const jar = [
+      cookie("session", "example.com", { path: "/api", value: { type: "string", value: "narrow" } }),
+      cookie("session", "example.com", { path: "/", value: { type: "string", value: "wide" } }),
+      cookie("blob", "example.com", { value: { type: "base64", value: Buffer.from("bytes").toString("base64") } }),
+    ];
+    expect(cookiesFor("https://example.com/api/x", jar)).toEqual({ session: "narrow", blob: "bytes" });
+    expect(cookiesFor("https://example.com/other", jar)).toEqual({ session: "wide", blob: "bytes" });
+  });
+
+  /*
+   * The rule moved to the surface package so the Playwright and HTTP adapters
+   * send what this one does; this export is kept, and answers exactly what
+   * the shared rule answers for the same cookies once their values are read.
+   */
+  it("answers what the rule every adapter shares answers", () => {
+    const jar = [
+      cookie("host", "app.example.com"),
+      cookie("domain", ".example.com", { path: "/api" }),
+      cookie("secret", ".example.com", { secure: true }),
+      cookie("blob", "app.example.com", { value: { type: "base64", value: Buffer.from("bytes").toString("base64") } }),
+    ];
+    const plain = jar.map((one) => ({
+      name: one.name,
+      value: one.value.type === "base64" ? Buffer.from(one.value.value, "base64").toString("utf8") : one.value.value,
+      domain: one.domain,
+      ...(one.path === undefined ? {} : { path: one.path }),
+      ...(one.secure === undefined ? {} : { secure: one.secure }),
+    }));
+    for (const url of [
+      "https://app.example.com/api/items",
+      "http://app.example.com/api",
+      "https://api.example.com/apiary",
+      "https://example.com/",
+    ]) {
+      expect(cookiesFor(url, jar), url).toEqual(sharedCookiesFor(url, plain));
+    }
   });
 });
 

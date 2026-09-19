@@ -10,6 +10,8 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 
 export interface EchoServer {
   readonly origin: string;
+  /** The port, for a test that reaches the server under another name. */
+  readonly port: number;
   close(): Promise<void>;
 }
 
@@ -55,8 +57,25 @@ export async function startEchoServer(): Promise<EchoServer> {
         return;
       }
 
+      if (url.pathname.endsWith("/set-cookie")) {
+        // Every `c` is sent back as a Set-Cookie line, attributes and all, so a
+        // test says exactly what a server set; under any path, so the path a
+        // cookie defaults to can be chosen.
+        res.writeHead(200, { "content-type": "application/json", "set-cookie": url.searchParams.getAll("c") });
+        res.end(JSON.stringify(echo));
+        return;
+      }
+
       if (url.pathname === "/redirect") {
         res.writeHead(302, { location: "/echo" });
+        res.end();
+        return;
+      }
+
+      if (url.pathname === "/redirect-to") {
+        // A redirect to wherever `to` says, another host included, for the
+        // tests that follow a request to where it ended up.
+        res.writeHead(302, { location: url.searchParams.get("to") ?? "/echo" });
         res.end();
         return;
       }
@@ -105,6 +124,7 @@ export async function startEchoServer(): Promise<EchoServer> {
 
   return {
     origin: `http://127.0.0.1:${port}`,
+    port,
     close: () => new Promise<void>((done, fail) => server.close((e) => (e ? fail(e) : done()))),
   };
 }

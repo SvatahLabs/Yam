@@ -45,17 +45,21 @@ import type { AgentSurface } from "@svatah/yam-surface";
 import {
   ActionabilityError,
   buildSnapshot,
+  cookiesFor as sharedCookiesFor,
+  DataError,
   LocateError,
   NavigationError,
   ScriptError,
   SessionError,
   structuralHash,
+  UnsupportedError,
+  waitForPage,
   type SnapshotNode,
 } from "@svatah/yam-surface";
 import { BidiClient } from "./client.js";
 import { openEndpoint, type BidiEndpoint, type LaunchOptions } from "./launch.js";
 import { BidiSession, fromRemoteValue, sleep, toLocalValue } from "./session.js";
-import type { RawCandidate } from "./page-script.js";
+import type { Actionability, RawCandidate } from "./page-script.js";
 import { evaluateBidiPredicate } from "./predicates.js";
 import { keyActions, pointerClick, pointerDrag, typeText } from "./input.js";
 
@@ -466,19 +470,57 @@ export class BidiSurface implements AgentSurface {
         await sleep(Math.max(0, ms));
         return { ok: true };
       }
+      /*
+       * `waitFor`, on the page or on an element (SF-11, SF-16).
+       *
+       * With no reference it waits for the page through the helper every
+       * adapter shares, reading the active document's `innerText`, so a wait
+       * for "Saved" means here what it means through Playwright.
+       *
+       * With a reference, `attached` fell through to the `visible` row: a wait
+       * for an element to come back into the document held only once it was
+       * also rendered, and one put back hidden waited out its whole timeout.
+       * Each state now has its own row, a reference that no longer resolves is
+       * hidden and detached and never anything else, and a state with no row
+       * is refused rather than quietly read as `visible`.
+       */
       case "waitFor": {
-        const target = need(ref);
+        /*
+         * A page wait (SF-16) waits as long as any other action here: it
+         * waited `DEFAULT_PAGE_WAIT_MS` whatever the adapter's own timeout
+         * said. Its text is the active context's and that of the same-origin
+         * frames inside it, as a person sees one page; a cross-origin frame's
+         * document cannot be read from the page, and is left out.
+         */
+        if (ref === undefined) {
+          return await waitForPage(this, args, {
+            adapter: "bidi",
+            defaultTimeoutMs: timeout,
+            textOf: async () => String((await session.evaluate(PAGE_TEXT_EXPRESSION)) ?? ""),
+          });
+        }
+        const target = ref;
         const state = String(args["state"] ?? "visible");
+        const holds: Record<string, (now: Actionability | undefined) => boolean> = {
+          visible: (now) => now?.visible === true,
+          hidden: (now) => now === undefined || !now.visible,
+          attached: (now) => now?.attached === true,
+          detached: (now) => now === undefined || !now.attached,
+          enabled: (now) => now?.enabled === true,
+          disabled: (now) => now !== undefined && !now.enabled,
+        };
+        const condition = holds[state];
+        if (condition === undefined) {
+          throw new DataError(
+            `The "waitFor" action cannot wait for an element to be "${state}"; it waits for ` +
+              `${Object.keys(holds).map((one) => `"${one}"`).join(", ")}.`,
+            { adapter: "bidi" },
+          );
+        }
+        const requested = Number(args["timeoutMs"]);
         await session.waitFor(
-          async () => {
-            const now = await session.actionability(target).catch(() => undefined);
-            if (now === undefined) return state === "hidden" || state === "detached";
-            if (state === "hidden") return !now.visible;
-            if (state === "detached") return !now.attached;
-            if (state === "enabled") return now.enabled;
-            return now.visible;
-          },
-          timeout,
+          async () => condition(await session.actionability(target).catch(() => undefined)),
+          Number.isFinite(requested) && requested >= 0 ? requested : timeout,
           `${target} to be ${state}`,
         );
         return { ok: true, ref: target };
@@ -665,8 +707,16 @@ export class BidiSurface implements AgentSurface {
         return { ok: true };
       }
 
+      /*
+       * The refusals: actions this adapter will never perform, each an
+       * `UnsupportedError` (SF-11). They were a `ScriptError` and a
+       * `NavigationError`, which a caller is told as `OUTCOME_UNKNOWN` and
+       * `CONNECT_FAILED` — "check whether it happened" and "check the
+       * browser" — when nothing was dispatched and nothing will change the
+       * answer. The broker says `UNSUPPORTED_OPERATION`, refused.
+       */
       case "invoke":
-        throw new ScriptError(
+        throw new UnsupportedError(
           '"invoke" calls another story and is the executor\'s, not an adapter\'s (LLD §8.2).',
           { adapter: "bidi" },
         );
@@ -679,7 +729,7 @@ export class BidiSurface implements AgentSurface {
        * flow "pass" against something it never quit.
        */
       case "quit":
-        throw new NavigationError(
+        throw new UnsupportedError(
           'There is no application to quit here. "Quit the app" is a desktop step ' +
             "(pattern 31); drive this application through its own controls instead.",
           { adapter: "bidi" },
@@ -687,7 +737,7 @@ export class BidiSurface implements AgentSurface {
 
       default: {
         const never: never = action;
-        throw new ScriptError(`The BiDi adapter has no row for "${String(never)}".`, {
+        throw new UnsupportedError(`The BiDi adapter has no row for "${String(never)}".`, {
           adapter: "bidi",
         });
       }
@@ -812,6 +862,29 @@ export class BidiSurface implements AgentSurface {
         wait: "complete",
       });
     }
+  }
+
+  /**
+   * The cookies this session would send to `url`, by name (REQ-ADP-3).
+   *
+   * What `Call the "x" API with the session cookies` sends. BiDi's
+   * `storage.getCookies` has a filter, but every field of it is an exact
+   * match — a `domain` filter of `app.example.com` does not find a cookie set
+   * for `.example.com`, and a `path` of `/api/bookings` does not find one set
+   * for `/` — so the browser's whole jar for the default partition is asked
+   * for once and `cookiesFor` applies the rules a browser applies when it
+   * sends a request: domain, path, and `Secure`.
+   */
+  async cookies(url: string): Promise<Record<string, string>> {
+    const session = this.live();
+    const absolute =
+      /^[a-z][a-z0-9+.-]*:/i.test(url) || this.baseUrl === undefined
+        ? url
+        : new URL(url, this.baseUrl).toString();
+    const answer = (await session.client.call("storage.getCookies", {})) as {
+      cookies?: readonly BidiCookie[];
+    };
+    return cookiesFor(absolute, answer.cookies ?? []);
   }
 
   /* ── helpers ────────────────────────────────────────────────────────────── */
@@ -997,6 +1070,66 @@ export class BidiSurface implements AgentSurface {
     }
   }
 }
+
+/** A cookie as `storage.getCookies` answers it (WebDriver BiDi `network.Cookie`). */
+export interface BidiCookie {
+  readonly name: string;
+  readonly value: { readonly type: "string" | "base64"; readonly value: string };
+  readonly domain: string;
+  readonly path?: string;
+  readonly secure?: boolean;
+}
+
+/**
+ * The cookies a browser would send with a request to `url`, by name (RFC 6265
+ * §5.4, REQ-ADP-3).
+ *
+ * The rule itself moved to `@svatah/yam-surface`, which this delegates to:
+ * it was written here first, and the Playwright and HTTP adapters each sent
+ * cookies by a rule of their own that disagreed with it. What stays here is
+ * BiDi's: a cookie's value arrives as a `network.BytesValue`, and a `base64`
+ * one is decoded before it is sent. Both Gecko and chromium-bidi answer
+ * `domain` with a leading dot for a domain cookie, the convention the shared
+ * rule reads. Kept exported, with its signature, for whoever imported it.
+ */
+export function cookiesFor(url: string, cookies: readonly BidiCookie[]): Record<string, string> {
+  return sharedCookiesFor(
+    url,
+    cookies.map((cookie) => ({
+      name: cookie.name,
+      value:
+        cookie.value.type === "base64"
+          ? Buffer.from(cookie.value.value, "base64").toString("utf8")
+          : cookie.value.value,
+      domain: cookie.domain,
+      ...(cookie.path === undefined ? {} : { path: cookie.path }),
+      ...(cookie.secure === undefined ? {} : { secure: cookie.secure }),
+    })),
+  );
+}
+
+/**
+ * The text a page wait reads: the document's, and each same-origin frame's
+ * inside it, a few levels deep. A cross-origin frame's `contentDocument` is
+ * `null` (or throws), and is skipped.
+ */
+const PAGE_TEXT_EXPRESSION = `(() => {
+  const texts = [];
+  const visit = (doc, depth) => {
+    texts.push(doc.body ? doc.body.innerText : "");
+    if (depth >= 3) return;
+    for (const frame of Array.from(doc.querySelectorAll("iframe, frame"))) {
+      try {
+        const inner = frame.contentDocument;
+        if (inner) visit(inner, depth + 1);
+      } catch (error) {
+        // Cross-origin: not this page's to read.
+      }
+    }
+  };
+  visit(document, 0);
+  return texts.join("\\n");
+})()`;
 
 /** Candidate kinds this adapter cannot honour, and which adapter owns each. */
 const FOREIGN_KINDS: Record<string, string> = {

@@ -8,6 +8,7 @@
  * `check`, and the snapshot mechanism is behind `snapshot.ts` so nothing here
  * knows whether a reference came from Playwright or from our own walker.
  */
+import { createRequire } from "node:module";
 import { type Route, chromium, firefox, webkit } from "playwright";
 import type {
   Browser,
@@ -41,13 +42,18 @@ import { DEFAULT_IGNORE_ATTRIBUTES } from "@svatah/yam-schema";
 import type { AgentSurface, ObservedEvent } from "@svatah/yam-surface";
 import {
   ActionabilityError,
+  cookiesFor,
+  DataError,
   DialogError,
   locateDeadline,
   LocateError,
   NavigationError,
   ScriptError,
   SessionError,
+  SurfaceError,
   TimeoutError,
+  UnsupportedError,
+  waitForPage,
 } from "@svatah/yam-surface";
 import { describeElement } from "./page-script.js";
 import { PICKED_ATTRIBUTE, PICKER_SCRIPT } from "./picker.js";
@@ -120,6 +126,40 @@ export interface PlaywrightAdapterOptions {
 
 /** How many neighbouring texts `describe()` collects on each side (LLD §3.3). */
 const NEIGHBOUR_COUNT = 3;
+
+/**
+ * The element states `waitFor` hands to Playwright's own wait. `attached` and
+ * `detached` are not among them: a handle has no such state, so `act` polls
+ * for those itself. The same set the BiDi adapter answers, so a flow's wait
+ * does not depend on which of the two ran it (REQ-ADP-4).
+ */
+const ELEMENT_WAIT_STATES = ["visible", "hidden", "enabled", "disabled"] as const;
+
+/**
+ * The text a page wait reads: the document's, and each same-origin frame's
+ * inside it, a few levels deep. A cross-origin frame's `contentDocument` is
+ * `null` (or throws), and is skipped.
+ */
+const PAGE_TEXT_SCRIPT = (): string => {
+  const texts: string[] = [];
+  const visit = (doc: Document, depth: number): void => {
+    texts.push(doc.body?.innerText ?? "");
+    if (depth >= 3) return;
+    for (const frame of Array.from(doc.querySelectorAll("iframe, frame"))) {
+      try {
+        const inner = (frame as HTMLIFrameElement).contentDocument;
+        if (inner !== null) visit(inner, depth + 1);
+      } catch {
+        // Cross-origin: not this page's to read.
+      }
+    }
+  };
+  visit(document, 0);
+  return texts.join("\n");
+};
+
+/** How often an `attached`/`detached` wait asks again. */
+const CONNECTION_POLL_MS = 100;
 
 /** The capability descriptor for this adapter (LLD §2.4). */
 export const PLAYWRIGHT_CAPABILITIES: Capabilities = {
@@ -514,8 +554,26 @@ export class PlaywrightSurface implements AgentSurface {
       try {
         this.browser = await type.launch({ headless: this.options.headless ?? true });
       } catch (cause) {
+        /*
+         * The line that says what went wrong. Playwright puts its own call name
+         * on the first line and, for missing host libraries, the reason inside a
+         * box drawn on the lines below it.
+         */
+        const lines = (cause instanceof Error ? cause.message : String(cause))
+          .split("\n")
+          .map((line) => line.replace(/[║╔╗╚╝═]/g, "").trim())
+          .filter((line) => line !== "");
+        const first =
+          /^[\w.]+:$/.test(lines[0] ?? "") && lines[1] !== undefined
+            ? `${lines[0]} ${lines[1]}`
+            : (lines[0] ?? "the browser did not start");
+        const said = /[.!?]$/.test(first) ? first : `${first}.`;
         throw new SessionError(
-          `Could not launch ${name}. Run \`pnpm exec playwright install ${name}\`.`,
+          /executable doesn't exist/i.test(said)
+            ? `Could not launch ${name}: ${said} Run \`${browserInstallCommand(name)}\`, which ` +
+                "installs the browser this Playwright drives."
+            : `Could not launch ${name}: ${said} If its browser is not installed, run ` +
+                `\`${browserInstallCommand(name)}\`.`,
           { cause, adapter: "playwright" },
         );
       }
@@ -1104,16 +1162,57 @@ export class PlaywrightSurface implements AgentSurface {
           await page.waitForTimeout(ms);
           return { ok: true };
         }
+        /*
+         * `waitFor`, on the page or on an element (SF-11, SF-16).
+         *
+         * With no reference it waits for the page — its text, its URL, its
+         * title — through the one helper every adapter shares, so "wait for
+         * `Saved`" means the same thing here as in BiDi. The text is the
+         * active frame's `innerText`, which is what a person can read, rather
+         * than a snapshot's rendering of it.
+         *
+         * With a reference, `attached` and `detached` were both mapped to
+         * `waitForElementState("stable")`: a wait for a toast to go away
+         * returned as soon as the toast stopped moving, which is to say at
+         * once, and the step after it clicked through the toast. Playwright's
+         * handle has no attached state to wait for — a handle holds its node
+         * whether or not the node is still in the document — so those two
+         * are polled: `detached` holds when the node is no longer connected
+         * or the reference no longer resolves (a navigation took it), and
+         * `attached` when the node is connected.
+         */
         case "waitFor": {
-          const state = String(args["state"] ?? "visible") as
-            | "visible"
-            | "hidden"
-            | "attached"
-            | "detached";
-          await withHandle(ref, action, (h) => h.waitForElementState(
-            state === "visible" ? "visible" : state === "hidden" ? "hidden" : "stable",
-            { timeout },
-          ));
+          /*
+           * A page wait (SF-16) waits as long as any other action here: it
+           * waited `DEFAULT_PAGE_WAIT_MS` whatever the adapter's own timeout
+           * said. Its text is the active frame's and that of the same-origin
+           * frames inside it, as a person sees one page; a cross-origin frame's
+           * document cannot be read from the page, and is left out.
+           */
+          if (ref === undefined) {
+            return await waitForPage(this, args, {
+              adapter: "playwright",
+              defaultTimeoutMs: timeout,
+              textOf: async () => await this.frame().evaluate(PAGE_TEXT_SCRIPT),
+            });
+          }
+          const state = String(args["state"] ?? "visible");
+          const requested = Number(args["timeoutMs"]);
+          const waitMs = Number.isFinite(requested) && requested >= 0 ? requested : timeout;
+          if (state === "attached" || state === "detached") {
+            await this.waitForConnection(ref, state, waitMs);
+            return { ok: true, ref };
+          }
+          if (!ELEMENT_WAIT_STATES.includes(state as (typeof ELEMENT_WAIT_STATES)[number])) {
+            throw new DataError(
+              `The "waitFor" action cannot wait for an element to be "${state}"; it waits for ` +
+                `${ELEMENT_WAIT_STATES.map((one) => `"${one}"`).join(", ")}, "attached" or "detached".`,
+              { adapter: "playwright" },
+            );
+          }
+          await withHandle(ref, action, (h) =>
+            h.waitForElementState(state as (typeof ELEMENT_WAIT_STATES)[number], { timeout: waitMs }),
+          );
           return { ok: true, ref };
         }
 
@@ -1282,9 +1381,18 @@ export class PlaywrightSurface implements AgentSurface {
           return { ok: true, value: path };
         }
 
-        /* ── the executor's own actions ─────────────────────────────────── */
+        /*
+         * ── the executor's own actions, and the refusals ───────────────────
+         *
+         * Each of these is an action this adapter will never perform, and each
+         * is an `UnsupportedError` for that reason (SF-11). They were an
+         * `ActionabilityError` and a `NavigationError`, which a caller is told
+         * as `TIMEOUT` and `CONNECT_FAILED` — "try again" and "check the
+         * browser" — and neither retrying nor the browser changes the answer.
+         * Nothing was dispatched, so the broker says `UNSUPPORTED_OPERATION`.
+         */
         case "invoke":
-          throw new ActionabilityError(
+          throw new UnsupportedError(
             'The "invoke" action is an executor concern and never reaches an adapter (LLD §8.2).',
             { adapter: "playwright" },
           );
@@ -1299,7 +1407,7 @@ export class PlaywrightSurface implements AgentSurface {
        * against a browser it never quit.
        */
       case "quit":
-        throw new NavigationError(
+        throw new UnsupportedError(
           'A browser has no application to quit. "Quit the app" is a desktop step ' +
             "(pattern 31); drive a web application through its own controls, and let the " +
             "session close when the run ends.",
@@ -1308,13 +1416,44 @@ export class PlaywrightSurface implements AgentSurface {
 
         default: {
           const exhaustive: never = action;
-          throw new ActionabilityError(`Unknown action "${String(exhaustive)}".`, {
+          throw new UnsupportedError(`Unknown action "${String(exhaustive)}".`, {
             adapter: "playwright",
           });
         }
       }
     } catch (error) {
       throw translate(error);
+    }
+  }
+
+  /**
+   * Wait until a referenced element is, or is no longer, in the document.
+   *
+   * A reference that no longer resolves counts as detached: the ref space is
+   * reset by a navigation, and an element on a page that has gone is not in
+   * the document. It never counts as attached, so `attached` on a stale
+   * reference waits out its time and says so.
+   */
+  private async waitForConnection(ref: Ref, state: "attached" | "detached", waitMs: number): Promise<void> {
+    const space = this.refs();
+    const deadline = Date.now() + waitMs;
+    for (;;) {
+      let connected = false;
+      const handle = await space.handleFor(ref).catch(() => undefined);
+      if (handle !== undefined) {
+        // A handle whose document has gone throws rather than answering.
+        connected = await handle.evaluate((el) => el.isConnected).catch(() => false);
+        if (!space.ownsHandle(ref)) await handle.dispose().catch(() => undefined);
+      }
+      if (state === "attached" ? connected : !connected) return;
+      if (Date.now() >= deadline) {
+        throw new TimeoutError(
+          `Waited ${waitMs} ms for ${ref} to be ${state}, and it is still ` +
+            `${connected ? "in the document" : "not in the document"}.`,
+          { adapter: "playwright", timeoutMs: waitMs },
+        );
+      }
+      await new Promise<void>((done) => setTimeout(done, CONNECTION_POLL_MS));
     }
   }
 
@@ -1476,6 +1615,42 @@ export class PlaywrightSurface implements AgentSurface {
     await this.space?.reset();
   }
 
+  /**
+   * The cookies this session would send to `url`, by name (REQ-ADP-3).
+   *
+   * What `Call the "x" API with the session cookies` sends: the executor asks
+   * for the request's own URL, so a cookie the browser holds for one host is
+   * never offered to another.
+   *
+   * `context.cookies(url)` was taken to apply the browser's rules, and its
+   * filter is looser than a browser's: it sends a host-only cookie to every
+   * subdomain, matches a cookie on `/admin` to `/administrator`, and sends a
+   * `Secure` cookie over plain http to localhost. So every cookie is read and
+   * `cookiesFor`, the rule every adapter with a jar shares, decides. Playwright
+   * already writes a domain cookie's domain with a leading dot and a host-only
+   * cookie's without one, which is the convention that rule reads.
+   */
+  async cookies(url: string): Promise<Record<string, string>> {
+    if (this.context === undefined) {
+      throw new SessionError("The session is not open.", { adapter: "playwright" });
+    }
+    const absolute =
+      /^[a-z][a-z0-9+.-]*:/i.test(url) || this.baseUrl === undefined
+        ? url
+        : new URL(url, this.baseUrl).toString();
+    const all = await this.context.cookies();
+    return cookiesFor(
+      absolute,
+      all.map((cookie) => ({
+        name: cookie.name,
+        value: cookie.value,
+        domain: cookie.domain,
+        path: cookie.path,
+        secure: cookie.secure,
+      })),
+    );
+  }
+
   async trace(start: boolean, path?: string): Promise<void> {
     if (this.context === undefined) {
       throw new SessionError("The session is not open.", { adapter: "playwright" });
@@ -1503,17 +1678,16 @@ function describeError(error: unknown): string {
  * knowing which adapter ran (LLD §8.4).
  */
 export function translate(error: unknown): unknown {
-  if (
-    error instanceof ActionabilityError ||
-    error instanceof LocateError ||
-    error instanceof TimeoutError ||
-    error instanceof DialogError ||
-    error instanceof NavigationError ||
-    error instanceof ScriptError ||
-    error instanceof SessionError
-  ) {
-    return error;
-  }
+  /*
+   * Any surface error is already typed, and is passed through as it is.
+   *
+   * This was a list of seven classes, so an error `act` threw on purpose that
+   * was not on it — a `DataError` from a page wait with nothing to wait for,
+   * an `UnsupportedError` from `quit` — fell through to the message matching
+   * below and came out as an `ActionabilityError`, which undid the reason it
+   * was thrown as what it was.
+   */
+  if (error instanceof SurfaceError) return error;
   if (!(error instanceof Error)) return error;
   const message = error.message;
 
@@ -1561,4 +1735,23 @@ export function createPlaywrightSurface(
     ...(config.app.attach?.cdpUrl === undefined ? {} : { cdpUrl: config.app.attach.cdpUrl }),
     ...overrides,
   });
+}
+
+/**
+ * The command that installs the browser *this* Playwright drives (PK-03).
+ *
+ * The launch failure said `pnpm exec playwright install`, which a person who
+ * started Yam with `npx` has no project to run, and a bare `npx playwright
+ * install` resolves whichever Playwright npx finds — a different version from
+ * the one Yam loaded wants a different browser build, installs it, and the
+ * launch fails again with the same message. Pinned to the version that failed.
+ */
+export function browserInstallCommand(name: string): string {
+  try {
+    const manifest = createRequire(import.meta.url)("playwright/package.json") as { version?: unknown };
+    if (typeof manifest.version === "string") return `npx playwright@${manifest.version} install ${name}`;
+  } catch {
+    // Unreadable: the unpinned command is still the right kind of command.
+  }
+  return `npx playwright install ${name}`;
 }

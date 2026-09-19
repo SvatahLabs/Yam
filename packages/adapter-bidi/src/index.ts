@@ -18,8 +18,10 @@
 export {
   BidiSurface,
   BIDI_CAPABILITIES,
+  cookiesFor,
   createBidiSurface,
   type BidiAdapterOptions,
+  type BidiCookie,
 } from "./surface.js";
 
 export { registerBidiAdapter, BIDI_ADAPTER_NAME } from "./register.js";

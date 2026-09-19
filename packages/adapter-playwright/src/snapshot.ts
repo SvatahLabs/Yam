@@ -44,6 +44,9 @@ export const REGISTRY = "__yamRefs__";
 /** Default cap on nodes; a larger page is truncated in document order. */
 export const DEFAULT_MAX_NODES = 2000;
 
+/** What a password field's value reads as, everywhere (SF-15). */
+const REDACTED = "[REDACTED]";
+
 /** How long a reference is given to resolve before it is called stale. */
 const STALE_REF_TIMEOUT_MS = 1000;
 
@@ -65,6 +68,17 @@ const ENRICHABLE_ROLES = new Set([
   "radio",
   "slider",
 ]);
+
+/**
+ * Roles whose text after the colon is a control's value.
+ *
+ * Playwright puts other text there too — `paragraph [ref=e3]: Welcome back`
+ * is the paragraph's inline text — and a paragraph has no value: the own-refs
+ * walker gives one only to inputs, text areas, selects and outputs. Reading it
+ * for every role would give the two mechanisms different trees and send every
+ * paragraph through the password check.
+ */
+const VALUE_ROLES = new Set(["textbox", "searchbox", "combobox", "spinbutton", "slider", "listbox"]);
 
 /** Cap on how many nodes are enriched, so a pathological page cannot stall. */
 const MAX_ENRICHED = 200;
@@ -122,7 +136,11 @@ export async function chooseMechanism(
  *
  * ```
  *   - button "Sign in" [disabled] [ref=e12]
- *   - textbox "Username": you@example.com [ref=e13]
+ *   - textbox "Username" [ref=e13]: you@example.com
+ *   - textbox "Notes" [ref=e14]: "quoted: when it needs to be"
+ *   - textbox "Password" [ref=e15]:
+ *     - /placeholder: Your password
+ *     - text: hunter2
  * ```
  *
  * Two spaces of indentation per level, which gives `depth` and `parent`.
@@ -142,10 +160,61 @@ const AI_STATE_KEYS: Record<string, SnapshotNode["states"][number]> = {
   hidden: "hidden",
 };
 
+/**
+ * What follows a node's name: its bracketed attributes, and its value.
+ *
+ * The value was read only straight after the name — `textbox "Username":
+ * you@example.com [ref=e13]` — and Playwright 1.62 renders it after the
+ * brackets, `textbox "Username" [ref=e13]: you@example.com`, or, for a field
+ * with a placeholder, as a `- text:` line under it. So every textbox value was
+ * dropped, which also meant the password withholding below never had a value
+ * to withhold, and would have leaked the day the value came back. All three
+ * are read (the third in `parseAiSnapshot`). After the brackets, the value is
+ * the rest of the line: a value holding `[...]` of its own is text, not a
+ * state, so states are read from the brackets alone. A line ending in a bare
+ * `:` is a node with children, not a value, and a value YAML would misread is
+ * double-quoted.
+ */
+function splitRest(rest: string): { brackets: string; value: string | undefined } {
+  const trimmed = rest.trimStart();
+  let brackets: string;
+  let raw: string | undefined;
+  if (trimmed.startsWith(":")) {
+    const before = /^:\s*(.*?)((?:\s*\[[^\]]*\])*)\s*$/.exec(trimmed);
+    raw = before?.[1];
+    brackets = before?.[2] ?? "";
+  } else {
+    const after = /^((?:\s*\[[^\]]*\])*)\s*(?::(.*))?$/.exec(rest);
+    brackets = after?.[1] ?? rest;
+    raw = after?.[2];
+  }
+  return { brackets, value: unquoted(raw) };
+}
+
+/** A rendered value, with YAML's double quotes taken off; `undefined` when empty. */
+function unquoted(raw: string | undefined): string | undefined {
+  const value = raw?.trim();
+  if (value === undefined || value === "") return undefined;
+  if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) {
+    try {
+      return String(JSON.parse(value));
+    } catch {
+      return value;
+    }
+  }
+  return value;
+}
+
 export function parseAiSnapshot(text: string): SnapshotNode[] {
   const nodes: SnapshotNode[] = [];
   /** Depth → the ref of the node open at that depth. */
   const openAt = new Map<number, string>();
+  /**
+   * The control a `- text:` line may give a value to: the last node, when it
+   * is a control, until any other node's line is read. Property lines
+   * (`- /placeholder: …`) are not nodes and leave it be.
+   */
+  let control: { node: SnapshotNode; depth: number } | undefined;
 
   for (const rawLine of text.split("\n")) {
     if (rawLine.trim() === "") continue;
@@ -153,13 +222,27 @@ export function parseAiSnapshot(text: string): SnapshotNode[] {
     if (match?.groups === undefined) continue;
     const groups = match.groups as { indent: string; role: string; name?: string; rest: string };
 
-    const refMatch = /\[ref=([a-z0-9]+)\]/i.exec(groups.rest);
-    if (refMatch === null) continue; // A node Playwright issued no reference for.
-
     const depth = Math.floor(groups.indent.length / 2);
 
+    // `- text: hunter2` directly under a control is its value; Playwright
+    // renders it so when the field also has a `/placeholder` line. It has no
+    // brackets, so the whole of the line after the colon is the text.
+    const valueFor = control;
+    control = undefined;
+    if (groups.role === "text" && groups.name === undefined && groups.rest.trimStart().startsWith(":")) {
+      const text = unquoted(groups.rest.trimStart().slice(1));
+      if (valueFor !== undefined && valueFor.depth === depth - 1 && valueFor.node.value === undefined) {
+        if (text !== undefined) valueFor.node.value = text;
+      }
+      continue;
+    }
+
+    const { brackets, value } = splitRest(groups.rest);
+    const refMatch = /\[ref=([a-z0-9]+)\]/i.exec(brackets);
+    if (refMatch === null) continue; // A node Playwright issued no reference for.
+
     const states: SnapshotNode["states"] = [];
-    for (const bracket of groups.rest.matchAll(/\[([a-zA-Z]+)(?:=([^\]]*))?\]/g)) {
+    for (const bracket of brackets.matchAll(/\[([a-zA-Z]+)(?:=([^\]]*))?\]/g)) {
       const key = bracket[1]!.toLowerCase();
       if (key === "ref" || key === "level") continue;
       const mapped = AI_STATE_KEYS[key];
@@ -170,17 +253,6 @@ export function parseAiSnapshot(text: string): SnapshotNode[] {
         continue;
       }
       states.push(mapped);
-    }
-
-    // `- textbox "Username": value [ref=e13]` — the value follows the colon.
-    let value: string | undefined;
-    const afterName = groups.rest.trimStart();
-    if (afterName.startsWith(":")) {
-      value = afterName
-        .slice(1)
-        .replace(/\[[a-zA-Z]+(?:=[^\]]*)?\]/g, "")
-        .trim();
-      if (value === "") value = undefined;
     }
 
     // Playwright renders `[checked]` only when a control is checked. REQ-SURF-4
@@ -197,9 +269,10 @@ export function parseAiSnapshot(text: string): SnapshotNode[] {
 
     const node: SnapshotNode = { ref: refMatch[1]!, role: groups.role, states, depth };
     if (groups.name !== undefined) node.name = groups.name.replace(/\\(.)/g, "$1");
-    if (value !== undefined) node.value = value;
+    if (value !== undefined && VALUE_ROLES.has(groups.role)) node.value = value;
     const parent = openAt.get(depth - 1);
     if (parent !== undefined) node.parent = parent;
+    if (VALUE_ROLES.has(node.role) && node.value === undefined) control = { node, depth };
 
     openAt.set(depth, node.ref);
     for (const level of [...openAt.keys()]) if (level > depth) openAt.delete(level);
@@ -349,8 +422,46 @@ async function viaPlaywright(
   let nodes = parseAiSnapshot(snapshot);
   if (options.interactiveOnly === true) nodes = nodes.filter((n) => isInteractiveRole(n.role));
   nodes = nodes.slice(0, options.maxNodes ?? DEFAULT_MAX_NODES);
+  await withholdPasswords(space, nodes);
   await enrichStates(space, nodes);
   return nodes;
+}
+
+/**
+ * A password field's value, withheld (SF-15).
+ *
+ * Playwright's AI snapshot renders a filled password field as `textbox
+ * "Password" [ref=e5]: hunter2`, and its text carries no input type to tell it
+ * from any other textbox. This asked the frame for the values its password
+ * fields held and withheld a node showing one of them. It never ran — the
+ * parser dropped every value, see `splitRest` — and it would have leaked once
+ * it did: `document.querySelectorAll` does not reach into a shadow root or a
+ * child frame, both of which the snapshot does, so a password there matched
+ * nothing and went out as it was.
+ *
+ * So each node with a value asks its own element, by reference, whether it is
+ * a password input: the `aria-ref` engine resolves a reference wherever the
+ * snapshot found it, shadow root and child frame included. Every node the
+ * parser gave a value is asked, not only a `textbox`, since a page can give a
+ * password input another role; one whose role carries no value (`VALUE_ROLES`)
+ * has none to leak. A reference that cannot be asked keeps no value: a
+ * snapshot missing a value is a smaller problem than one carrying a password
+ * into an agent's context and a trajectory.
+ */
+async function withholdPasswords(space: RefSpace, nodes: SnapshotNode[]): Promise<void> {
+  await Promise.all(
+    nodes
+      .filter((node) => node.value !== undefined && node.value !== REDACTED)
+      .map(async (node) => {
+        const password = await space.frame
+          .locator(`aria-ref=${node.ref}`)
+          .evaluate((el) => el instanceof HTMLInputElement && el.type === "password", undefined, {
+            timeout: STALE_REF_TIMEOUT_MS,
+          })
+          .catch(() => true);
+        if (password) node.value = REDACTED;
+      }),
+  );
 }
 
 /**

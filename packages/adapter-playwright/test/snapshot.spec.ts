@@ -78,6 +78,32 @@ for (const mechanism of MECHANISMS) {
 
       const described = await surface.describe(password!.ref);
       expect(described.attrs["id"]).toBe("password");
+
+      // What was typed is never read back out of a password field (SF-15): not
+      // in the next snapshot, its text, or the element's description.
+      expect(described.value).toBe("[REDACTED]");
+      const after = await surface.snapshot();
+      // Both mechanisms say the field is filled, and neither says with what.
+      // Playwright's snapshot looked as if it left the value out: the parser
+      // dropped every value, and so the withholding was never exercised.
+      expect(after.nodes.find((n) => n.role === "textbox" && n.name?.includes("Password"))?.value).toBe(
+        "[REDACTED]",
+      );
+      expect(after.text).not.toContain("typed through the snapshot");
+    });
+
+    test("a textbox that is not a password shows its value", async ({ openSurface }) => {
+      const surface = await openSurface(mechanism, "/login");
+      const username = (await surface.snapshot()).nodes.find(
+        (n) => n.role === "textbox" && !(n.name ?? "").includes("Password"),
+      );
+      expect(username).toBeDefined();
+      await surface.act("type", username!.ref, { value: "atul@example.com" });
+      const after = await surface.snapshot();
+      expect(after.nodes.find((n) => n.name === username!.name && n.role === "textbox")?.value).toBe(
+        "atul@example.com",
+      );
+      expect(after.text).toContain("atul@example.com");
     });
 
     test("refs are lost on navigation and say so", async ({ openSurface }) => {
@@ -215,6 +241,45 @@ test.describe("the two mechanisms agree (LLD §7.1)", () => {
   });
 });
 
+/*
+ * A password where `document.querySelectorAll` does not look (SF-15).
+ *
+ * The withholding asked the frame for its password inputs' values, and a
+ * shadow root's inputs and a child frame's are not in that answer, while
+ * Playwright's snapshot shows both. Each node is now asked about by its own
+ * reference, which resolves wherever the snapshot found it.
+ */
+test.describe("password values the page hides from a document query (playwright refs)", () => {
+  test("are withheld in an open shadow root and a child frame, and other values are not", async ({
+    openSurface,
+  }) => {
+    const surface = await openSurface("playwright", "/login");
+    await surface.act("evaluate", undefined, {
+      expression: `(async () => {
+        const host = document.createElement("div");
+        document.body.appendChild(host);
+        host.attachShadow({ mode: "open" }).innerHTML =
+          '<label>Shadow secret <input type="password" value="shadow-hunter2"></label>';
+        const frame = document.createElement("iframe");
+        frame.srcdoc =
+          '<label>Framed secret <input type="password" value="frame-hunter2"></label>' +
+          '<label>Framed note <input value="plain words"></label>';
+        const loaded = new Promise((done) => frame.addEventListener("load", done));
+        document.body.appendChild(frame);
+        await loaded;
+        return true;
+      })()`,
+    });
+
+    const snapshot = await surface.snapshot();
+    const named = (name: string) => snapshot.nodes.find((n) => n.name === name);
+    expect(named("Shadow secret")?.value).toBe("[REDACTED]");
+    expect(named("Framed secret")?.value).toBe("[REDACTED]");
+    expect(named("Framed note")?.value).toBe("plain words");
+    expect(snapshot.text).not.toContain("hunter2");
+  });
+});
+
 test.describe("parsing Playwright's AI snapshot", () => {
   test("reads roles, names, values, states, depth and parents", () => {
     const nodes = parseAiSnapshot(
@@ -234,6 +299,62 @@ test.describe("parsing Playwright's AI snapshot", () => {
     expect(nodes[2]!.states).toContain("required");
     expect(nodes[3]!.states).toContain("unchecked");
     expect(nodes[4]!.states).toContain("disabled");
+  });
+
+  /*
+   * Playwright 1.62 renders the value after the brackets, and the parser read
+   * it only straight after the name, so every value was dropped.
+   */
+  test("reads a value after the brackets, as Playwright 1.62 renders it", () => {
+    const nodes = parseAiSnapshot(
+      [
+        `- generic [active] [ref=e1]:`,
+        `  - textbox "Pass" [required] [ref=e5]: hunter2`,
+        `  - textbox "Notes" [ref=f1e3]: "hello: there"`,
+        `  - textbox "Tricky" [ref=e6]: "[disabled] v"`,
+        `  - slider "Volume" [ref=e7]: "3"`,
+        `  - paragraph [ref=e8]: Welcome back`,
+        `  - list [ref=e9]:`,
+        `    - listitem [ref=e10]: One`,
+      ].join("\n"),
+    );
+    const byRef = (ref: string) => nodes.find((n) => n.ref === ref)!;
+    expect(byRef("e1").value).toBeUndefined();
+    expect(byRef("e5")).toMatchObject({ role: "textbox", name: "Pass", value: "hunter2" });
+    expect(byRef("e5").states).toContain("required");
+    expect(byRef("f1e3").value).toBe("hello: there");
+    // A value's own brackets are text, not states.
+    expect(byRef("e6").value).toBe("[disabled] v");
+    expect(byRef("e6").states).not.toContain("disabled");
+    expect(byRef("e7").value).toBe("3");
+    // Inline text is not a value; only a control has one.
+    expect(byRef("e8").value).toBeUndefined();
+    expect(byRef("e10")).toMatchObject({ parent: "e9", depth: 2 });
+    expect(byRef("e10").value).toBeUndefined();
+  });
+
+  test("reads a control's value from the text line Playwright puts under it with a placeholder", () => {
+    const nodes = parseAiSnapshot(
+      [
+        `- generic [ref=e1]:`,
+        `  - textbox "Username" [active] [ref=e16]:`,
+        `    - /placeholder: you@example.com`,
+        `    - text: "a: b [x]"`,
+        `  - textbox "Empty" [ref=e17]:`,
+        `    - /placeholder: nothing typed`,
+        `  - generic [ref=e18]:`,
+        `    - text: Remember me`,
+        `  - textbox "Password" [ref=e19]:`,
+        `    - /placeholder: Your password`,
+        `    - text: hunter2`,
+      ].join("\n"),
+    );
+    const byRef = (ref: string) => nodes.find((n) => n.ref === ref)!;
+    expect(byRef("e16").value).toBe("a: b [x]");
+    // Another node's text is not the empty field's value.
+    expect(byRef("e17").value).toBeUndefined();
+    expect(byRef("e18").value).toBeUndefined();
+    expect(byRef("e19").value).toBe("hunter2");
   });
 
   test("skips a node Playwright issued no reference for", () => {
