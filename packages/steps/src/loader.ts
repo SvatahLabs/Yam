@@ -46,6 +46,16 @@ function stepFiles(dir: string): string[] {
   return out;
 }
 
+/**
+ * The files `loadSteps` would import, relative to `root` (SF-15).
+ *
+ * Exported so a caller can ask whether a project carries code of its own before
+ * anything under it is run: importing a step file runs it.
+ */
+export function stepCode(root: string, dir = "steps"): string[] {
+  return stepFiles(join(root, dir)).map((path) => relative(root, path).split(sep).join("/"));
+}
+
 export interface LoadResult {
   readonly registry: StepRegistry;
   readonly diagnostics: readonly Diagnostic[];

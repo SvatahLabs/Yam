@@ -26,6 +26,7 @@
  * accessibility tree exposes almost nothing to either.
  */
 import { app, nativeTheme, BrowserWindow, dialog, ipcMain, shell } from "electron";
+import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { DEFAULT_PREFERENCES, personsProjects, preferencesPath, readPreferences, type Preferences, withRecentProject, writePreferences } from "./preferences.js";
@@ -372,12 +373,63 @@ function createWindow(): void {
   }
 }
 
+/**
+ * Ask before a project's own code runs (SF-15).
+ *
+ * Opening a project starts `yam serve` on it, and loading a project imports the
+ * JavaScript and TypeScript under its `steps/` — so choosing a folder somebody
+ * sent you used to run their code as you, with nothing asked. The command line
+ * decides whether a project is trusted (`yam trust --status`), and here a person
+ * who chose the folder is asked once. Declining still opens it: the flows, the
+ * bindings and the runs are there, and the project says which steps are missing.
+ *
+ * Only for a project a person opened. The private surfaces workspace has no
+ * code, and `YAM_APP_PROJECT` is a harness naming a project on purpose.
+ */
+async function askToTrust(directory: string): Promise<void> {
+  let cli: string;
+  let runtime: NodeRuntime;
+  let env: Record<string, string | undefined>;
+  try {
+    cli = cliPath();
+    ({ runtime, env } = nodeRuntime(cli));
+  } catch {
+    return; // Opening will fail with the runtime's own message.
+  }
+  const root = resolve(directory);
+  const status = spawnSync(runtime.path, [cli, "trust", root, "--status", "--json"], { encoding: "utf8", env });
+  let trust: { runsCode?: boolean; code?: string[] };
+  try {
+    trust = JSON.parse(status.stdout) as { runsCode?: boolean; code?: string[] };
+  } catch {
+    return;
+  }
+  if (trust.runsCode !== false) return;
+  const code = trust.code ?? [];
+  const choice = await dialog.showMessageBox({
+    type: "warning",
+    message: "Run this project's code?",
+    detail:
+      `${root} has code under steps/ (${code.slice(0, 3).join(", ")}${code.length > 3 ? ", …" : ""}). ` +
+      "Opening a project runs that code as you. Trust it only if you trust where the project came from; " +
+      "if you do not, it opens without its custom steps.",
+    buttons: ["Open without running it", "Trust and open"],
+    defaultId: 0,
+    cancelId: 0,
+  });
+  if (choice.response === 1) {
+    spawnSync(runtime.path, [cli, "trust", root], { encoding: "utf8", env });
+    debug("project.trusted", { directory: root });
+  }
+}
+
 /* ── the bridge's four functions, answered here (LLD §13.6) ───────────────── */
 
 ipcMain.handle("app:openProject", async (_event, directory: unknown) => {
   if (typeof directory !== "string" || directory === "") {
     throw new Error("openProject needs a directory.");
   }
+  await askToTrust(directory);
   return await openProject(directory);
 });
 

@@ -41,6 +41,7 @@ import {
 import { loadConfig } from "../project.js";
 import { registerModelTiers } from "../tiers/register.js";
 import { loadSteps, type StepRegistry } from "@svatah/yam-steps";
+import { projectTrust } from "../trust.js";
 
 /** The thresholds REQ-COMP-9 names. */
 export const TIER1_THRESHOLD = 1;
@@ -85,9 +86,17 @@ async function loadGoldenProject(dir: string): Promise<GoldenProject> {
   let steps: StepRegistry | undefined;
   const loaderDiagnostics: string[] = [];
   if (existsSync(join(dir, "steps"))) {
-    const loaded = await loadSteps(dir, "steps");
-    steps = loaded.registry;
-    for (const one of loaded.diagnostics) loaderDiagnostics.push(one.message);
+    /*
+     * The golden project is a directory `--golden-project` names, and its steps
+     * are code: trusted as any project is before they are imported (SF-15).
+     */
+    if (projectTrust(dir).runsCode) {
+      const loaded = await loadSteps(dir, "steps");
+      steps = loaded.registry;
+      for (const one of loaded.diagnostics) loaderDiagnostics.push(one.message);
+    } else {
+      loaderDiagnostics.push(`${dir}/steps holds code this machine has not been told to run; run \`yam trust ${dir}\`.`);
+    }
   }
 
   return {

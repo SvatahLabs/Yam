@@ -8,7 +8,7 @@
  * compiler — which depends on both — passes them through unchanged.
  */
 export interface Diagnostic {
-  readonly code: "E_STEP_AMBIGUOUS" | "E_STEP_LOAD" | "W_CUSTOM";
+  readonly code: "E_STEP_AMBIGUOUS" | "E_STEP_LOAD" | "W_STEP_UNTRUSTED" | "W_CUSTOM";
   readonly severity: "error" | "warning";
   readonly message: string;
   readonly file: string;

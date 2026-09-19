@@ -208,6 +208,21 @@ The same as yam ui --tmux.
 Exit codes: 0 ok · 64 usage
 ```
 
+### `yam trust`
+
+```text
+yam trust [dir] [--revoke] [--status] [--list] [--json]
+
+Let this project's own code run on this machine: the files under its steps directory, a playwright.config at its root, and a program its config launches. A project nobody has trusted loads without its custom steps and says so, and a run that would start its code is refused. yam init trusts the project it makes; the desktop asks when it opens one; CI=true (or 1) and YAM_TRUST_PROJECT=1 trust without asking.
+
+  --revoke  stop trusting it
+  --status  say whether its code runs here, and why; exit 1 when it does not
+  --list    every trusted directory
+  --json    one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
 ### `yam serve`
 
 ```text

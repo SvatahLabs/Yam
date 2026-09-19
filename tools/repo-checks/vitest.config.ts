@@ -16,9 +16,16 @@ import { defineConfig } from "vitest/config";
 const BROKER_STATE_DIR = `${tmpdir()}/yam-broker-repo-checks-${String(process.pid)}`;
 process.env["YAM_BROKER_STATE_DIR"] = BROKER_STATE_DIR;
 
+/*
+ * A trust store of this run's own, so a `yam init` in a temporary directory is
+ * not remembered in the machine's list of trusted projects (SF-15).
+ */
+const TRUST_STORE = `${tmpdir()}/yam-trust-repo-checks-${String(process.pid)}.json`;
+process.env["YAM_TRUST_STORE"] = TRUST_STORE;
+
 export default defineConfig({
   test: {
-    env: { YAM_BROKER_STATE_DIR: BROKER_STATE_DIR },
+    env: { YAM_BROKER_STATE_DIR: BROKER_STATE_DIR, YAM_TRUST_STORE: TRUST_STORE },
     /* …and it dies with the run, so ten runs are not ten brokers. */
     globalSetup: ["../../scripts/vitest-broker.mjs"],
     // The boundary check shells out to eslint over the whole workspace.

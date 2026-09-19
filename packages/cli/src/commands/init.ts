@@ -13,6 +13,7 @@ import { boolOption, stringOption, stringOptions, type ParsedArgs } from "@svata
 import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import type { CommandIo } from "@svatah/yam-bindings-cli";
 import { OLD_SCAFFOLD_MARKER } from "../scaffold.js";
+import { trustProject } from "../trust.js";
 
 const CONFIG = `# Yam project configuration.
 schemaVersion: "1.0.0"
@@ -284,6 +285,8 @@ export async function initCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
     writeFileSync(join(root, name), contents, "utf8");
   }
 
+  // The person just made this project; its steps are theirs (SF-15).
+  trustProject(root);
   const where = root === "." ? "this directory" : root;
   const note =
     a.baseUrl === undefined

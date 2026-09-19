@@ -42,7 +42,7 @@ The yam CLI and MCP server
 | `loadBindings` | function | `export function loadBindings(` | The bindings store, or a `ConfigError` naming the file (P2-F2). |
 | `loadConfig` | function | `declare function loadConfig(root: string, env?: NodeJS.ProcessEnv):` | The config with the selected endpoint applied (Draft 2.22, REQ-CLI-11). |
 | `LoadedProject` | interface | `export interface LoadedProject` |  |
-| `loadProject` | function | `export async function loadProject(root: string): Promise<LoadedProject>` |  |
+| `loadProject` | function | `export async function loadProject(root: string, options: { honourCi?: boolean } = {}): Promise<LoadedProject>` |  |
 | `main` | function | `export async function main(argv: readonly string[], io: CommandIo): Promise<ExitCode>` |  |
 | `ModelGroundingOptions` | interface | `export interface ModelGroundingOptions` |  |
 | `newRunId` | function | `declare function newRunId(now?: Date, random?: () => number): string;` | A lexicographically sortable id, which is what a run directory wants. |

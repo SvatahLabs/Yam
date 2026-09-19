@@ -32,6 +32,7 @@ defineStep API and the Tier 0 matcher
 | `PlaceholderType` | typealias | `export type PlaceholderType = (typeof PLACEHOLDER_TYPES)[number];` |  |
 | `RegistryMatch` | interface | `export interface RegistryMatch` |  |
 | `StepArgs` | typealias | `export type StepArgs = Readonly<Record<string, unknown>>;` | The arguments a handler receives. |
+| `stepCode` | function | `export function stepCode(root: string, dir = "steps"): string[]` | The files `loadSteps` would import, relative to `root` (SF-15). |
 | `StepContext` | interface | `export interface StepContext<A extends StepArgs = StepArgs>` | What a handler can do. |
 | `StepHandler` | typealias | `export type StepHandler<A extends StepArgs = StepArgs> = (` |  |
 | `StepMeta` | interface | `export interface StepMeta` | What `defineStep`'s second argument may say. |

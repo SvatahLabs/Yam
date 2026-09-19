@@ -45,7 +45,7 @@ import {
 } from "@svatah/yam-bindings-cli";
 import { registerAllAdapters } from "../adapters.js";
 import { gatewayForRecording } from "../gateway-for.js";
-import { compileProject, loadProject } from "../project.js";
+import { compileProject, loadProject, untrustedRun } from "../project.js";
 import { noteCheck, preflight } from "../front-door.js";
 import { diagnostic, say } from "../diagnostics.js";
 import { report as reportDiagnostics } from "./compile.js";
@@ -61,6 +61,11 @@ export async function recordCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
   const loaded = await loadProject(root);
   const nothing = preflight(root, loaded, args, io);
   if (nothing !== undefined) return nothing;
+  const untrusted = untrustedRun(loaded);
+  if (untrusted !== undefined) {
+    io.err(untrusted);
+    return EXIT.failed;
+  }
   noteCheck(loaded, io);
   const compiled = compileProject(loaded, { stable: true });
   const diagnostics = [...loaded.diagnostics, ...compiled.diagnostics];

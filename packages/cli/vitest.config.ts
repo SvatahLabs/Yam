@@ -14,6 +14,13 @@ import { defineConfig } from "vitest/config";
 const BROKER_STATE_DIR = `${tmpdir()}/yam-broker-cli-${String(process.pid)}`;
 process.env["YAM_BROKER_STATE_DIR"] = BROKER_STATE_DIR;
 
+/*
+ * A trust store of this run's own, so a `yam init` in a temporary directory is
+ * not remembered in the machine's list of trusted projects (SF-15).
+ */
+const TRUST_STORE = `${tmpdir()}/yam-trust-cli-${String(process.pid)}.json`;
+process.env["YAM_TRUST_STORE"] = TRUST_STORE;
+
 export default defineConfig({
   test: {
     /*
@@ -35,7 +42,7 @@ export default defineConfig({
      * broker a run then spawns finds "a broker is already running" and exits 0,
      * which the caller reports as "exited with 0 instead of starting".
      */
-    env: { YAM_BROKER_STATE_DIR: BROKER_STATE_DIR },
+    env: { YAM_BROKER_STATE_DIR: BROKER_STATE_DIR, YAM_TRUST_STORE: TRUST_STORE },
     /* …and it dies with the run, so ten runs are not ten brokers. */
     globalSetup: ["../../scripts/vitest-broker.mjs"],
     /*

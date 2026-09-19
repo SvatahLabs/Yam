@@ -422,6 +422,8 @@ async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Pro
       return await (await import("./commands/migrate.js")).migrateCommand(args, io);
     case "init":
       return await (await import("./commands/init.js")).initCommand(args, io);
+    case "trust":
+      return await (await import("./commands/trust.js")).trustCommand(args, io);
     case "doctor":
       return await (await import("./commands/doctor.js")).doctorCommand(args, io);
     case "host":

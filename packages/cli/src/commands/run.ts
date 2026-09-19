@@ -25,7 +25,7 @@ import type { Invoker, Plan, StepResult, Summary } from "@svatah/yam-schema";
 import type { Diagnostic } from "@svatah/yam-spec";
 import { canonicalJson, planSchema } from "@svatah/yam-schema";
 import { BindingsStore, resolve as resolveBinding } from "@svatah/yam-bindings";
-import { HttpSurface } from "@svatah/yam-adapter-http";
+import { HttpSurface, type HttpAdapterOptions } from "@svatah/yam-adapter-http";
 import { generateSpecs } from "@svatah/yam-host-playwright";
 import {
   expandRuns,
@@ -56,7 +56,7 @@ import {
 import { registerAllAdapters } from "../adapters.js";
 import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import { ConfigError } from "../config-error.js";
-import { compileProject, loadProject } from "../project.js";
+import { compileProject, loadProject, untrustedRun } from "../project.js";
 import { noteCheck, planStaleness, preflight, reasonFor, warnUnsetSecrets, writeLastRun, writePlanInputs } from "../front-door.js";
 import { diagnostic, say } from "../diagnostics.js";
 import { report } from "./compile.js";
@@ -69,6 +69,11 @@ export async function runCommand(args: ParsedArgs, io: CommandIo): Promise<ExitC
   const loaded = await loadProject(root);
   const nothing = preflight(root, loaded, args, io);
   if (nothing !== undefined) return nothing;
+  const untrusted = untrustedRun(loaded, stringOption(args, "host") ?? "none");
+  if (untrusted !== undefined) {
+    io.err(untrusted);
+    return EXIT.failed;
+  }
   warnUnsetSecrets(loaded, args, io);
 
   /*
@@ -342,6 +347,10 @@ export async function runProject(
   const runId = options.runId ?? newRunId();
   const outputDir = resolve(loaded.root, options.outputDir ?? loaded.config.run.outputDir);
   const context = { root: loaded.root, loaded, plan, runId, outputDir };
+
+  // What a run would start, refused before it starts, for every caller (SF-15).
+  const untrusted = untrustedRun(loaded);
+  if (untrusted !== undefined) throw new Error(untrusted);
 
   registerAllAdapters();
 
@@ -643,6 +652,8 @@ export interface ProjectRunnerOptions {
   /** The project root, for a request body that names a file. */
   readonly cwd: string;
   readonly log?: (message: string) => void;
+  /** Injected in tests: the `fetch` the API runner's requests go through. */
+  readonly fetch?: HttpAdapterOptions["fetch"];
 }
 
 /**
@@ -666,17 +677,39 @@ export function projectRunners(
   const http = new HttpSurface({
     ...(options.baseUrl === undefined ? {} : { baseUrl: options.baseUrl }),
     cwd: options.cwd,
+    ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
   });
 
-  const api: ApiRunner = async (step, { scope }) => {
+  const api: ApiRunner = async (step, { scope, surface }) => {
     const name = literalArg(step.args?.["request"]);
     const request = name === undefined ? undefined : loaded.project.apis.requests.get(name);
     if (request === undefined) {
       throw new Error(`No API request named "${name ?? "?"}" in ${loaded.config.api.dir}/.`);
     }
     const withSessionCookies = step.args?.["withSessionCookies"] === true;
+    /*
+     * The browser's cookies, for this request's own URL (REQ-ADP-3).
+     *
+     * `Call the "x" API with the session cookies` compiled to
+     * `withSessionCookies: true` and sent none of them: this runner never saw
+     * the surface, and the HTTP adapter has no idea a browser exists. The
+     * executor now hands the surface over, and the adapter asks it with the
+     * absolute URL once it has one, so a cookie the browser holds for one host
+     * goes to that host and no other. A surface with no cookie jar — a desktop
+     * app, a terminal — has no `cookies`, and the request goes with the HTTP
+     * adapter's own jar alone.
+     */
+    const browser = withSessionCookies && surface?.cookies !== undefined ? surface : undefined;
     const response = await http.request(request, {
       withSessionCookies,
+      /*
+       * `Call the "x" API without cookies` compiles to `withSessionCookies:
+       * false`, and the plain form to no key at all; the first means none — not
+       * the jar's either — so a check that an endpoint refuses an anonymous
+       * caller is made anonymously.
+       */
+      ...(step.args?.["withSessionCookies"] === false ? { withoutCookies: true } : {}),
+      ...(browser === undefined ? {} : { sessionCookiesFor: (url: string) => browser.cookies!(url) }),
       scope: { read: (reference) => readReference(scope, reference) },
     });
     /*

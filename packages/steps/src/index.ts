@@ -20,7 +20,7 @@ export {
   type TemplateMatch,
 } from "./template.js";
 export { StepRegistry, type RegistryMatch } from "./registry.js";
-export { loadSteps, type LoadResult } from "./loader.js";
+export { loadSteps, stepCode, type LoadResult } from "./loader.js";
 export { emitCustom, type EmitOptions, type EmittedCustom, type TargetResolver, type ValueParser } from "./emit.js";
 export { customDiagnostic, type Diagnostic } from "./diagnostics.js";
 export {

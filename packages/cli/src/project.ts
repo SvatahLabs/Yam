@@ -16,7 +16,8 @@ import {
   type CompileResult,
 } from "@svatah/yam-compiler";
 import { diagnostic, readProjectFrom, type Diagnostic, type Project } from "@svatah/yam-spec";
-import { loadSteps, type StepRegistry } from "@svatah/yam-steps";
+import { customDiagnostic, loadSteps, StepRegistry } from "@svatah/yam-steps";
+import { projectTrust, type ProjectTrust } from "./trust.js";
 import type { Config } from "@svatah/yam-schema";
 import { loadConfig as readConfig } from "@svatah/yam-bindings-cli";
 import { ConfigError } from "./config-error.js";
@@ -31,6 +32,8 @@ export { CONFIG_FILES, loadConfig } from "@svatah/yam-bindings-cli";
 export interface LoadedProject {
   readonly root: string;
   readonly config: Config;
+  /** Whether the project's own code may run here, and why (SF-15). */
+  readonly trust: ProjectTrust;
   readonly project: Project;
   readonly steps: StepRegistry;
   /** Everything reading the project said, including the step loader's. */
@@ -91,7 +94,32 @@ function bindingsOf(
   return { entries, diagnostics };
 }
 
-export async function loadProject(root: string): Promise<LoadedProject> {
+/** What a project's config launches: `app.launch`'s bundle and path (SF-15). */
+export function launchesOf(config: { app: { launch?: { bundle?: string; path?: string } } }): string[] {
+  const launch = config.app.launch;
+  return [launch?.bundle, launch?.path].filter((one): one is string => one !== undefined);
+}
+
+/**
+ * Why this project may not run here, or `undefined` when it may (SF-15).
+ *
+ * The steps are withheld at load; what a run would *start* is refused before
+ * it starts: a program the config launches, and the Playwright config the
+ * Playwright host runs.
+ */
+export function untrustedRun(loaded: LoadedProject, host?: string): string | undefined {
+  if (loaded.trust.runsCode) return undefined;
+  const launched = launchesOf(loaded.config);
+  const playwright = host === "playwright" ? loaded.trust.code.filter((one) => one.startsWith("playwright.config.")) : [];
+  const starts = [...launched, ...playwright];
+  if (starts.length === 0) return undefined;
+  return (
+    `This project would start code this machine has not been told to run (${starts.join(", ")}). ` +
+    `If you trust it, run \`yam trust ${loaded.root}\`.`
+  );
+}
+
+export async function loadProject(root: string, options: { honourCi?: boolean } = {}): Promise<LoadedProject> {
   const absolute = resolve(root);
   const { config } = readConfig(absolute);
 
@@ -110,11 +138,47 @@ export async function loadProject(root: string): Promise<LoadedProject> {
     bindings: bindings.entries,
   });
 
-  const steps = await loadSteps(absolute, config.steps.dir);
+  /*
+   * A project's code runs only where the person has said it may (SF-15). An
+   * untrusted project still loads — its flows, its bindings, its runs — and
+   * says why its custom steps are missing, with the command that trusts it.
+   */
+  const trust = projectTrust(absolute, {
+    stepsDir: config.steps.dir,
+    launches: launchesOf(config),
+    ...(options.honourCi === undefined ? {} : { honourCi: options.honourCi }),
+  });
+  const stepFiles = trust.code.filter((one) => one.startsWith(`${config.steps.dir}/`));
+  /*
+   * A warning, not an error: a project whose flows use no custom step still
+   * compiles and runs, and one that does fails on the step it cannot find —
+   * with this beside it saying why.
+   */
+  const steps =
+    trust.runsCode || stepFiles.length === 0
+      ? trust.runsCode
+        ? await loadSteps(absolute, config.steps.dir)
+        : { registry: new StepRegistry(), diagnostics: [] }
+      : {
+          registry: new StepRegistry(),
+          diagnostics: [
+            {
+              ...customDiagnostic(
+                "W_STEP_UNTRUSTED",
+                `${config.steps.dir}/ holds code (${stepFiles.slice(0, 3).join(", ")}` +
+                  `${stepFiles.length > 3 ? ", …" : ""}) that this machine has not been told to run, so ` +
+                  `none of its custom steps were loaded. If you trust this project, run \`yam trust ${absolute}\`.`,
+                stepFiles[0]!,
+              ),
+              severity: "warning" as const,
+            },
+          ],
+        };
 
   return {
     root: absolute,
     config,
+    trust,
     project: read.project,
     steps: steps.registry,
     diagnostics: [
