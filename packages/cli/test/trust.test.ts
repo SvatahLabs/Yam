@@ -21,9 +21,13 @@ let dir: string;
  * `C:\Users\RUNNER~1\…` — and a `~` in a path is percent-encoded by
  * `pathToFileURL`, which the test runner's own loader then cannot find. The
  * product imports the same file through Node and does not care; the test does.
+ *
+ * `realpathSync.native` is the one that answers the long name: the JavaScript
+ * one resolves links and hands back `RUNNER~1` unchanged, which is why the
+ * first fix for this changed nothing on Windows.
  */
 function temporaryDir(prefix: string): string {
-  return realpathSync(mkdtempSync(join(tmpdir(), prefix)));
+  return realpathSync.native(mkdtempSync(join(tmpdir(), prefix)));
 }
 
 /** A project whose one step file writes a marker when it is imported. */
