@@ -350,6 +350,13 @@ export class RefSpace {
    * `hN` is a handle this session minted; `eN` is Playwright's, resolved through
    * the public `aria-ref=` selector engine; `rN` is an index into the in-page
    * registry the own-refs walker filled.
+   *
+   * Playwright's own refs carry a frame prefix — `f1e111` — as soon as the
+   * snapshot is taken on a frame it did not number first, which a navigation in
+   * the session is enough to cause. Those are ours as much as `eN` is, and the
+   * selector engine takes them whole: stripping the prefix does not resolve.
+   * Before this, every ref a navigated session issued came back as "not a
+   * reference this adapter issued", so nothing on the page could be clicked.
    */
   async handleFor(ref: Ref): Promise<ElementHandle<Element>> {
     if (this.tools.has(ref)) {
@@ -363,7 +370,7 @@ export class RefSpace {
       if (held === undefined) throw new Error(staleRef(ref));
       return held;
     }
-    if (ref.startsWith("e")) {
+    if (ref.startsWith("e") || /^f\d+e\d+$/.test(ref)) {
       // A short timeout: a reference either resolves against the current tree or
       // it is stale, and waiting out the step timeout to say so would turn a
       // clear "take a new snapshot" into an opaque hang.

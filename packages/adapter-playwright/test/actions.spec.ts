@@ -50,6 +50,23 @@ for (const mechanism of MECHANISMS) {
       expect(await surface.read("url")).toContain("/login");
     });
 
+    /*
+     * Measured against npm's website through an attached Chrome: every ref a
+     * navigated session issued came back "is not a reference this adapter
+     * issued", so nothing on the page could be clicked. Playwright numbers the
+     * frame a snapshot is taken on and prefixes its refs — `f1e111` — as soon
+     * as the frame is not the first one it saw, and a navigation is enough.
+     */
+    test("a ref issued after a navigation still acts", async ({ openSurface }) => {
+      const surface = await openSurface(mechanism, "/");
+      await surface.act("navigate", undefined, { url: "/login" });
+      const snapshot = await surface.snapshot({ interactiveOnly: true });
+      const field = snapshot.nodes.find((node) => node.role === "textbox");
+      expect(field, "the login page offers a textbox").toBeDefined();
+      const typed = await surface.act("type", field!.ref, { value: "someone@example.com" });
+      expect(typed.ok).toBe(true);
+    });
+
     test("navigate resolves a relative url against the session base url", async ({
       openSurface,
       origin,
