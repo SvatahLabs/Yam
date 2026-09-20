@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * The 0.1.0 release candidate's tarballs, and what is in them (T7.6,
+ * The release candidate's tarballs, and what is in them (T7.6,
  * REQ-PKG-1, 2, 3, 4, REQ-STD-1, 2).
  *
  *   node scripts/release-dry-run.mjs [--out release] [--json]
@@ -34,7 +34,7 @@
  * own — and being installable from the tarballs alone is the thing being tested.
  */
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdirSync, rmSync, statSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { SETS, closureOf, workspacePackages } from "./lib/release-packages.mjs";
@@ -42,6 +42,15 @@ import { SETS, closureOf, workspacePackages } from "./lib/release-packages.mjs";
 export { SETS, closureOf };
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+
+/*
+ * The version every tarball must carry, read rather than written down.
+ *
+ * This said `0.1.0`, so the first release after a bump failed with 35
+ * problems about the version the bump had just set — and it failed in the job
+ * that gates publishing, on a workspace that was otherwise ready.
+ */
+const VERSION = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).version;
 const args = process.argv.slice(2);
 const option = (name, fallback) => {
   const at = args.indexOf(`--${name}`);
@@ -127,7 +136,7 @@ for (const [name, listing] of contents) {
   const manifest = JSON.parse(
     execFileSync("tar", ["-xzOf", tarballs.get(name), "package/package.json"], { encoding: "utf8" }),
   );
-  claim(manifest.version === "0.1.0", `${name}: version is ${manifest.version}, not 0.1.0`);
+  claim(manifest.version === VERSION, `${name}: version is ${manifest.version}, not ${VERSION}`);
   claim(manifest.license === "Apache-2.0", `${name}: licence is ${manifest.license}`);
   for (const [dependency, range] of Object.entries(manifest.dependencies ?? {})) {
     // The one thing `pnpm pack` is for: no `workspace:` escapes into a tarball.
