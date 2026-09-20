@@ -26,6 +26,7 @@
  *   protocol implementation.
  */
 import { spawn, type ChildProcess } from "node:child_process";
+import { existsSync } from "node:fs";
 
 /** What the agent panel tells people to run (`AGENT_SERVER` in `@svatah/yam-screens`). */
 export const MCP_TEST_COMMAND: readonly string[] = ["npx", "-y", "@svatah/yam-mcp"];
@@ -142,6 +143,22 @@ export async function testMcpServer(options: {
   const timeoutMs = options.timeoutMs ?? MCP_TEST_TIMEOUT_MS;
   if (program === undefined || program === "") {
     return { ok: false, command: line, stage: "start", message: "No MCP server command is configured.", ms: 0 };
+  }
+  /*
+   * A path that is not there, said before anything is started.
+   *
+   * On Windows the command runs through a shell, because `npx` is `npx.cmd`
+   * there — and a shell given a program that does not exist starts perfectly
+   * well, prints its own complaint and exits. So the answer was "it exited
+   * before answering initialize" for a command that never ran. A bare name is
+   * left to the shell's own PATH lookup; only a path is checked here.
+   */
+  if (program.includes("/") || program.includes("\\")) {
+    const candidates =
+      process.platform === "win32" ? [program, `${program}.exe`, `${program}.cmd`, `${program}.bat`] : [program];
+    if (!candidates.some((one) => existsSync(one))) {
+      return { ok: false, command: line, stage: "start", message: `Could not start \`${line}\`: no such file.`, ms: 0 };
+    }
   }
 
   return await new Promise<McpTestResult>((resolve) => {
