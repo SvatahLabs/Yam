@@ -356,9 +356,15 @@ export function findAgain(
  * the first of a preference list the element actually declares, and refuses by
  * name when it declares none of them, rather than picking whatever is first and
  * hoping.
+ *
+ * `select` is last for a click, and is there because Chromium gives a tab, a
+ * row or a list item `select` and no `click` at all: the Linux conformance run
+ * refused "Go to Run" with "declares no action for click. It offers: select,
+ * showContextMenu", which is a control a person clicks. Last, so an element
+ * that offers both is still clicked.
  */
 export const ACTION_PREFERENCE: Readonly<Record<string, readonly string[]>> = {
-  click: ["click", "press", "activate", "jump"],
+  click: ["click", "press", "activate", "jump", "select"],
   doubleClick: ["click", "press"],
   press: ["press", "click"],
   setChecked: ["click", "press", "toggle"],

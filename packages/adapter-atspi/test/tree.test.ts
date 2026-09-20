@@ -224,6 +224,9 @@ describe("which AT-SPI action performs a gesture", () => {
     expect(actionFor("click", node({ role: "push button", actions: ["click"] }))).toBe("click");
     expect(actionFor("click", node({ role: "push button", actions: ["press"] }))).toBe("press");
     expect(actionFor("click", node({ role: "link", actions: ["jump", "click"] }))).toBe("click");
+    // Chromium's tabs, rows and list items offer `select` and no `click`.
+    expect(actionFor("click", node({ role: "list item", actions: ["select", "showContextMenu"] }))).toBe("select");
+    expect(actionFor("click", node({ role: "page tab", actions: ["select", "click"] }))).toBe("click");
   });
 
   it("answers nothing when the element declares none of them, so the refusal can name it", () => {
