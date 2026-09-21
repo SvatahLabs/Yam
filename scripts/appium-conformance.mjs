@@ -59,6 +59,16 @@ const SUBSET = [
   "dashboard.read-kinds",
   "dashboard.state",
   "widgets.select",
+  /*
+   * An element with no accessibility node, reached by coordinates — which is a
+   * thing a phone does, and the gate was not asking.
+   *
+   * The README counted this among the cases that skip for a missing capability.
+   * It declares no `requires` and never did, so it neither skipped nor ran: it
+   * sat outside the subset for a reason that was not true of it. Run against a
+   * real device it passes, which is what put it here.
+   */
+  "widgets.canvas-coords",
   "errors.typed",
   "capabilities.descriptor",
 ];
