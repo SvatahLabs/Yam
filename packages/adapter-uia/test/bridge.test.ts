@@ -52,6 +52,35 @@ describe("availability (`yam surface doctor`)", () => {
     expect(run).not.toHaveBeenCalled();
   });
 
+  /*
+   * The Windows leg of 2026-09-21's run, which failed and then passed on the
+   * same commit and the same runner image: 11.4 s against a ten-second budget,
+   * then 7.0 s. This probe is the first PowerShell of the session and loads two
+   * .NET Framework assemblies, so it pays the cold start every other call
+   * avoids.
+   *
+   * Two things were wrong. The budget was under what a loaded machine takes,
+   * and a probe that ran out of time was reported as
+   * "`UIAutomationClient` would not load" — which sends whoever reads it to
+   * check a Constrained Language Mode policy that is perfectly fine.
+   */
+  it("gives the cold start a budget a loaded machine can meet", async () => {
+    const { run, calls } = answering('{"ok":true,"root":"Desktop"}');
+    await powershellBridge({ process: "Yam", run, platform: "win32" }).availability();
+    expect(calls[0]!.timeoutMs).toBeGreaterThanOrEqual(30_000);
+  });
+
+  it("says a timeout is a timeout, not an assembly that would not load", async () => {
+    const run: Run = async () => ({ code: null, stdout: "", stderr: "", timedOut: true });
+    const availability = await powershellBridge({ process: "x", run, platform: "win32" }).availability();
+    expect(availability.state).toBe("slow");
+    expect(availability.advice).toMatch(/did not answer within \d+ s/);
+    expect(availability.advice).toContain("under load");
+    // Not the refusal's advice: nothing here says the policy is the problem.
+    expect(availability.advice).not.toContain("Constrained Language Mode");
+    expect(availability.advice).not.toContain("would not load");
+  });
+
   it("explains the two things that actually go wrong on Windows", async () => {
     const run: Run = async () => ({
       code: 1,
