@@ -62,6 +62,8 @@ import { tmpdir } from "node:os";
 import { dirname, join, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp } from "sample-web";
+/* The comparator lives in `scripts/lib/` so a test can drive it without a recording. */
+import { comparable } from "./lib/screen-fixture-compare.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
@@ -119,27 +121,6 @@ function stable(value, workspace) {
   return JSON.parse(seen);
 }
 
-/**
- * What `--check` looks past, and what it still catches.
- *
- * Everything that is true of *when* and *where* the recording was made rather
- * than of what the project contains: the wall clock, the durations, the
- * per-candidate timings inside a resolver failure's message ("matched nothing
- * (37 ms)"), and `configHash`, which covers `app.baseUrl` and therefore the
- * port. All four are kept in the committed file, because the screens show
- * them — the Run screen's audit column is a stamp and its summary line is a
- * duration — and a fixture without them could not test those screens.
- *
- * A change to a status, a candidate, a captured value, a plan hash, a bindings
- * hash, a flow, a story or a binding still fails the check.
- */
-function comparable(text) {
-  return text
-    .replace(/\(\d+ ms\)/g, "(N ms)")
-    .replace(/"configHash": "[0-9a-f]+"/g, '"configHash": "<per-run>"')
-    .replace(/"(startedAt|endedAt|at|recordedAt)": "[^"]*"/g, '"$1": "<when>"')
-    .replace(/"durationMs": [0-9.]+/g, '"durationMs": 0');
-}
 
 /** `yam <args>`, as a person would run it, with the sample application's URL. */
 function yam(args, options = {}) {
