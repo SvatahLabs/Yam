@@ -153,7 +153,9 @@ export type UiaAvailabilityState =
   /** Not Windows. */
   | "unsupported"
   /** Windows, but `UIAutomationClient` would not load. */
-  | "unavailable";
+  | "unavailable"
+  /** Windows, and the probe did not answer within its budget. */
+  | "slow";
 
 export interface UiaAvailability {
   readonly state: UiaAvailabilityState;
@@ -715,7 +717,22 @@ export interface PowershellBridgeOptions {
 }
 
 const DEFAULT_TIMEOUT_MS = 30_000;
-const AVAILABILITY_TIMEOUT_MS = 10_000;
+/**
+ * The cold-start budget, which is the one call that pays it (T7.2).
+ *
+ * This probe starts PowerShell and `Add-Type`s two .NET Framework assemblies,
+ * and it is the *first* PowerShell this process runs — so it pays for the
+ * runtime's own start and for JIT-loading `UIAutomationClient` and
+ * `UIAutomationTypes`, where every call after it finds them loaded. Ten seconds
+ * was under that on a loaded machine: the Windows leg of 2026-09-21's run took
+ * 11.4 s and failed, and the same commit on the same image took 7.0 s and
+ * passed.
+ *
+ * Generous rather than tuned, because it costs nothing when things are well —
+ * the call returns as soon as the assemblies load — and the alternative is a
+ * gate that is red once in a while for a reason that is not the adapter's.
+ */
+const AVAILABILITY_TIMEOUT_MS = 60_000;
 
 /**
  * A `SendKeys` sequence of named keys only: `{ESC}`, `+{F10}`, `{TAB}{ENTER}`.
@@ -820,6 +837,25 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
       const result = await run(AVAILABILITY_SCRIPT, {}, AVAILABILITY_TIMEOUT_MS);
       if (!result.timedOut && result.code === 0 && result.stdout.includes('"ok":true')) {
         return { state: "available", advice: "UI Automation is reachable." };
+      }
+      /*
+       * A timeout is not a refusal, and saying so matters (SF-11).
+       *
+       * Everything below was answered for both: a probe that ran out of time
+       * was reported as "`UIAutomationClient` would not load", which sends a
+       * reader to check a Constrained Language Mode policy that is fine. The
+       * assemblies were loading; the machine was busy.
+       */
+      if (result.timedOut) {
+        return {
+          state: "slow",
+          advice:
+            `UI Automation did not answer within ${Math.round(AVAILABILITY_TIMEOUT_MS / 1000)} s. ` +
+            "Nothing is necessarily wrong with it: this is the first PowerShell of the " +
+            "session and it loads two .NET Framework assemblies, so a machine under load " +
+            "can take longer than the budget. Run it again on a quieter machine before " +
+            "reading anything into it.",
+        };
       }
       const detail = readablePowershellError(result.stderr) || result.stdout.trim();
       return {
