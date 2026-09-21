@@ -41,11 +41,35 @@ export function automationIdOf(node: AtspiNode): string | undefined {
   return id === undefined || id === "" ? undefined : id;
 }
 
+/**
+ * What an element's `Text` interface actually says (SF-23).
+ *
+ * AT-SPI answers `getText` on a container with U+FFFC — the object replacement
+ * character — once per embedded child, and not with anything those children
+ * say. A table row of two cells answers `"￼￼"`. Both `nameOf` and `valueOf`
+ * fall through to the text, so such a row arrived with the name `"￼￼"` and the
+ * value `"￼￼"`, and everything that reads a row read `"￼￼ ￼￼"`: the Linux
+ * gate's `app.result` could not find `guards-and-compensation.flow` in a flow
+ * list that was showing it, and reported eight rows of replacement characters.
+ *
+ * What the row says is what its children say, and the walker already publishes
+ * them as nodes — so the marker is dropped rather than translated. A text that
+ * is nothing but markers is no text, which is different from an empty one only
+ * in that it would otherwise be reported as the element's name.
+ */
+const EMBEDDED_OBJECT = /￼/gu;
+
+export function spokenText(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  const said = value.replace(EMBEDDED_OBJECT, " ").replace(/\s+/gu, " ").trim();
+  return said === "" ? undefined : said;
+}
+
 /** What the element is called, in the order a screen reader would say it. */
 export function nameOf(node: AtspiNode): string {
   for (const candidate of [node.name, node.description, node.text]) {
-    const said = candidate?.replace(/\s+/gu, " ").trim();
-    if (said !== undefined && said !== "") return said;
+    const said = spokenText(candidate);
+    if (said !== undefined) return said;
   }
   return "";
 }
@@ -87,7 +111,7 @@ export function statesOf(node: AtspiNode): NodeState[] {
 
 /** The value a `read` of kind `value` answers with. */
 export function valueOf(node: AtspiNode): string {
-  return node.value ?? node.text ?? "";
+  return node.value ?? spokenText(node.text) ?? "";
 }
 
 /** Whether a node is worth showing when the caller asked for controls only. */

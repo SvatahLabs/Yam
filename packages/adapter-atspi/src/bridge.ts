@@ -225,6 +225,48 @@ export const WALK_SCRIPT = [
   "def failure(error):",
   "    said = str(error).strip()",
   "    return (said or error.__class__.__name__)[:200]",
+  /*
+   * The state names the rest of Yam is written against (SF-23).
+   *
+   * `statesOf` reads `showing`, `enabled`, `checkable` and `read only` — a
+   * space in the last one, which is `pyatspi.stateToString`'s spelling and
+   * nothing else's. What was here instead was `str(one).split('_', 2)[-1]`
+   * over the raw enum, and `str` of a PyGObject enum is
+   * `<enum ATSPI_STATE_SHOWING of type Atspi-StateType>`, so every name came
+   * back as `showing of type atspi-statetype>`. Nothing matched, so every node
+   * was reported `hidden` and `disabled`: `Snapshot.text` rendered to nothing
+   * at all — the renderer drops hidden nodes — and the first live run of the
+   * gate reported a window with no text and no window chrome.
+   *
+   * It survived unit tests because they feed `parseTree` the vocabulary this
+   * function is supposed to produce, which is the right thing for them to test
+   * and no test at all of the half that produces it.
+   *
+   * `stateToString` first, then the enum's own nick or name, then `str`; each
+   * normalised the same way, so the three agree on `read only`.
+   */
+  "def state_name(one):",
+  "    said = None",
+  "    try:",
+  "        said = pyatspi.stateToString(one)",
+  "    except Exception:",
+  "        said = None",
+  "    if not said:",
+  "        said = getattr(one, 'value_nick', None) or getattr(one, 'value_name', None) or str(one)",
+  "    said = str(said)",
+  "    for prefix in ('ATSPI_STATE_', 'STATE_'):",
+  "        if prefix in said:",
+  "            said = said.split(prefix, 1)[1]",
+  "            break",
+  "    said = said.split(' of type', 1)[0].strip('<>').strip()",
+  "    return said.replace('_', ' ').replace('-', ' ').strip().lower()",
+  "def state_names(element):",
+  "    out = []",
+  "    for one in element.getState().getStates():",
+  "        said = state_name(one)",
+  "        if said:",
+  "            out.append(said)",
+  "    return out",
   "def walk(element, parent):",
   "    if len(nodes) >= limit:",
   "        truncated[0] = True",
@@ -242,7 +284,7 @@ export const WALK_SCRIPT = [
   "    if found:",
   "        node['automationId'] = found",
   "    try:",
-  "        node['states'] = [str(one).split('_', 2)[-1].lower() for one in element.getState().getStates()]",
+  "        node['states'] = state_names(element)",
   "    except Exception:",
   "        pass",
   "    try:",
