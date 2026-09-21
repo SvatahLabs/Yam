@@ -1,13 +1,13 @@
 {
-  "name": "@svatah/yam-adapter-bidi",
+  "name": "@svatah/yam-page-script",
   "version": "0.2.0",
-  "description": "WebDriver BiDi adapter (independence proof)",
+  "description": "The DOM walker adapters evaluate in a page: roles, names, states and refs (LLD \u00a72.2, \u00a77.3)",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SvatahLabs/Yam.git",
-    "directory": "packages/adapter-bidi"
+    "directory": "packages/page-script"
   },
   "bugs": {
     "url": "https://github.com/SvatahLabs/Yam/issues"
@@ -34,13 +34,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
-  "dependencies": {
-    "@svatah/yam-page-script": "workspace:*",
-    "@svatah/yam-schema": "workspace:*",
-    "@svatah/yam-surface": "workspace:*"
-  },
   "devDependencies": {
-    "sample-web": "workspace:*",
+    "jsdom": "^30.0.1",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

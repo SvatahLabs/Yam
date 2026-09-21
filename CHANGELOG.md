@@ -170,7 +170,7 @@ product was renamed before anything was published, so no package has ever
 existed under another name. Svatah is the brand and the npm organisation; every
 package is `@svatah/yam` or `@svatah/yam-<name>`. **Published to npm on
 2026-09-15**, with provenance, by the release workflow's publish job (T8.5):
-`node scripts/publish.mjs` prints the 35 exact `npm publish` commands, one per
+`node scripts/publish.mjs` prints the 36 exact `npm publish` commands, one per
 package of the release set in `scripts/lib/release-packages.mjs`, and stops
 unless `--publish`, a GitHub `workflow_dispatch` and a publish identity (trusted
 publishing, or `NPM_TOKEN`) all hold. Before that, `pnpm release:dry-run` packed

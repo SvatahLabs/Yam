@@ -53,9 +53,22 @@ import {
   appiumServerUrl,
   capabilitiesFromEnv,
   connectWebdriverIo,
+  elementArg,
+  elementIdOf,
+  ELEMENT_VALUE_SCRIPT,
   type AppiumClient,
   type ElementId,
 } from "./client.js";
+import {
+  describeElement,
+  locateInPage,
+  walkDocument,
+  HANDLES,
+  REGISTRY,
+  type RawCandidate,
+  type RawDescription,
+  type RawNode,
+} from "@svatah/yam-page-script";
 import { isNativeContext, strategyFor } from "./locate.js";
 import {
   boxOf,
@@ -273,6 +286,26 @@ export class AppiumSurface implements AgentSurface {
   /* ── snapshot, locate, describe ─────────────────────────────────────────── */
 
   async snapshot(opts: { root?: Ref; maxNodes?: number; interactiveOnly?: boolean } = {}): Promise<Snapshot> {
+    /*
+     * A webview is a DOM, and `getPageSource()` in one answers with HTML
+     * (REQ-ADP-5, Draft 2.29).
+     *
+     * Everything below this line converts Appium's *native* page source: an XML
+     * document of `android.widget.*` classes, read by a scanner and mapped
+     * through the Android role table. In a Chrome session that same call
+     * answers with the page's HTML, and it was being put through the same
+     * conversion — so `<input type="password" name="password">` came back with
+     * the role `generic` and the name `password`, which is the `name`
+     * *attribute*, and the emulator gate found no navigation landmark, no
+     * heading and no link on a page full of them.
+     *
+     * The adapter already switches to the webview context when the capabilities
+     * name a browser, and `locate` already uses web candidate kinds there. What
+     * was missing is the tree: in a webview the DOM is walked in the page, by
+     * the same script the BiDi adapter evaluates, so the two agree about what a
+     * "button named Sign In" is.
+     */
+    if (!this.native()) return await this.snapshotWebview(opts);
     const source = parsePageSource(await this.live().getPageSource());
     const root = opts.root === undefined ? source : this.sourceFor(opts.root);
 
@@ -286,7 +319,114 @@ export class AppiumSurface implements AgentSurface {
     return buildSnapshot(opts.root ?? nodes[0]?.ref ?? "r0", nodes, structuralHash(nodes));
   }
 
+  /**
+   * The snapshot of a webview context: the DOM, walked in the page (LLD §2.2).
+   *
+   * `executeScript` takes a function *body*, so the walker is serialised and
+   * called with the options object as `arguments[0]` — the same shape BiDi
+   * passes through `script.callFunction`.
+   */
+  private async snapshotWebview(opts: {
+    root?: Ref;
+    maxNodes?: number;
+    interactiveOnly?: boolean;
+  }): Promise<Snapshot> {
+    const nodes = await this.live().execute<RawNode[]>(
+      `return (${walkDocument.toString()})(arguments[0]);`,
+      [
+        {
+          registry: REGISTRY,
+          maxNodes: opts.maxNodes ?? this.options.maxNodes ?? DEFAULT_MAX_NODES,
+          interactiveOnly: opts.interactiveOnly === true,
+          testIdAttributes: [...this.testIdAttributes()],
+          ignoreAttributes: [...(this.options.ignoreAttributes ?? DEFAULT_IGNORE_ATTRIBUTES)],
+          rootIndex:
+            opts.root === undefined || opts.root[0] !== "r" ? null : Number(opts.root.slice(1)),
+        },
+      ],
+    );
+    /*
+     * The page's own refs, and no page-source nodes behind them. `this.nodes`
+     * is the native tree's index and a webview has none, so it is cleared:
+     * `describe(ref)` for an `rN` goes back to the page rather than to a
+     * position in an XML document that was never read.
+     */
+    this.nodes = [];
+    const snapshot = nodes as SnapshotNode[];
+    return buildSnapshot(
+      opts.root ?? snapshot[0]?.ref ?? "r0",
+      snapshot,
+      structuralHash(snapshot),
+    );
+  }
+
+  /**
+   * The element a reference names, in the page (LLD §2.2).
+   *
+   * `walkDocument` registers what it walked in `window[REGISTRY]` and
+   * `locateInPage` what it matched in `window[HANDLES]`, so a reference is an
+   * index into one of the two. Every webview call that needs the element goes
+   * through this, and the script is written so that a missing array or a
+   * missing index is `null` rather than a `TypeError` from the page.
+   */
+  private webviewElementScript(ref: Ref): { script: string; args: unknown[] } {
+    return {
+      script:
+        "var a = window[arguments[0].store]; " +
+        "return a && a[arguments[0].index] ? a[arguments[0].index] : null;",
+      args: [{ store: ref[0] === "h" ? HANDLES : REGISTRY, index: Number(ref.slice(1)) }],
+    };
+  }
+
+  /** One element of a webview, described from the page (LLD §3.3, §7.4). */
+  private async describeWebview(ref: Ref): Promise<ElementDescription> {
+    const { args } = this.webviewElementScript(ref);
+    /*
+     * `describeElement` takes the element and its options, in that order — it
+     * is the same self-contained function the BiDi adapter evaluates, and BiDi
+     * hands it a node reference. Here the element is looked up in the page by
+     * index first, inside the same script, so nothing has to cross the wire but
+     * numbers.
+     */
+    const raw = await this.live().execute<RawDescription | null>(
+      "var o = arguments[0];" +
+        "var a = window[o.store];" +
+        "var el = a && a[o.index];" +
+        "if (!el) return null;" +
+        `return (${describeElement.toString()})(el, o.options);`,
+      [
+        {
+          ...(args[0] as Record<string, unknown>),
+          options: {
+            testIdAttributes: [...this.testIdAttributes()],
+            neighbourCount: 3,
+            ignoreAttributes: [...(this.options.ignoreAttributes ?? DEFAULT_IGNORE_ATTRIBUTES)],
+          },
+        },
+      ],
+    );
+    if (raw === null) throw staleRef(ref);
+    return { ...raw, ref } as ElementDescription;
+  }
+
   async locate(candidate: Candidate): Promise<Ref[]> {
+    /*
+     * In a webview, matched in the page by the same rules the walk uses
+     * (Draft 2.29).
+     *
+     * `locateInPage` exists so that `snapshot` and `locate` cannot disagree
+     * about what a "button named Sign In" is, and a reference it mints is an
+     * index into `window[HANDLES]` — which is what `elementFor` and
+     * `describe` read. Going through `findElements` instead minted an `hN`
+     * backed by a protocol element id that neither of them knew, so
+     * `login.checkbox-state` set the checkbox and then could not describe the
+     * element it had just acted on.
+     *
+     * The native path keeps `findElements`: a native tree has no page to ask,
+     * and `strategyFor` is what maps a candidate onto `accessibilityId`,
+     * `resourceId` or `xpath` there.
+     */
+    if (!this.native()) return await this.locateInWebview(candidate);
     const strategy = strategyFor(candidate, this.context, this.testIdAttributes());
     const found = await this.live().findElements(strategy.using, strategy.value);
     const chosen = candidate.nth === undefined ? found : found.slice(candidate.nth, candidate.nth + 1);
@@ -297,7 +437,73 @@ export class AppiumSurface implements AgentSurface {
     });
   }
 
+  /**
+   * What a native context has no such thing for (LLD §2.4, SF-11).
+   *
+   * `UnsupportedError`, not a `ScriptError`: a caller told `OUTCOME_UNKNOWN`
+   * goes and checks whether it happened, and nothing was sent to the device.
+   */
+  private refuseNativeOnly(action: string): never {
+    throw new UnsupportedError(
+      `The Appium adapter does not implement "${action}" on a native context: ` +
+        "a phone application has no windows, no file picker and no <select> " +
+        "(LLD §2.4 — the capability descriptor declares it rather than emulating it).",
+      { adapter: "appium" },
+    );
+  }
+
+  /** Candidate → refs, matched in the page and minted against `window[HANDLES]`. */
+  private async locateInWebview(candidate: Candidate): Promise<Ref[]> {
+    /*
+     * A malformed candidate is a `LocateError`, not an empty match (SF-11).
+     *
+     * The native path gets this from `strategyFor`, which refuses a candidate
+     * with no value; going through the page skipped it, and `errors.typed`
+     * caught the difference — `locate({ by: "testid" })` with no value returned
+     * `[]`, which a caller reads as "nothing matched" rather than "you asked for
+     * something that is not a locator".
+     */
+    const needsValue = [
+      "label",
+      "placeholder",
+      "testid",
+      "text",
+      "altText",
+      "title",
+      "css",
+      "xpath",
+      "id",
+      "name",
+      "coords",
+    ];
+    if (needsValue.includes(candidate.by) && (candidate.value === undefined || candidate.value === "")) {
+      throw new LocateError(`A "${candidate.by}" candidate must carry a value.`, {
+        adapter: "appium",
+      });
+    }
+    if (candidate.by === "role" && candidate.role === undefined) {
+      throw new LocateError('A "role" candidate must carry a role.', { adapter: "appium" });
+    }
+    const flat: RawCandidate = {
+      by: candidate.by,
+      ...(candidate.role === undefined ? {} : { role: candidate.role }),
+      ...(candidate.name === undefined ? {} : { name: candidate.name }),
+      ...(candidate.exact === undefined ? {} : { exact: candidate.exact }),
+      ...(candidate.value === undefined ? {} : { value: candidate.value }),
+      ...(candidate.attribute === undefined ? {} : { attribute: candidate.attribute }),
+      ...(candidate.nth === undefined ? {} : { nth: candidate.nth }),
+    };
+    const indices = await this.live().execute<number[]>(
+      `return (${locateInPage.toString()})(arguments[0]);`,
+      [{ handles: HANDLES, candidate: flat, testIdAttributes: [...this.testIdAttributes()] }],
+    );
+    return indices.map((index) => `h${index}` as Ref);
+  }
+
   async describe(ref: Ref): Promise<ElementDescription> {
+    // In a webview both kinds of reference are the page's, and the page is what
+    // knows about them (Draft 2.29).
+    if (!this.native()) return await this.describeWebview(ref);
     if (ref.startsWith("r")) return this.describeFromSource(ref);
 
     /*
@@ -737,7 +943,56 @@ export class AppiumSurface implements AgentSurface {
 
       case "selectOption":
       case "deselectOption":
-      case "deselectAll":
+      case "deselectAll": {
+        /*
+         * Chrome on a phone has a native `<select>` (Draft 2.29).
+         *
+         * The refusal below is about a *native* application, where there is no
+         * such element — and it was refusing in a webview too, so
+         * `widgets.select` threw where the page had two working selects on it.
+         * What the picker looks like when a person taps it is the platform's
+         * business; what a caller asked for is the element's value, and a
+         * webview sets it the way every web adapter does.
+         */
+        if (!this.native()) {
+          const target = need(ref);
+          const wanted =
+            args?.["values"] !== undefined
+              ? (args["values"] as string[])
+              : args?.["value"] === undefined
+                ? []
+                : [String(args["value"])];
+          const { args: located } = this.webviewElementScript(target);
+          const ok = await client.execute<boolean>(
+            "var o = arguments[0];" +
+              "var a = window[o.store];" +
+              "var el = a && a[o.index];" +
+              "if (!el || el.tagName !== 'SELECT') return false;" +
+              "var want = o.action === 'deselectAll' ? [] : o.values;" +
+              "for (var i = 0; i < el.options.length; i += 1) {" +
+              "  var opt = el.options[i];" +
+              "  var hit = want.indexOf(opt.value) >= 0 || want.indexOf(opt.label) >= 0 ||" +
+              "            want.indexOf(opt.textContent.trim()) >= 0;" +
+              "  if (o.action === 'deselectOption') { if (hit) opt.selected = false; }" +
+              "  else if (o.action === 'deselectAll') { opt.selected = false; }" +
+              "  else if (el.multiple) { opt.selected = hit; }" +
+              "  else if (hit) { el.value = opt.value; }" +
+              "}" +
+              "el.dispatchEvent(new Event('input', { bubbles: true }));" +
+              "el.dispatchEvent(new Event('change', { bubbles: true }));" +
+              "return true;",
+            [{ ...(located[0] as Record<string, unknown>), action, values: wanted }],
+          );
+          if (!ok) {
+            throw new ActionabilityError(
+              `${target} is not a <select>, so "${action}" has nothing to choose from.`,
+              { adapter: "appium" },
+            );
+          }
+          return { ok: true };
+        }
+        return this.refuseNativeOnly(action);
+      }
       case "upload":
       case "switchWindow":
       case "closeOtherWindows":
@@ -753,12 +1008,7 @@ export class AppiumSurface implements AgentSurface {
          * told `OUTCOME_UNKNOWN` — go and check whether it happened — about an
          * action that was never sent to the device.
          */
-        throw new UnsupportedError(
-          `The Appium adapter does not implement "${action}": ` +
-            "a phone has no windows, no file picker and no native <select> " +
-            "(LLD §2.4 — the capability descriptor declares it rather than emulating it).",
-          { adapter: "appium" },
-        );
+        return this.refuseNativeOnly(action);
       case "invoke":
         throw new UnsupportedError(
           '"invoke" calls another story and is the executor\'s, not an adapter\'s (LLD §8.2).',
@@ -810,10 +1060,25 @@ export class AppiumSurface implements AgentSurface {
       case "result":
         return (await client.getText(id)).replace(/\s+/g, " ").trim();
       case "value":
-        return (
-          (await client.getAttribute(id, this.native() ? "text" : "value")) ??
-          (await client.getText(id))
-        );
+        /*
+         * The live property, in a webview (Draft 2.29).
+         *
+         * `getElementAttribute(id, "value")` answers with the *attribute* — what
+         * the HTML said — and typing does not change it, so `read("value")` came
+         * back empty on a field the case had just filled. A `<select>` has no
+         * `value` attribute at all, so it fell through to `getText` and answered
+         * with the options' labels: `"Test Staging Production"` where `staging`
+         * was wanted.
+         *
+         * A multiple select answers with its selected values joined, which is the
+         * shape every other web adapter answers with.
+         */
+        if (!this.native()) {
+          return (
+            (await client.execute<string | null>(ELEMENT_VALUE_SCRIPT, [elementArg(id)])) ?? ""
+          );
+        }
+        return (await client.getAttribute(id, "text")) ?? (await client.getText(id));
       case "attribute": {
         if (name === undefined) {
           throw new LocateError('Reading "attribute" needs the attribute name.', {
@@ -997,6 +1262,26 @@ export class AppiumSurface implements AgentSurface {
    * `xpathOf` is part of the conversion rather than an afterthought.
    */
   private async elementFor(ref: Ref): Promise<ElementId> {
+    /*
+     * In a webview a reference is an index into one of the page's own arrays,
+     * and the way to hand the driver that element is to return it from a script
+     * (Draft 2.29). WebDriver serialises a returned DOM node as an element
+     * reference, which is exactly what `elementClick` and the rest take — so
+     * the page's refs and the driver's element ids meet here and nowhere else.
+     *
+     * The native path below resolves by XPath instead, because a native tree
+     * has no page to ask.
+     */
+    if (!this.native()) {
+      const { script, args } = this.webviewElementScript(ref);
+      const found = await this.live().execute<unknown>(script, args);
+      if (found === null || found === undefined) throw staleRef(ref);
+      /*
+       * Unwrapped: a script that returns a DOM node answers with W3C's
+       * `{"element-6066-…": "<id>"}`, and every command below takes the id.
+       */
+      return elementIdOf(found);
+    }
     if (ref.startsWith("h")) return this.handleFor(ref);
     const node = this.nodeFor(ref);
     const xpath = node.native?.["xpath"] ?? xpathOf(node.path);

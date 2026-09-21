@@ -18,7 +18,7 @@ import {
   type RawCandidate,
   type RawDescription,
   type RawNode,
-} from "./page-script.js";
+} from "@svatah/yam-page-script";
 
 /** A BiDi browsing context id: a top-level tab, or a frame inside one. */
 export type ContextId = string;
@@ -482,7 +482,7 @@ export class BidiSession {
    * Call a function in the page and get its return value as plain JSON.
    *
    * The function is serialised to its source, so it must be self-contained —
-   * which is exactly the constraint `page-script.ts` is written under.
+   * which is exactly the constraint `@svatah/yam-page-script` is written under.
    */
   async callFunction<T>(
     fn: (...args: never[]) => T,

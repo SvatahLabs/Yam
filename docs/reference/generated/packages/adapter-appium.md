@@ -51,7 +51,7 @@ Appium adapter: Android Chrome and native
 | `UnsupportedPng` | class | `export class UnsupportedPng extends Error` | What this masker can rewrite, and why anything else is refused. |
 | `valueOf` | function | `export function valueOf(node: SourceNode): string \| undefined` | The value a control holds, as distinct from what it is called. |
 | `WebdriverIoBrowser` | interface | `export interface WebdriverIoBrowser` | The WebdriverIO surface this adapter uses, as a structural type. |
-| `webdriverIoClient` | function | `export function webdriverIoClient(browser: WebdriverIoBrowser): AppiumClient` | `AppiumClient` over a WebdriverIO browser object. |
+| `webdriverIoClient` | function | `export function webdriverIoClient(browser: WebdriverIoBrowser): AppiumClient` |  |
 | `webviewStrategy` | function | `export function webviewStrategy(` | The strategy for a candidate in a **webview** context. |
 | `xpathLiteral` | function | `export function xpathLiteral(value: string): string` | Quote a value for an XPath predicate, including one that contains quotes. |
 | `xpathOf` | function | `export function xpathOf(path: readonly SourceNode[]): string` | The XPath that names one node from the root, by class and sibling index. |

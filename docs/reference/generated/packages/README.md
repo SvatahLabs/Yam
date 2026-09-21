@@ -25,6 +25,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-host-playwright`](host-playwright.md) | 22 | Playwright Test host for Yam flows: the yam fixture, generated specs and the results reporter |
 | [`@svatah/yam-mcp`](mcp.md) | 10 | The Yam MCP server: surface and operation tools over stdio or Streamable HTTP |
 | [`@svatah/yam-migrate`](migrate.md) | 34 | v1/v2 to v3 migration and prototype database import |
+| [`@svatah/yam-page-script`](page-script.md) | 10 | The DOM walker adapters evaluate in a page: roles, names, states and refs (LLD §2.2, §7.3) |
 | [`@svatah/yam-playwright-test`](playwright-test.md) | 23 | The bind() fixture for an existing Playwright Test project |
 | [`@svatah/yam-recorder`](recorder.md) | 51 | Grounding, record session and report |
 | [`@svatah/yam-runtime`](runtime.md) | 50 | Runner-agnostic executor core: scope, guards, checkpoints, policies, results, audit |
