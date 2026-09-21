@@ -56,7 +56,7 @@ export interface AppiumClient {
   refresh(): Promise<void>;
   execute<T>(script: string, args: unknown[]): Promise<T>;
   /** `POST /session/:id/actions` — pointer and key streams (W3C actions). */
-  performActions(actions: unknown[]): Promise<void>;
+  performActions(actions: object[]): Promise<void>;
   screenshot(): Promise<string>;
   deleteSession(): Promise<void>;
 }
@@ -207,7 +207,19 @@ export function webdriverIoClient(browser: WebdriverIoBrowser): AppiumClient {
 
     findElements: async (using, value) => (await browser.findElements(using, value)).map(id),
     click: (element) => browser.elementClick(element),
-    sendKeys: (element, text) => browser.elementSendKeys(element, text, [...text]),
+    /*
+     * Two arguments. W3C Element Send Keys takes `{text}` and nothing else, and
+     * WebdriverIO rejects a third with *"Wrong parameters applied for
+     * elementSendKeys"* rather than ignoring it. The `[...text]` was the old
+     * JSON Wire Protocol's `value` array, which W3C replaced.
+     *
+     * It type-checked because `WebdriverIoBrowser` below is a hand-written
+     * structural type — written out so this package compiles without the
+     * driver installed — and it declared the arity the code wanted. The first
+     * real device the adapter ever drove is what found it; every earlier test
+     * drove a fake client that accepted whatever it was handed.
+     */
+    sendKeys: (element, text) => browser.elementSendKeys(element, text),
     clear: (element) => browser.elementClear(element),
     getText: (element) => browser.getElementText(element),
     getAttribute: (element, name) => browser.getElementAttribute(element, name),
@@ -222,12 +234,22 @@ export function webdriverIoClient(browser: WebdriverIoBrowser): AppiumClient {
     back: () => browser.back(),
     forward: () => browser.forward(),
     refresh: () => browser.refresh(),
-    execute: <T,>(script: string, args: unknown[]) => browser.executeScript(script, args) as Promise<T>,
-    performActions: (actions) => browser.performActions(actions as never),
+    /*
+     * The one cast at the boundary: above the surface a script argument is
+     * `unknown`, and what the protocol can carry is narrower. Checked here
+     * rather than declared away, so `client-shape.test.ts` still holds the
+     * hand-written type to WebdriverIO's.
+     */
+    execute: <T,>(script: string, args: unknown[]) =>
+      browser.executeScript(script, args as ScriptArg[]) as Promise<T>,
+    performActions: (actions) => browser.performActions(actions as object[]),
     screenshot: () => browser.takeScreenshot(),
     deleteSession: () => browser.deleteSession(),
   };
 }
+
+/** What W3C Execute Script can carry as an argument. */
+export type ScriptArg = string | object | number | boolean | null | undefined;
 
 /**
  * The WebdriverIO surface this adapter uses, as a structural type.
@@ -235,6 +257,11 @@ export function webdriverIoClient(browser: WebdriverIoBrowser): AppiumClient {
  * Written out rather than imported so that `@svatah/yam-adapter-appium` type-checks
  * and its logic is testable whether or not WebdriverIO is installed — the real
  * client is loaded dynamically at `open()`.
+ *
+ * `test/client-shape.test.ts` holds it to WebdriverIO's own declarations. It had
+ * drifted twice — a third argument to `elementSendKeys` that W3C dropped with
+ * the JSON Wire Protocol, and `unknown[]` where the protocol takes JSON — and
+ * both type-checked, because this is the declaration the compiler reads.
  */
 export interface WebdriverIoBrowser {
   getPageSource(): Promise<string>;
@@ -243,7 +270,7 @@ export interface WebdriverIoBrowser {
   switchContext(name: string): Promise<void>;
   findElements(using: string, value: string): Promise<unknown[]>;
   elementClick(element: string): Promise<void>;
-  elementSendKeys(element: string, text: string, value: string[]): Promise<void>;
+  elementSendKeys(element: string, text: string): Promise<void>;
   elementClear(element: string): Promise<void>;
   getElementText(element: string): Promise<string>;
   getElementAttribute(element: string, name: string): Promise<string | null>;
@@ -257,8 +284,14 @@ export interface WebdriverIoBrowser {
   back(): Promise<void>;
   forward(): Promise<void>;
   refresh(): Promise<void>;
-  executeScript(script: string, args: unknown[]): Promise<unknown>;
-  performActions(actions: unknown[]): Promise<void>;
+  /*
+   * The argument types W3C Execute Script serialises, which is what WebdriverIO
+   * declares. `unknown[]` was wider than the truth: a value the protocol has no
+   * JSON form for — a symbol, a bigint, a function — type-checked here and is
+   * refused on the wire.
+   */
+  executeScript(script: string, args: ScriptArg[]): Promise<unknown>;
+  performActions(actions: object[]): Promise<void>;
   takeScreenshot(): Promise<string>;
   deleteSession(): Promise<void>;
 }
