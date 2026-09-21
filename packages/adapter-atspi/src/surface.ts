@@ -830,6 +830,24 @@ export class AtspiSurface implements AgentSurface {
       box: (found.source.box ?? [0, 0, 0, 0]) as [number, number, number, number],
       index: Math.max(0, at),
       states: statesOf(found.source),
+      /*
+       * The same bag the snapshot node carries (T12.3, SF-23).
+       *
+       * `ax` and `uia` both spread their node's `native` into the description,
+       * and every caller that wants the application's own id for an element
+       * reads it from there — `describe(ref).native.automationId` is how the
+       * desktop healing cases check that a relocalization landed on the element
+       * that was recorded, rather than on one that merely scored well. This
+       * adapter put the id in `attrs` only, so that check compared the key with
+       * `undefined` and the Linux gate's two healing cases failed at the last
+       * step, having relocalized correctly.
+       */
+      native: {
+        atspiRole: found.source.role,
+        ...(found.source.automationId === undefined
+          ? {}
+          : { automationId: found.source.automationId }),
+      },
     };
   }
 
