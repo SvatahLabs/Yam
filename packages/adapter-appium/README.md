@@ -66,7 +66,7 @@ YAM_APPIUM_CAPS='{"platformName":"Android","appium:automationName":"UiAutomator2
     --base-url http://10.0.2.2:4173 \
     --only home.snapshot,home.click-navigates,login.snapshot-states,login.type-changes-value,\
 login.checkbox-state,login.describe,login.locate-cardinality,dashboard.read-kinds,\
-dashboard.state,widgets.select,errors.typed,capabilities.descriptor
+dashboard.state,widgets.select,widgets.canvas-coords,errors.typed,capabilities.descriptor
 
 # 5. Native: grounding and three steps against an app under test.
 YAM_APPIUM_CAPS='{"platformName":"Android","appium:automationName":"UiAutomator2","appium:app":"/path/to/sample.apk"}' \
@@ -74,11 +74,16 @@ YAM_APPIUM_CAPS='{"platformName":"Android","appium:automationName":"UiAutomator2
 ```
 
 Step 4 names a subset because the whole suite cannot pass on a phone and should
-not: `widgets.dialog`, `widgets.frame`, `widgets.windows` and
-`widgets.canvas-coords` need capabilities `APPIUM_CAPABILITIES` declares false,
-and the suite skips a case whose capability is missing rather than failing it
-(LLD §14). Running the whole suite is therefore also correct; the subset is what
-a person watching wants to see.
+not: `widgets.dialog`, `widgets.frame` and `widgets.windows` need capabilities
+`APPIUM_CAPABILITIES` declares false, and the suite skips a case whose
+capability is missing rather than failing it (LLD §14). Running the whole suite
+is therefore also correct; the subset is what a person watching wants to see.
+
+`widgets.canvas-coords` was named here as a fourth and is not one. It declares
+no `requires`, so it never skipped — it simply sat outside the subset, and the
+gate measured one case fewer than it could for a reason that was not true of it.
+An element with no accessibility node, reached by coordinates, is very much a
+thing a phone does; run against a device it passes, and it is in the subset now.
 
 ## What a phone does not have
 
