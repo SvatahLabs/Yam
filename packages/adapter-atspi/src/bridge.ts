@@ -121,11 +121,24 @@ export interface AtspiBridge {
 }
 
 export class AtspiBridgeError extends Error {
+  /*
+   * The detail is part of the message, not only a field beside it (SF-23).
+   *
+   * Everything that reports one of these reports `error.message`: the
+   * conformance runner's "the case threw", the CLI's diagnostics, a run's step
+   * result. The walker's stderr went into `detail`, which none of them print —
+   * so the Linux gate's `app.result` failed with *"The accessibility bus could
+   * not be read."* and nothing at all about why, on a runner nobody can attach
+   * to. The sentence a person can act on was collected and then dropped one
+   * layer above.
+   *
+   * `detail` stays, because a caller that wants the two apart still can.
+   */
   constructor(
     message: string,
     readonly detail?: string,
   ) {
-    super(message);
+    super(detail === undefined || detail.trim() === "" ? message : `${message} ${detail.trim()}`);
     this.name = "AtspiBridgeError";
   }
 }
