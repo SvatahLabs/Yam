@@ -20,7 +20,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { SCREEN_IDS } from "@svatah/yam-screens";
+import { ACTIONS, SCREEN_IDS, SECTIONS } from "@svatah/yam-screens";
 import { fromRoot, REPO_ROOT } from "../src/repo.js";
 
 /**
@@ -75,6 +75,9 @@ const PATTERNS: ReadonlyArray<{ readonly what: string; readonly find: RegExp }> 
  */
 const SECTION_IDS = ["session", "automations", "activity", "settings"] as const;
 
+/** Every screen the rail reaches, which is what a `rail-<id>` may name. */
+const RAIL_IDS: readonly string[] = SECTIONS.flatMap((one) => one.rail);
+
 /**
  * Ids a test names in order to assert they are *absent*.
  *
@@ -85,6 +88,33 @@ const SECTION_IDS = ["session", "automations", "activity", "settings"] as const;
  * guessing, and this is two words.
  */
 const ASSERTED_GONE = ["legacy"] as const;
+
+/**
+ * The self suite's bindings name the same ids, and nothing checked them.
+ *
+ * This file was written for stale ids in *tests*, and the self suite is not a
+ * test directory: `evals/self/bindings/app/*.yaml` binds a phrase to an
+ * `automationId`, which is the same kind of locator by another spelling. Six of
+ * them had gone stale and the parity gate carried the cost — `palette-go-record`
+ * for a screen Draft 2.28 removed outright, `palette-go-explorer` and four
+ * `action-explorer-*` for the screen T15 replaced. The gate's first run in CI
+ * is what surfaced them, a wave after the screens went.
+ *
+ * Read as YAML only so far as this needs: the `automationId` candidates, which
+ * is one regular expression over a file whose shape `schema.bindings` fixes.
+ */
+function bindingIds(): Array<{ readonly file: string; readonly id: string }> {
+  const dir = fromRoot("evals/self/bindings/app");
+  const out: Array<{ file: string; id: string }> = [];
+  for (const entry of readdirSync(dir)) {
+    if (!entry.endsWith(".yaml")) continue;
+    const text = readFileSync(join(dir, entry), "utf8");
+    for (const match of text.matchAll(/^\s*-\s*by: "automationId"\s*\n\s*value: "([^"]+)"/gm)) {
+      out.push({ file: `evals/self/bindings/app/${entry}`, id: match[1] as string });
+    }
+  }
+  return out;
+}
 
 describe("every screen id a test names is one the model has", () => {
   const files = [
@@ -133,5 +163,43 @@ describe("every screen id a test names is one the model has", () => {
   it("is looking at the suites that navigate", () => {
     expect(files.some((one) => one.endsWith("shell.spec.ts"))).toBe(true);
     expect(files.length).toBeGreaterThan(5);
+  });
+
+  it("finds no self-suite binding for a screen that was removed", () => {
+    const stale: string[] = [];
+    for (const { file, id } of bindingIds()) {
+      const screen = /^palette-go-([a-z-]+)$/.exec(id)?.[1];
+      if (screen !== undefined && !(SCREEN_IDS as readonly string[]).includes(screen)) {
+        stale.push(`${file}: a palette Go-to row for "${screen}"`);
+      }
+      const rail = /^rail-([a-z-]+)$/.exec(id)?.[1];
+      if (rail !== undefined && !RAIL_IDS.includes(rail)) {
+        stale.push(`${file}: a rail item for "${rail}"`);
+      }
+    }
+    expect(stale, stale.join("\n")).toEqual([]);
+  });
+
+  /*
+   * And an action id the registry does not have. A binding to
+   * `action-explorer-open` is a phrase that can never resolve, and the run says
+   * so a wave later and one screen further on.
+   */
+  it("finds no self-suite binding for an action the registry dropped", () => {
+    const known = new Set(ACTIONS.map((one) => `action-${one.id.replace(/[^a-zA-Z0-9]+/g, "-")}`));
+    const stale = bindingIds()
+      .filter(({ id }) => id.startsWith("action-") && !known.has(id))
+      .map(({ file, id }) => `${file}: "${id}" is not in the action registry`);
+    expect(stale, stale.join("\n")).toEqual([]);
+  });
+
+  /*
+   * And it is reading them. A rename of the bindings directory would otherwise
+   * leave both cases above passing over an empty list.
+   */
+  it("is looking at the self suite's bindings", () => {
+    const ids = bindingIds();
+    expect(ids.length).toBeGreaterThan(50);
+    expect(ids.some(({ id }) => id.startsWith("rail-"))).toBe(true);
   });
 });

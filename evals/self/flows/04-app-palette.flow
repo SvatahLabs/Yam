@@ -53,13 +53,21 @@ story: the command palette opens on the chord and lists the registry's actions
   The command palette should be visible
   The command list should be visible
   The go to Flows row should be present
-  The go to Record row should be present
+  # "Go to Session", not "Go to Record" (Draft 2.27, Draft 2.28).
+  #
+  # The palette's second group is one row per screen, generated from
+  # `SCREEN_IDS`, and Draft 2.27 merged Surfaces and Record into `session` with
+  # three modes — Draft 2.28 removed both ids outright, because nothing had
+  # shipped and an alias kept "just in case" is two names for one screen for
+  # ever. `palette-go-record` has not been a row since, and this asked for it on
+  # every run of the parity gate that reached here.
+  The go to Session row should be present
   Press "Escape"
 
 story: the Record review opens from the palette and chooses its gateway
   Click the Flows rail item
   Press "Meta+k"
-  Click the go to Record row
+  Click the go to Session row
   The toolbar title should contain "Record review"
   The Gateway select should be visible
   The Accept button should be visible
@@ -127,7 +135,7 @@ story: the Record toolbar keeps its title and its select at two widths
   Resize the window to 1440 by 900
   Click the Flows rail item
   Press "Meta+k"
-  Click the go to Record row
+  Click the go to Session row
   The toolbar title should contain "Record review"
   The Gateway select should be visible
   The Stop recording button should be visible

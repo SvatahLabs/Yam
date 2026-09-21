@@ -12,23 +12,23 @@
 # thing in one word, and `yam bindings verify` is what turns it true against
 # a running app.
 schemaVersion: "1.0.0"
-id: "app.action-explorer-snapshot"
+id: "app.palette-go-session"
 phrases:
-  - "the Snapshot the session button"
+  - "the go to Session row"
 entries:
   - candidates:
       - by: "automationId"
-        value: "action-explorer-snapshot"
+        value: "palette-go-session"
         score: 0.99
     context:
       platform: "desktop"
       pattern: "Yam"
-      hash: "17c7509e234524fe9ac486c91fb9425783fe5ffe6297087ea8b6e8c301f4a7b1"
+      hash: "5b9da4d38e2c2825781b2817cc6a2256c9c657867340f4a8f89e7db9d75cf80e"
     fingerprint:
-      tag: "AXButton"
+      tag: "AXUnknown"
       attrs:
-        automationId: "action-explorer-snapshot"
-      text: "Snapshot the session"
+        automationId: "palette-go-session"
+      text: "Go to Session"
       neighbours:
         before: []
         after: []

@@ -57,9 +57,25 @@ story: the Bindings screen opens and shows its own controls
   Click the Bindings rail item
   The Verify all bindings button should be visible
 
+# What the Agents screen shows, which is not a button (`AX-05`, `B8`).
+#
+# This asked for **Start the tool server** and the screen has never drawn it.
+# The toolbar's rule is that an unavailable control is drawn after every
+# available one, and *a bar with nothing available draws no buttons at all* —
+# "a row of dead controls is not information, it is furniture in front of the
+# door". `agents.serve` is `availableWhen: () => false` by construction, because
+# the tool server is a process and the service has no route for it, and
+# `trajectory.compile` needs a trajectory the fixtures project has not captured.
+# So nothing on this screen is available and the bar is empty, at every width.
+#
+# The action is still reachable — `palette-agents-serve` is in the command
+# palette, which is where the shedding already sends everything — and what the
+# screen *shows* is the two lists and the refused panel, which is what the
+# external oracle reads too.
 story: the Agents screen opens and shows its own controls
   Click the Agents and tools rail item
-  The Start the tool server button should be visible
+  The exposed tools table should be visible
+  The invocations table should be visible
 
 story: the API screen opens and shows its own controls
   Click the API rail item

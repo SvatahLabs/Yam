@@ -69,7 +69,15 @@ story: the Agents screen lists what an agent may call
   The exposed tools table should be visible
   The invocations table should be visible
   The refused panel should be visible
-  Every row of the exposed tools table should be visible
+  # No row until an agent has connected, and pattern 32 says so.
+  #
+  # `Every row of the exposed tools table should be visible` refused with "an
+  # assertion about every member of an empty set is not one anybody asked" —
+  # correctly: this suite opens the app on the fixtures project with no agent
+  # attached, so the table lists nothing. The set assertion belongs to a flow
+  # that has connected one; what this story is about is that the screen offers
+  # the three panes, which is what the external oracle reads.
+
 
 story: the API screen shows a saved request and its headers
   Click the API rail item
