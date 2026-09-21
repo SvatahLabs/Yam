@@ -216,6 +216,31 @@ describe("what an element is called", () => {
  * comparison was against `undefined`: both Linux healing cases relocalized
  * correctly and then failed their last check.
  */
+/*
+ * The walker's own words reach the reader (SF-23).
+ *
+ * The Linux gate reported `app.result` as *"The accessibility bus could not be
+ * read."* and nothing more, on a runner nobody can attach to: the walker's
+ * stderr had been collected into `detail`, and every reporter prints
+ * `error.message`.
+ */
+describe("a bridge failure says what the bus said", () => {
+  it("carries the detail in the message, where every reporter looks", () => {
+    const error = new AtspiBridgeError(
+      "The accessibility bus could not be read.",
+      "Traceback (most recent call last): GLib.Error: g-dbus-error-quark: Timeout was reached",
+    );
+    expect(error.message).toContain("The accessibility bus could not be read.");
+    expect(error.message).toContain("Timeout was reached");
+    expect(error.detail).toContain("Timeout was reached");
+  });
+
+  it("says only the sentence when there is no detail", () => {
+    expect(new AtspiBridgeError("No window.").message).toBe("No window.");
+    expect(new AtspiBridgeError("No window.", "   ").message).toBe("No window.");
+  });
+});
+
 describe("what describe() says about an element", () => {
   it("carries automationId in native, where every caller reads it", async () => {
     const surface = await openOn(changingBus([...WINDOW]).bridge);
