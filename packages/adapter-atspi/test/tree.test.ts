@@ -205,6 +205,30 @@ describe("what an element is called", () => {
  * "nothing" and the Linux gate read each row of the flow list as empty — having
  * found the row and none of the cells inside it.
  */
+/*
+ * `describe()` carries the application's own id where callers read it
+ * (T12.3, SF-23).
+ *
+ * `ax` and `uia` spread their node's `native` bag into the description, and the
+ * desktop healing cases read `describe(ref).native.automationId` to check that
+ * a relocalization landed on the element that was recorded rather than on one
+ * that merely scored well. This adapter put the id in `attrs` alone, so that
+ * comparison was against `undefined`: both Linux healing cases relocalized
+ * correctly and then failed their last check.
+ */
+describe("what describe() says about an element", () => {
+  it("carries automationId in native, where every caller reads it", async () => {
+    const surface = await openOn(changingBus([...WINDOW]).bridge);
+    const snapshot = await surface.snapshot();
+    const save = snapshot.nodes.find((one) => one.name === "Save flow")!;
+    const described = await surface.describe(save.ref);
+    expect(described.native?.["automationId"]).toBe("action-flows-save");
+    expect(described.native?.["atspiRole"]).toBe("push button");
+    // Still in `attrs` as well: the fingerprint reads it from there.
+    expect(described.attrs["automationId"]).toBe("action-flows-save");
+  });
+});
+
 describe("a node names the one above it", () => {
   const TABLE: AtspiNode[] = [
     node({ parent: -1, role: "frame", name: "Yam" }),
