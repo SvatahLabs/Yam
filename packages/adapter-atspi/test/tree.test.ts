@@ -36,6 +36,7 @@ import {
   parseTree,
   roleOf,
   statesOf,
+  valueOf,
   AtspiBridgeError,
   type AtspiBridge,
   type AtspiCommand,
@@ -170,6 +171,27 @@ describe("what an element is called", () => {
 
   it("collapses the whitespace a toolkit puts in a label", () => {
     expect(nameOf(node({ role: "label", name: "  two   words \n" }))).toBe("two words");
+  });
+
+  /*
+   * The row the Linux gate could not read (SF-23).
+   *
+   * `getText` on a container answers one U+FFFC per embedded child and nothing
+   * the children say, so a two-cell row answered `"￼￼"` — and because both
+   * `nameOf` and `valueOf` fall through to the text, the row arrived with that
+   * as its name *and* as its value. `app.result` read every row of the flow
+   * list as `"￼￼ ￼￼"` and could not find a file name that was on the screen.
+   */
+  it("says nothing for a row whose text is only embedded-object markers", () => {
+    const row = node({ role: "table row", text: "￼￼" });
+    expect(nameOf(row)).toBe("");
+    expect(valueOf(row)).toBe("");
+  });
+
+  it("keeps the words either side of an embedded child", () => {
+    const cell = node({ role: "table cell", text: "Flow ￼ guards-and-compensation.flow" });
+    expect(nameOf(cell)).toBe("Flow guards-and-compensation.flow");
+    expect(valueOf(cell)).toBe("Flow guards-and-compensation.flow");
   });
 });
 
@@ -1031,13 +1053,29 @@ STATE_ACTIVE = 'STATE_ACTIVE'
 class _App(object):
     def __init__(self, bus_name):
         self.bus_name = bus_name
+class _StateType(object):
+    """
+    What pyatspi hands back: a PyGObject enum, not a string.
+
+    Its str() is the repr GObject introspection prints, which is where the
+    walker's first attempt at a name went wrong. Modelling it as 'STATE_SHOWING'
+    — a plain string — is what let that ship: the name happened to fall out of
+    the parsing, and no live registry had been asked.
+    """
+    def __init__(self, name):
+        self.value_name = 'ATSPI_' + name
+        self.value_nick = name[len('STATE_'):].lower().replace('_', '-')
+    def __str__(self):
+        return '<enum %s of type Atspi-StateType>' % self.value_name
 class _States(object):
     def __init__(self, states):
         self._states = states
     def getStates(self):
-        return self._states
+        return [_StateType(one) for one in self._states]
     def contains(self, state):
         return state in self._states
+def stateToString(one):
+    return one.value_nick.replace('-', ' ')
 class _Action(object):
     def __init__(self, names):
         self._names = names
@@ -1061,7 +1099,7 @@ class Accessible(object):
     def getAttributes(self):
         return []
     def getState(self):
-        return _States(['STATE_ENABLED', 'STATE_SHOWING', 'STATE_ACTIVE'])
+        return _States(['STATE_ENABLED', 'STATE_SHOWING', 'STATE_READ_ONLY'])
     def queryText(self):
         raise NotImplementedError
     def queryValue(self):
@@ -1112,6 +1150,64 @@ describe.skipIf(!PYTHON)("the walker, run against a stand-in pyatspi", () => {
       expect(plain?.actionsError).toBeUndefined();
       expect(plain?.actions).toBeUndefined();
       expect(plain?.address).toBeUndefined();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  /*
+   * The states the walker writes are the ones `statesOf` reads (SF-23).
+   *
+   * Everything above this line in the file drives `statesOf` against
+   * `['enabled', 'showing', …]` — the vocabulary the walker is supposed to
+   * produce — and nothing checked that it produces it. It did not: the names
+   * came out as `showing of type atspi-statetype>`, so no node was ever
+   * `showing` or `enabled`, every node was reported `hidden` and `disabled`,
+   * and `Snapshot.text` rendered to the empty string because the renderer drops
+   * hidden nodes. That is what the first live run of the Linux gate reported,
+   * and this is the seam it went through.
+   *
+   * Both halves, because they are the halves that have to agree: the names out
+   * of the Python, and what `statesOf` makes of them.
+   */
+  it("writes the state names statesOf reads, so a showing node is not hidden", () => {
+    const dir = mkdtempSync(join(tmpdir(), "yam-atspi-"));
+    try {
+      writeFileSync(join(dir, "pyatspi.py"), FAKE_PYATSPI);
+      const ran = spawnSync("python3", ["-c", WALK_SCRIPT, "Yam", "50"], {
+        encoding: "utf8",
+        env: { ...process.env, PYTHONPATH: dir },
+      });
+      expect(ran.stderr).toBe("");
+      const [frame] = parseTree(ran.stdout).nodes;
+      expect(frame?.states).toEqual(["enabled", "showing", "read only"]);
+      const states = statesOf(frame as AtspiNode);
+      expect(states).not.toContain("hidden");
+      expect(states).not.toContain("disabled");
+      expect(states).toContain("readonly");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  /*
+   * And on a pyatspi too old to have `stateToString`, which is the fallback the
+   * walker carries. Nothing is gained by the fallback being silently dead.
+   */
+  it("falls back to the enum's own name where stateToString is missing", () => {
+    const dir = mkdtempSync(join(tmpdir(), "yam-atspi-"));
+    try {
+      writeFileSync(
+        join(dir, "pyatspi.py"),
+        FAKE_PYATSPI.replace("def stateToString(one):", "def _withheld(one):"),
+      );
+      const ran = spawnSync("python3", ["-c", WALK_SCRIPT, "Yam", "50"], {
+        encoding: "utf8",
+        env: { ...process.env, PYTHONPATH: dir },
+      });
+      expect(ran.stderr).toBe("");
+      const [frame] = parseTree(ran.stdout).nodes;
+      expect(frame?.states).toEqual(["enabled", "showing", "read only"]);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
