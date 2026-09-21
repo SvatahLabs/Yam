@@ -87,6 +87,8 @@ export const BIDI_CAPABILITIES: Capabilities = {
   webmcp: false,
   pick: false,
   observe: false,
+  // A page has no window frame of its own to publish.
+  windowChrome: false,
   screenshot: true,
   restore: true,
 };

@@ -102,6 +102,12 @@ export const UIA_CAPABILITIES: Capabilities = {
   webmcp: false,
   pick: false,
   observe: false,
+  /*
+   * Chromium's frame on Windows publishes them as the window element's own
+   * `WindowPattern` rather than as caption buttons, which is what the desktop
+   * conformance case accepts from this adapter (Draft 2.29).
+   */
+  windowChrome: true,
   screenshot: true,
   restore: true,
 };

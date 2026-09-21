@@ -19,6 +19,7 @@
 | `trace` | boolean | yes |
 | `upload` | boolean | yes |
 | `webmcp` | boolean | yes |
+| `windowChrome` | boolean | yes |
 | `windows` | boolean | yes |
 
 The file itself: [`packages/schema/json/surface.capabilities-flags.schema.json`](../../../../packages/schema/json/surface.capabilities-flags.schema.json).

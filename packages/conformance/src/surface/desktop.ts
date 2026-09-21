@@ -522,16 +522,29 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
        * An adapter that reports no patterns (AX) still needs the three buttons.
        */
       const root = nodes[0];
-      const windowPattern =
-        chrome.length >= 3 || root === undefined
-          ? false
-          : String((await surface.describe(root.ref)).attrs["patterns"] ?? "")
-              .split(",")
-              .includes("Window");
-      check("the window's own controls are in the snapshot", chrome.length >= 3 || windowPattern, {
-        expected: ">= 3 window-chrome controls (close, minimise, zoom), or a window that is their Window pattern",
-        actual: chrome.map((node) => `${node.role} "${node.name ?? ""}"`).slice(0, 8),
-      });
+      /*
+       * Only of an adapter that says it publishes them (Draft 2.29).
+       *
+       * On Linux the decorations belong to the window manager's process and are
+       * in no application's accessibility tree — under any desktop, and on the
+       * bare `Xvfb` the gate runs on there is no window manager to own them at
+       * all. Asking `atspi` for three buttons is asking it to invent one, so
+       * the adapter declares `windowChrome` and this is skipped where it is
+       * false. It still bites on `ax` and `uia`, which is where a tree read
+       * that quietly stopped at the application's content would show up.
+       */
+      if (surface.capabilities().windowChrome) {
+        const windowPattern =
+          chrome.length >= 3 || root === undefined
+            ? false
+            : String((await surface.describe(root.ref)).attrs["patterns"] ?? "")
+                .split(",")
+                .includes("Window");
+        check("the window's own controls are in the snapshot", chrome.length >= 3 || windowPattern, {
+          expected: ">= 3 window-chrome controls (close, minimise, zoom), or a window that is their Window pattern",
+          actual: chrome.map((node) => `${node.role} "${node.name ?? ""}"`).slice(0, 8),
+        });
+      }
 
       equals("the snapshot hash is a hash", /^[0-9a-f]{16,}$/.test(snapshot.hash), true);
       check("the snapshot renders text with references", snapshot.text.includes("[ref="), {

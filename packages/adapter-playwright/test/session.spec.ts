@@ -19,6 +19,7 @@ import {
   createSurface,
   DataError,
   DEFAULT_CONFIG,
+  isWindowChrome,
   LocateError,
   NavigationError,
   ScriptError,
@@ -173,6 +174,18 @@ test.describe("capabilities (LLD §2.4)", () => {
         await surface.restore(await surface.state());
         return true;
       },
+      /*
+       * Draft 2.29: whether the snapshot carries the window's own close,
+       * minimise and zoom controls. A browser page has no window frame of its
+       * own — the chrome around it is the browser's, and no adapter of a page
+       * publishes it — so the honest proof is that there is none to find. Not
+       * `false` written out: if this adapter ever claimed the flag, this is the
+       * call that would have to start finding them.
+       */
+      windowChrome: async () =>
+        ((await surface.snapshot()).nodes as ReadonlyArray<{ native?: Record<string, string> }>).some(
+          (node) => isWindowChrome(node),
+        ),
       /*
        * WebMCP (T6.3, REQ-ADP-9). The claim is that this adapter can read a
        * page's `navigator.modelContext` declaration — so the proof is that it

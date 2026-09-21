@@ -39,6 +39,9 @@
             "webmcp": {
               "type": "boolean"
             },
+            "windowChrome": {
+              "type": "boolean"
+            },
             "windows": {
               "type": "boolean"
             }
@@ -54,7 +57,8 @@
             "screenshot",
             "restore",
             "pick",
-            "observe"
+            "observe",
+            "windowChrome"
           ],
           "type": "object"
         },

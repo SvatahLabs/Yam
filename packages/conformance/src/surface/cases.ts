@@ -7,6 +7,7 @@
  * throw. Nothing here is Playwright-specific — the suite is handed an
  * `AgentSurface` and knows nothing else, which is the point (REQ-SURF-3).
  */
+import { CAPABILITY_FLAGS } from "@svatah/yam-schema";
 import type { ConformanceCase } from "./types.js";
 
 /** A textbox, button, link or the like — what an adapter must always report. */
@@ -247,7 +248,16 @@ export const SURFACE_CASES: readonly ConformanceCase[] = [
       await surface.act("navigate", undefined, { url: `${baseUrl}/dashboard` });
       const saved = await surface.state();
 
-      equals("the state names the surface kind", saved.kind, "web");
+      /*
+       * The adapter's own kind, not the literal `web` (Draft 2.29).
+       *
+       * These cases are the *web* suite and three adapters run them, one of
+       * which is a phone: Appium reports `mobile`, correctly, and the emulator
+       * gate's first live run failed this line for saying so. What the case is
+       * about is that `state()` names the kind at all and names it consistently
+       * with the surface, which is the same assertion on every adapter.
+       */
+      equals("the state names the surface kind", saved.kind, surface.kind);
       check("the state names where the session is", typeof saved.url === "string" && saved.url !== "", {
         expected: "a url",
         actual: saved.url,
@@ -432,18 +442,16 @@ export const SURFACE_CASES: readonly ConformanceCase[] = [
     description: "The adapter publishes a capability descriptor covering every published flag.",
     async run({ surface, check }) {
       const capabilities = surface.capabilities();
-      const flags = [
-        "dialogs",
-        "frames",
-        "windows",
-        "upload",
-        "drag",
-        "trace",
-        "webmcp",
-        "screenshot",
-        "restore",
-      ];
-      for (const flag of flags) {
+      /*
+       * The published list, not a copy of it (Draft 2.29).
+       *
+       * This was nine flags written out, and `CAPABILITY_FLAGS` had grown to
+       * eleven: `pick` (Draft 2.21) and `observe` (Draft 2.23) were published,
+       * were required of every descriptor by the schema, and were asked about
+       * by nothing. A case whose job is "covering every published flag" cannot
+       * hold its own list of them.
+       */
+      for (const flag of CAPABILITY_FLAGS) {
         check(`the descriptor answers for "${flag}"`, typeof (capabilities as Record<string, unknown>)[flag] === "boolean", {
           expected: "a boolean",
           actual: (capabilities as Record<string, unknown>)[flag],

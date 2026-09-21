@@ -180,6 +180,8 @@ export const PLAYWRIGHT_CAPABILITIES: Capabilities = {
   webmcp: true,
   pick: true,
   observe: true,
+  // A page has no window frame of its own to publish.
+  windowChrome: false,
   screenshot: true,
   restore: true,
 };

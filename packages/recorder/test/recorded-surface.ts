@@ -58,6 +58,8 @@ const CAPABILITIES: Capabilities = {
   observe: false,
   screenshot: true,
   restore: true,
+  // The recorded pages are a web surface replayed; it has no window frame.
+  windowChrome: false,
 };
 
 export interface RecordedSurfaceOptions {

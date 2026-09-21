@@ -75,7 +75,7 @@ implement them as throwing stubs — callers check for presence.
 
 ### Every capability flag
 
-`capabilities()` returns exactly these eleven booleans. Default every one to `false`
+`capabilities()` returns exactly these twelve booleans. Default every one to `false`
 and opt in to what you actually support: the executor checks a plan against them
 **before the run starts**, so a missing feature is a refusal to begin rather than a
 failure halfway through a flow (LLD §2.4).
@@ -90,6 +90,7 @@ failure halfway through a flow (LLD §2.4).
 | `trace` | `trace()` is implemented. | — |
 | `pick` | The adapter can overlay the application and take a person's click as an element; what the recorder's human gateway needs (Draft 2.21). The Playwright adapter has it. | — |
 | `observe` | The adapter can report what a person does in the session as events on elements; what `yam record` captures a flow from (Draft 2.23). The Playwright adapter has it. | — |
+| `windowChrome` | The snapshot carries the window's own close, minimise and zoom controls (Draft 2.29). `ax` publishes them as subroles of the window and `uia` as the window element's `WindowPattern`. `atspi` answers `false`: on Linux the decorations belong to the window manager's process and are in no application's tree. A page or a phone screen has none. | — |
 | `webmcp` | The adapter can read a page's declared tools and call one (REQ-ADP-9). Says nothing about whether the *current* page declares any — that is `locate({ by: "webmcp" })`, asked per resolution. | — |
 | `screenshot` | `screenshot()` produces an image. | `screenshot` |
 | `restore` | `restore()` can put the session back into a stored state. | — |
