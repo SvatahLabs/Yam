@@ -130,6 +130,8 @@ export class BrokenAdapter implements AgentSurface {
         observe: false,
         screenshot: true,
         restore: true,
+        // An overclaiming adapter claims this too, which is the point of the fixture.
+        windowChrome: true,
       };
     }
     return { ...NO_CAPABILITIES, restore: true };

@@ -85,6 +85,10 @@ export const CAPABILITY_FLAGS = [
   // Draft 2.23: the adapter can report what a person does in the session — clicks, typing,
   // choices, navigations — as events on elements; what `yam record` captures.
   "observe",
+  // Draft 2.29: the snapshot carries the window's own close, minimise and zoom controls.
+  // `ax` and `uia` do; `atspi` cannot, because on Linux the decorations belong to the window
+  // manager's process and are in no application's tree. A page has none at all.
+  "windowChrome",
 ] as const;
 export type CapabilityFlag = (typeof CAPABILITY_FLAGS)[number];
 

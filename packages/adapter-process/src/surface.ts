@@ -176,6 +176,8 @@ export class ProcessSurface implements AgentSurface {
       webmcp: false,
       pick: false,
       observe: false,
+      // A terminal is rows of text; it has no window of its own.
+      windowChrome: false,
       /*
        * `screenshot` is true and means what it can mean here: a terminal has no
        * pixels, so the artifact is the screen as text. Saying `false` would

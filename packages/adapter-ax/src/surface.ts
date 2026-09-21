@@ -122,6 +122,11 @@ export const AX_CAPABILITIES: Capabilities = {
   webmcp: false,
   pick: false,
   observe: false,
+  /*
+   * macOS publishes the close, minimise and zoom buttons as subroles of the
+   * window, inside the application's own accessibility tree (Draft 2.29).
+   */
+  windowChrome: true,
   screenshot: true,
   restore: true,
 };

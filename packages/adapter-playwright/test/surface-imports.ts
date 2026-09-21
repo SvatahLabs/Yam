@@ -8,6 +8,7 @@ export {
   clearAdapters,
   createSurface,
   DataError,
+  isWindowChrome,
   listAdapters,
   LocateError,
   NavigationError,

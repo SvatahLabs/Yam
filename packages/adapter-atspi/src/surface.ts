@@ -166,6 +166,13 @@ export class AtspiSurface implements AgentSurface {
       pick: false,
       observe: false,
       /*
+       * On Linux the decorations belong to the window manager's process, not to
+       * the application, so they are in no application's accessibility tree —
+       * and on a bare `Xvfb` there is no window manager to own them at all
+       * (Draft 2.29).
+       */
+      windowChrome: false,
+      /*
        * A screenshot of a Linux desktop is a compositor question — X11 and
        * Wayland answer it differently and Wayland mostly refuses — and this
        * adapter does not answer it. `false` is what stops a caller being offered

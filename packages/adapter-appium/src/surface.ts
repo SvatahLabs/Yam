@@ -158,6 +158,8 @@ export const APPIUM_CAPABILITIES: Capabilities = {
   webmcp: false,
   pick: false,
   observe: false,
+  // A phone has one screen and no window decorations.
+  windowChrome: false,
   screenshot: true,
   restore: true,
 };

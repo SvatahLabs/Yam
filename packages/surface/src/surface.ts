@@ -145,6 +145,7 @@ export const NO_CAPABILITIES: Capabilities = {
   restore: false,
   pick: false,
   observe: false,
+  windowChrome: false,
 };
 
 /**
