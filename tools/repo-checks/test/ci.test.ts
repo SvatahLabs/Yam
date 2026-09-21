@@ -198,11 +198,18 @@ describe("the CI workflow (T0.2, T13.2)", () => {
   /*
    * Three gates that had never run live when they were added: the Linux AT-SPI
    * bridge (T23), the Appium adapter on an emulator (T4.2) and the self-parity
-   * gate (T11.5). Each runs on the schedule and on a manual dispatch, and on
-   * nothing else, until it has been green — a leg nobody has seen pass must not
-   * be able to block a push.
+   * gate (T11.5). Each ran on the schedule and on a manual dispatch and on
+   * nothing else, because a leg nobody has seen pass must not be able to block
+   * a push.
+   *
+   * All three were green for the first time on 2026-09-21. Draft 2.29 promotes
+   * the Linux leg and holds the other two back, and the difference is what each
+   * costs against what it has shown: three minutes for the gate to a surface
+   * nothing else drives, against twenty-six for `self-parity`. One green run is
+   * not yet evidence of a reliable one, so the two expensive legs wait for a
+   * week of nightlies. `docs/ci.md` §1 carries the same reasoning in prose.
    */
-  for (const job of ["desktop-conformance-linux", "appium-emulator", "self-parity"]) {
+  for (const job of ["appium-emulator", "self-parity"]) {
     it(`runs ${job} on the schedule and on dispatch only`, () => {
       const condition = github.jobs[job]!.if ?? "";
       expect(condition).toContain("github.event_name == 'schedule'");
@@ -212,6 +219,13 @@ describe("the CI workflow (T0.2, T13.2)", () => {
       expect(github.jobs[job]!["continue-on-error"]).toBeUndefined();
     });
   }
+
+  it("runs the Linux AT-SPI gate on every push, and lets it block one", () => {
+    // No `if` at all: it runs on whatever the workflow runs on.
+    expect(github.jobs["desktop-conformance-linux"]!.if).toBeUndefined();
+    // And it blocks: a leg that cannot fail the run is not a gate.
+    expect(github.jobs["desktop-conformance-linux"]!["continue-on-error"]).toBeUndefined();
+  });
 
   it("runs the AT-SPI gate on Linux and fails the leg on exit 2 (T23)", () => {
     expect(github.jobs["desktop-conformance-linux"]!["runs-on"]).toBe("ubuntu-latest");

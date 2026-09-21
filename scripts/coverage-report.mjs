@@ -329,17 +329,20 @@ function adapters() {
       "needs a Chrome or Firefox started with a BiDi endpoint; `pnpm bidi:independence` is the " +
       "suite that drives it and it is not part of this run",
     appium:
-      "needs an Appium server and a device or emulator; neither is present on this host, and no " +
-      "device runner is provisioned",
-    uia: "needs Windows; no Windows runner is available",
+      "needs an Appium server and a device or emulator; neither is present on this host. CI's " +
+      "`appium-emulator` leg drives it against Android Chrome on an emulator",
+    uia:
+      "needs Windows; not this host. CI's `desktop-conformance` Windows leg drives it against " +
+      "the packaged application",
     http:
       "driven by `packages/cli/test/surface-transport.test.ts` in the gate rather than by this " +
       "suite, which drives the packaged desktop",
     atspi:
       "needs a Linux host with a session bus, toolkit accessibility on, `at-spi2-registryd` " +
-      "running and `python3` with `pyatspi`; no Linux runner is provisioned. Its tree mapping, " +
-      "reference scope, state inversion, action selection and refusals are driven by " +
-      "`packages/adapter-atspi/test/tree.test.ts`; its conversation with a real registry is not",
+      "running and `python3` with `pyatspi`; not this host. Its tree mapping, reference scope, " +
+      "state inversion, action selection and refusals are driven by " +
+      "`packages/adapter-atspi/test/tree.test.ts`, and its conversation with a real registry by " +
+      "CI's `desktop-conformance` Linux leg, against the packaged application on a virtual display",
     process:
       "driven by the `cli-terminal` and `mcp-terminal` passes of this suite and by " +
       "`packages/adapter-process/test/surface.test.ts`",
