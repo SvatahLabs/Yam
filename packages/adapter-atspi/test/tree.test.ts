@@ -195,6 +195,62 @@ describe("what an element is called", () => {
   });
 });
 
+/*
+ * A row's cells, which nothing could ask for (T12.3, SF-23).
+ *
+ * `SnapshotNode.parent` is how a caller asks what is *inside* an element: the
+ * desktop conformance suite reads a table row by walking to its cells, and the
+ * resolver reads neighbours the same way. `ax` and `uia` have published it
+ * since T12.3; this adapter never did, so every such question answered
+ * "nothing" and the Linux gate read each row of the flow list as empty — having
+ * found the row and none of the cells inside it.
+ */
+describe("a node names the one above it", () => {
+  const TABLE: AtspiNode[] = [
+    node({ parent: -1, role: "frame", name: "Yam" }),
+    node({ parent: 0, role: "table", name: "Flows" }),
+    node({ parent: 1, role: "table row" }),
+    node({ parent: 2, role: "table cell", name: "guards-and-compensation.flow" }),
+    node({ parent: 2, role: "table cell", name: "2 stories" }),
+  ];
+
+  it("gives every node but the root a parent reference", () => {
+    const built = buildNodes(TABLE, 1).map((one) => one.node);
+    expect(built[0]!.parent).toBeUndefined();
+    expect(built[1]!.parent).toBe(built[0]!.ref);
+    expect(built[2]!.parent).toBe(built[1]!.ref);
+    expect(built[3]!.parent).toBe(built[2]!.ref);
+    expect(built[4]!.parent).toBe(built[2]!.ref);
+  });
+
+  /*
+   * What the conformance suite does with it: everything the row says is what
+   * its cells say, and a row's own name is empty.
+   */
+  it("lets a caller read a row by what is inside it", () => {
+    const built = buildNodes(TABLE, 1).map((one) => one.node);
+    const row = built.find((one) => one.role === "row")!;
+    const inside = built.filter((one) => one.parent === row.ref);
+    expect(inside.map((one) => one.name).join(" ")).toContain("guards-and-compensation.flow");
+  });
+
+  /*
+   * With the containers dropped, the nearest ancestor that survived. A ref to a
+   * node this snapshot does not carry would be worse than none.
+   */
+  it("names the nearest kept ancestor when the tree is filtered", () => {
+    const withFiller: AtspiNode[] = [
+      node({ parent: -1, role: "frame", name: "Yam" }),
+      node({ parent: 0, role: "filler" }),
+      node({ parent: 1, role: "push button", name: "Run", actions: ["click"] }),
+    ];
+    const built = buildNodes(withFiller, 1, { interactiveOnly: true }).map((one) => one.node);
+    const run = built.find((one) => one.name === "Run")!;
+    expect(built.some((one) => one.role === "generic")).toBe(false);
+    expect(run.parent).toBe(built[0]!.ref);
+  });
+});
+
 describe("references are scoped to the snapshot that issued them (SF-10)", () => {
   it("gives every node a reference carrying its generation", () => {
     const first = buildNodes(WINDOW, 1);

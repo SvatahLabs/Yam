@@ -143,6 +143,23 @@ export function buildNodes(
   const paths = new Map<number, number[]>();
   const built: BuiltNode[] = [];
   const max = options.maxNodes ?? 1_000;
+  /*
+   * Which source indices made it into the snapshot, so a node can name the one
+   * above it (T12.3, SF-23).
+   *
+   * `SnapshotNode.parent` is how a caller asks what is *inside* an element —
+   * the desktop conformance suite reads a table row's cells with it, and the
+   * resolver reads neighbours. The `ax` and `uia` adapters have published it
+   * since T12.3 and this one never did, so every question about containment
+   * answered "nothing": the Linux gate read every row of the flow list as
+   * empty, having found the row and none of its cells.
+   *
+   * The *nearest emitted* ancestor rather than the direct one, because
+   * `interactiveOnly` drops the containers in between and a ref to a node that
+   * is not in this snapshot is worse than none. Document order means every
+   * ancestor has been decided before its children are reached.
+   */
+  const emitted = new Map<number, Ref>();
 
   for (const [index, source] of nodes.entries()) {
     const depth = source.parent < 0 ? 0 : (depths.get(source.parent) ?? 0) + 1;
@@ -160,17 +177,28 @@ export function buildNodes(
     const name = nameOf(source);
     const value = valueOf(source);
     const automationId = automationIdOf(source);
+    const ref = `a${generation}_${index}` as Ref;
+    let parentRef: Ref | undefined;
+    for (let at = source.parent; at >= 0; at = nodes[at]?.parent ?? -1) {
+      const found = emitted.get(at);
+      if (found !== undefined) {
+        parentRef = found;
+        break;
+      }
+    }
+    emitted.set(index, ref);
     built.push({
       path,
       source,
       node: {
-        ref: `a${generation}_${index}` as Ref,
+        ref,
         role: roleOf(source),
         ...(name === "" ? {} : { name }),
         ...(value === "" ? {} : { value }),
         ...(source.box === undefined ? {} : { box: [...source.box] as [number, number, number, number] }),
         states: statesOf(source),
         depth,
+        ...(parentRef === undefined ? {} : { parent: parentRef }),
         /*
          * Adapter-specific extras go in `native`, where every other adapter
          * puts them and where the resolver looks for an `automationId`. A
