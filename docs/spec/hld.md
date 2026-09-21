@@ -294,7 +294,7 @@ yam/                      github.com/SvatahLabs/Yam (Draft 2.18)
     adapter-uia/          Windows UI Automation (P2)
     adapter-ax/           macOS Accessibility (P2)
     adapter-process/      command in a pseudo-terminal, streams, exit code, files under a root (T22)
-    adapter-atspi/        Linux AT-SPI over the accessibility bus (T23; implemented, unvalidated)
+    adapter-atspi/        Linux AT-SPI over the accessibility bus (T23; validated by CI's Linux leg, Draft 2.29)
     bindings/             store, resolver, synthesis, fingerprint, relocalization   ← module (a) core
     healer/               failure selection, repair, verify, diff                    ← module (a)
     playwright-test/      bind() fixture for plain Playwright tests                   ← module (a)

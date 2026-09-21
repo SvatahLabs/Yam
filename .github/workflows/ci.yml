@@ -639,9 +639,15 @@ jobs:
   # accessibility switched on, the accessibility bus that `org.a11y.Bus` hands
   # out, and `at-spi2-registryd` on it. Every step prints what answered, because
   # nobody has yet seen what a working one prints here.
+  # Blocking since Draft 2.29: green on the schedule of 2026-09-21 and on every
+  # run since, so it gates a push like the other two desktop gates. It stays its
+  # own job rather than a third entry in `desktop-conformance`'s matrix, which is
+  # what §1 of docs/ci.md anticipated: its host setup — apt, Xvfb, a session bus
+  # and at-spi2-registryd — is Linux's alone, and folding it in would put an
+  # `if: runner.os == 'Linux'` on five steps of a job that is green on three
+  # platforms. Worth doing; not worth risking two working gates to do here.
   desktop-conformance-linux:
     name: desktop conformance (ubuntu, atspi)
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:

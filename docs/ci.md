@@ -20,21 +20,37 @@ only place a publish can happen (`scripts/publish.mjs`, T8.5).
 | `desktop-conformance` (macos, ax) | macOS | the macOS Accessibility gate (REQ-ADP-7) |
 | `yam-on-yam` | macOS | Yam drives the packaged Yam through the command line and MCP |
 | `registry-mcp` | ubuntu, **nightly** and on dispatch | the published `@svatah/yam-mcp` from npm, in an empty directory: the README's browser install, `surface doctor`, and one page connected and read over the protocol |
-| `self-parity` | macOS, **nightly** and on dispatch | Yam verifies Yam: every check in `evals/self/checks.yaml` run through Yam and through an external oracle, passing only at 100 percent agreement (REQ-SELF-2). **Never run in CI before** — only by hand, as `pnpm self` |
-| `desktop-conformance-linux` | ubuntu, **nightly** and on dispatch | the Linux AT-SPI gate (SF-23), against the packaged app on a virtual display. **Never run live before**, so AT-SPI is unvalidated until it has — its first run is the first time the AT-SPI bridge talks to a real registry anywhere |
-| `appium-emulator` | ubuntu with an Android emulator, **nightly** and on dispatch | Android Chrome replays the Appium adapter's conformance subset against the sample application (REQ-ADP-5). **Never run live before** — every earlier test of the adapter drove a fake device |
+| `self-parity` | macOS, **nightly** and on dispatch | Yam verifies Yam: every check in `evals/self/checks.yaml` run through Yam and through an external oracle, passing only at 100 percent agreement (REQ-SELF-2). Green since 2026-09-21; nightly while it costs 26 minutes a run |
+| `desktop-conformance-linux` | ubuntu | the Linux AT-SPI gate (SF-23), against the packaged app on a virtual display. Blocking since Draft 2.29; what it measured is in the [support matrix](reference/generated/support-matrix.md) |
+| `appium-emulator` | ubuntu with an Android emulator, **nightly** and on dispatch | Android Chrome replays the Appium adapter's conformance subset against the sample application (REQ-ADP-5). Green since 2026-09-21 |
 | `grounding-eval` | ubuntu | replays the committed answer cache; never spends |
 | `model-evals` | ubuntu, on the schedule | the grounding and healing numbers against the real gateway, with the repository's `ANTHROPIC_API_KEY` — it skips, saying so, while the repository has none, which is today |
 
 Nothing here needs a machine the owner provides.
 
-The three legs marked nightly do not run on a push or a pull request, so none of
-them can block one. That is because none of them has been green yet, not because
-they are advisory: each fails its leg when its gate could not run — exit 2 from
-the two adapter gates, a run that compared nothing from `self-parity` — exactly
-as the desktop legs fail on exit 2. Once one has been green on the schedule it
-belongs beside its neighbours — the Linux leg as a third entry in
-`desktop-conformance`'s matrix. §5 says what each needs and how to run it by hand.
+All three were green for the first time on 2026-09-21 (run 35557004246 is the
+run that found what was wrong with them; 35585151955 is the one where they
+passed). None had ever completed before: the 2026-09-20 nightly was cancelled by
+concurrency, so that was the first run any of them finished.
+
+**The Linux leg blocks now.** It costs about three minutes and it is the gate
+for a surface nothing else drives. It stays its own job rather than a third
+entry in `desktop-conformance`'s matrix, which is what this page used to
+anticipate: its host setup — apt, Xvfb, a session bus and `at-spi2-registryd` —
+is Linux's alone, so folding it in would put an `if: runner.os == 'Linux'` on
+five steps of a job that is green on three platforms. Worth doing; not worth
+risking two working gates for.
+
+`self-parity` and `appium-emulator` stay nightly for now. Each has been green
+once, and `self-parity` costs twenty-six minutes a run — a leg that has passed
+one time is not yet evidence that it passes reliably, and the thing it would
+catch is not worth half an hour on every push until it is. Promote them when a
+week of nightlies has been green.
+
+Nightly is not advisory: each fails its leg when its gate could not run — exit 2
+from the two adapter gates, a run that compared nothing from `self-parity` —
+exactly as the desktop legs fail on exit 2. §5 says what each needs and how to
+run it by hand.
 
 ## 2. The macOS AX gate, and the runner it would need if hosted macOS stopped granting it
 

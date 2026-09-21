@@ -2,13 +2,22 @@
 
 Linux AT-SPI accessibility adapter (T23, SF-23).
 
-**Implemented and unvalidated.** The role table, reference scope, state
-inversion, action selection and every refusal are pure functions of an
-`AtspiNode[]` and are driven by `test/tree.test.ts` against recorded trees. The
-bridge's conversation with a live accessibility bus has never been run, because
-no Linux runner is provisioned for this repository — the generated
-[support matrix](../../docs/reference/generated/support-matrix.md) says so, with
-the four conditions that would change it.
+**Implemented and validated.** The role table, reference scope, state inversion,
+action selection and every refusal are pure functions of an `AtspiNode[]` and
+are driven by `test/tree.test.ts` against recorded trees. The bridge's
+conversation with a live accessibility bus is driven by CI's
+`desktop-conformance` Linux leg, against the packaged application on a virtual
+display; the generated
+[support matrix](../../docs/reference/generated/support-matrix.md) reports what
+that run measured.
+
+That leg's first run, on 2026-09-21, found four defects on exactly the seam this
+package's own tests do not cross — states named from a PyGObject enum's `str()`,
+`getText` answering with one U+FFFC per embedded child, no `parent` on a
+snapshot node, and no `native` bag on a description. All four are fixed and each
+has a test. It is the reason the package says *validated* now and did not
+before: the pure functions were right, and the conversation with the bus was
+where the adapter actually was.
 
 ## Asking about an element after the window changed
 
