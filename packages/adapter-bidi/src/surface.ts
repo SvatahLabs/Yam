@@ -14,7 +14,7 @@
  *   protocol. `session.ts` implements the wait the spec names — visible, enabled,
  *   and a box unchanged over two frames — so no caller above the surface has to.
  * * **Accessible names and roles.** BiDi exposes the DOM, not an accessibility
- *   tree with references. `page-script.ts` computes both, which is why
+ *   tree with references. `@svatah/yam-page-script` computes both, which is why
  *   `snapshot()` here has the same shape as `snapshot()` there (REQ-SURF-4).
  *
  * What BiDi genuinely cannot do is declared in `BIDI_CAPABILITIES` rather than
@@ -59,7 +59,7 @@ import {
 import { BidiClient } from "./client.js";
 import { openEndpoint, type BidiEndpoint, type LaunchOptions } from "./launch.js";
 import { BidiSession, fromRemoteValue, sleep, toLocalValue } from "./session.js";
-import type { Actionability, RawCandidate } from "./page-script.js";
+import type { Actionability, RawCandidate } from "@svatah/yam-page-script";
 import { evaluateBidiPredicate } from "./predicates.js";
 import { keyActions, pointerClick, pointerDrag, typeText } from "./input.js";
 

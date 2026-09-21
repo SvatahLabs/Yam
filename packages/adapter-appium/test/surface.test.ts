@@ -545,11 +545,44 @@ describe("scrolling an element into view", () => {
     expect(phone.swipes).toHaveLength(1);
   });
 
+  /*
+   * A webview's tree is the DOM's, so the fake answers the walker (Draft 2.29).
+   *
+   * This used to serve `android-login.xml` as a webview's page source and take
+   * the snapshot from it, which is the defect the emulator gate found: in a
+   * Chrome session `getPageSource()` answers with HTML, and putting that through
+   * the Android role table is what gave every control the role `generic`. The
+   * adapter walks the DOM in the page now, so what the fake has to answer is the
+   * walker's script — and what this case is still about is the step after it:
+   * a webview scrolls by handing the element to a script, not by swiping.
+   */
   it("hands a webview the element to scroll", async () => {
-    const { surface, device } = await open({
-      source: "android-login.xml",
-      context: "WEBVIEW_com.yam.sample",
-    });
+    const { device } = await open({ source: "android-login.xml" });
+    const walked = [
+      { ref: "r0", role: "document", states: [], depth: 0 },
+      { ref: "r1", role: "button", name: "Sign in button", states: [], depth: 1, parent: "r0" },
+    ];
+    const client: AppiumClient = {
+      ...device.client,
+      getContext: async () => "WEBVIEW_com.yam.sample",
+      getContexts: async () => ["NATIVE_APP", "WEBVIEW_com.yam.sample"],
+      /*
+       * Answered by what the call *asks for* rather than by matching the script
+       * text: the walker and the element lookup are both one serialised
+       * function, and a bundler is free to rename them.
+       */
+      execute: async <T,>(script: string, args: unknown[]) => {
+        await device.client.execute(script, args);
+        const asked = (args[0] ?? {}) as Record<string, unknown>;
+        if (asked["maxNodes"] !== undefined) return walked as T;
+        if (asked["store"] !== undefined) {
+          return { "element-6066-11e4-a52e-4f735466cecf": "android.widget.Button" } as T;
+        }
+        return "" as T;
+      },
+    };
+    const surface = new AppiumSurface({ connect: async () => client, timeoutMs: 2_000 });
+    await surface.open({});
     const submit = (await surface.snapshot()).nodes.find((node) => node.name === "Sign in button")!;
     await surface.act("scrollIntoView", submit.ref);
     const [script, args] = device.of("execute").at(-1)!.args as [string, unknown[]];

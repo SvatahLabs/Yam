@@ -1,27 +1,9 @@
 /**
- * The scripts the BiDi adapter injects into the page (T4.1, LLD §7.3).
+ * The DOM walker an adapter evaluates inside a page (LLD §2.2, §7.3, §7.4).
  *
  * > `snapshot()`: injected script computing roles and names from the DOM (a port
  * > of the accessible-name algorithm used by the Playwright fallback) and
  * > assigning refs; same shape as §2.2.
- *
- * This is that port, and it is a *copy* rather than an import for the reason the
- * adapter exists at all. REQ-ADP-4 asks BiDi to prove the surface boundary; an
- * adapter that reached into `@svatah/yam-adapter-playwright` for the thing it is
- * meant to be an independent implementation of would prove the opposite, and
- * would put Playwright in the dependency tree of the adapter whose whole claim is
- * that it does not need one.
- *
- * What keeps the copy honest is not that it stays byte-identical — it is free to
- * diverge where BiDi needs it to — but that `test/snapshot-parity.test.ts` drives
- * both adapters over the same pages and requires the same roles, names and
- * states out of each. That is REQ-SURF-4 ("snapshot output is normalised across
- * adapters") as a test rather than as an intention.
- *
- * Every function here is serialised to its source and evaluated in the page, so
- * each must be self-contained: no imports, no references to anything outside its
- * own body. That is why the role table and the accessible-name rules are
- * repeated inside each one.
  *
  * Four functions are injected:
  *
@@ -36,7 +18,32 @@
  *   `actionabilityOf` reports the visibility, enabledness and box a step's
  *                     actionability wait is decided from (LLD §7.3).
  *
- * Refs: LLD §2.2, §7.3, REQ-SURF-4, REQ-ADP-4.
+ * Every function here is serialised to its source and evaluated in the page, so
+ * each must be self-contained: no imports, no references to anything outside its
+ * own body. That is why the role table and the accessible-name rules are
+ * repeated inside each one. This package has no dependencies for the same
+ * reason — there is nothing here for one to reach.
+ *
+ * ## Why this is a package, and what it is *not* shared with
+ *
+ * It began inside `@svatah/yam-adapter-bidi`, written out there rather than
+ * imported from `@svatah/yam-adapter-playwright` on purpose: REQ-ADP-4 asks BiDi
+ * to prove the surface boundary, and an adapter that reached into the one it is
+ * meant to be an independent implementation of would prove the opposite.
+ *
+ * That argument is about **Playwright and BiDi**, and it still holds: Playwright
+ * snapshots through Playwright's own ARIA snapshot, this walks the DOM, and
+ * `test/snapshot-parity.test.ts` drives both over the same pages and requires
+ * the same roles, names and states out of each. Two implementations, still.
+ *
+ * What changed is that a third adapter needs a DOM: Appium drives Chrome on a
+ * phone, where `getPageSource()` answers with HTML and the page is reached by
+ * `executeScript`. Writing a *third* copy would not buy independence from
+ * anything — Appium is not the oracle for BiDi and never was — and it would be
+ * a third place for the accessible-name rules to drift. So the walker moved
+ * here, and the two adapters that have no ARIA snapshot of their own share it.
+ *
+ * Refs: LLD §2.2, §7.3, §7.4, REQ-SURF-4, REQ-ADP-4, REQ-ADP-5.
  */
 
 /** The shape `walkDocument` returns for one node. Mirrors `SnapshotNode`. */

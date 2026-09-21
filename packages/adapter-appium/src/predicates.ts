@@ -12,6 +12,7 @@
  */
 import type { CheckResult, CheckSubject, Predicate, Ref, ValueRef } from "@svatah/yam-schema";
 import { CheckError, DataError, UnsupportedError } from "@svatah/yam-surface";
+import { elementArg, ELEMENT_VALUE_SCRIPT } from "./client.js";
 import type { AppiumClient, ElementId } from "./client.js";
 
 export interface AppiumCheckContext {
@@ -177,8 +178,18 @@ export async function evaluateAppiumPredicate(
       return applyNegate(result(ok, on, predicate.kind !== "unchecked"), predicate.negate);
     }
     case "multiSelect": {
-      // Nothing on a phone is a multiple-select; a picker is a picker.
-      return applyNegate(result(false, false, true), predicate.negate);
+      /*
+       * In a webview it is a real question (Draft 2.29).
+       *
+       * "Nothing on a phone is a multiple-select" is true of a *native* screen,
+       * where a picker is a picker — and this adapter also drives Chrome, where
+       * `<select multiple>` is exactly what it says. Answering `false` there
+       * told `widgets.select` that a multiple select was not one.
+       */
+      const multiple = context.native
+        ? false
+        : ((await client.getAttribute(id, "multiple")) ?? null) !== null;
+      return applyNegate(result(multiple, multiple, true), predicate.negate);
     }
 
     case "text":
@@ -190,9 +201,9 @@ export async function evaluateAppiumPredicate(
     }
     case "value": {
       const expected = literalValue(predicate.value);
-      const actual =
-        (await client.getAttribute(id, context.native ? "text" : "value")) ??
-        (await client.getText(id));
+      const actual = context.native
+        ? ((await client.getAttribute(id, "text")) ?? (await client.getText(id)))
+        : ((await client.execute<string | null>(ELEMENT_VALUE_SCRIPT, [elementArg(id)])) ?? "");
       return applyNegate(result(actual === expected, actual, expected), predicate.negate);
     }
     case "tag": {

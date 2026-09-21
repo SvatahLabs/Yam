@@ -286,6 +286,7 @@ yam/                      github.com/SvatahLabs/Yam (Draft 2.18)
   packages/
     schema/               Zod + generated JSON Schemas: ir, plan, bindings, results, audit, checkpoint, config, surface
     surface/              AgentSurface interface, adapter registry, reference scheme, capabilities
+    page-script/          the DOM walker adapters evaluate in a page: roles, names, states, refs (Draft 2.29)
     adapter-playwright/   default web adapter
     adapter-http/         API adapter
     adapter-bidi/         WebDriver BiDi adapter (P1)

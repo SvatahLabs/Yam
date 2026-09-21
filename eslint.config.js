@@ -66,6 +66,10 @@ const ADAPTERS = [
 const ALL_PACKAGES = [
   "schema",
   "surface",
+  // The DOM walker the adapters with no ARIA snapshot of their own evaluate in
+  // a page (Draft 2.29). A leaf: it imports nothing, because every function in
+  // it is serialised to its source and run inside the page.
+  "page-script",
   ...ADAPTERS,
   "bindings",
   "healer",

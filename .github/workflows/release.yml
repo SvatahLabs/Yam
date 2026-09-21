@@ -33,7 +33,7 @@ on:
         required: false
       publish:
         description: >-
-          Publish the 35 packages of the release set to npm. Leave unchecked for a dry run that
+          Publish the 36 packages of the release set to npm. Leave unchecked for a dry run that
           prints the exact commands and contacts no registry (T8.5).
         type: boolean
         default: false

@@ -77,8 +77,11 @@ describe("repository layout (HLD §12)", () => {
     // the operation catalogue lifted out of `surface-control` so that three
     // installables can depend on the contract without depending on the broker
     // that implements it: 35. PK-05 moves the MCP server out of the CLI, so
-    // that a `yam` install does not carry the six-megabyte SDK: 36.
-    expect(fromHld.length).toBe(36);
+    // that a `yam` install does not carry the six-megabyte SDK: 36. Draft 2.29
+    // lifts the DOM walker out of `adapter-bidi` into `page-script`, so that the
+    // Appium adapter can evaluate it in a webview rather than parse Chrome's
+    // HTML as Android XML: 37.
+    expect(fromHld.length).toBe(37);
   });
 
   it("names every Draft 2.11 package the LLD requires, with the section", () => {

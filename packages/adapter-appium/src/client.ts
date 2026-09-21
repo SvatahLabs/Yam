@@ -186,15 +186,61 @@ export function appiumUnreachable(url: string, cause: unknown): SessionErrorType
  * came from somewhere the surface contract does not describe. The element *id*
  * is what the protocol returns and what this adapter holds.
  */
+/**
+ * The element id inside what the protocol hands back (LLD §7.4).
+ *
+ * A W3C element crosses the wire as `{"element-6066-…": "<id>"}`, and every
+ * `elementClick`, `getElementText` and the rest take the id *string*. Anything
+ * that returns an element — `findElements`, and a script that returns a DOM
+ * node — has to come through here first, or WebdriverIO answers *"Malformed
+ * type for elementId parameter … Expected: string, Actual: object"*.
+ *
+ * `ELEMENT` is the JSON Wire Protocol's spelling, which some drivers still use.
+ */
+export function elementIdOf(element: unknown): ElementId {
+  const record = element as Record<string, string> | null;
+  if (record === null || typeof record !== "object") return String(element);
+  return record["element-6066-11e4-a52e-4f735466cecf"] ?? record["ELEMENT"] ?? String(element);
+}
+
+/**
+ * An element id as an argument a script receives as the DOM node (LLD §7.4).
+ *
+ * W3C's wire form for an element is `{"element-6066-…": "<id>"}` in both
+ * directions: hand one to `executeScript` and it arrives in the page as the
+ * element itself.
+ */
+export function elementArg(id: ElementId): Record<string, string> {
+  return { "element-6066-11e4-a52e-4f735466cecf": id };
+}
+
+/**
+ * What a control in a web page is *currently* worth (Draft 2.29).
+ *
+ * `getElementAttribute(id, "value")` answers with the attribute — what the HTML
+ * said — and typing does not change it, so a field the caller had just filled
+ * read back empty. A `<select>` has no `value` attribute at all and fell through
+ * to the element's text, which is the options' labels.
+ *
+ * One script, because `read("value")` and the `value` predicate are two callers
+ * of one question and answered it differently: the read was fixed and the
+ * predicate still compared against the attribute, so `login.type-changes-value`
+ * reported the value correctly and then failed the assertion about it.
+ */
+export const ELEMENT_VALUE_SCRIPT =
+  "var el = arguments[0];" +
+  "if (!el) return null;" +
+  "if (el.multiple && el.options) {" +
+  "  var out = [];" +
+  "  for (var i = 0; i < el.options.length; i += 1)" +
+  "    if (el.options[i].selected) out.push(el.options[i].value);" +
+  "  return out.join(', ');" +
+  "}" +
+  "if (el.value !== undefined && el.value !== null) return String(el.value);" +
+  "return (el.textContent || '').replace(/\\s+/g, ' ').trim();";
+
 export function webdriverIoClient(browser: WebdriverIoBrowser): AppiumClient {
-  const id = (element: unknown): ElementId => {
-    const record = element as Record<string, string>;
-    // The W3C element identifier; `ELEMENT` is the JSONWP spelling some drivers
-    // still answer with.
-    return (
-      record["element-6066-11e4-a52e-4f735466cecf"] ?? record["ELEMENT"] ?? String(element)
-    );
-  };
+  const id = elementIdOf;
 
   return {
     getPageSource: () => browser.getPageSource(),

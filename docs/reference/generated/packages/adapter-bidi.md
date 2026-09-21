@@ -12,8 +12,8 @@ WebDriver BiDi adapter (independence proof)
 
 | Export | Kind | Signature | |
 |---|---|---|---|
-| `Actionability` | interface | `export interface Actionability` |  |
-| `actionabilityOf` | function | `export function actionabilityOf(options: { handles: string; registry: string; index: number; from: "handle" \| "registry" }): Actionability \| null` | The actionability facts for one element (LLD §7.3). |
+| `Actionability` | interface | `interface Actionability` |  |
+| `actionabilityOf` | function | `declare function actionabilityOf(options:` | The actionability facts for one element (LLD §7.3). |
 | `BIDI_ADAPTER_NAME` | variable | `BIDI_ADAPTER_NAME = "bidi"` | The name this adapter is selected by in `yam.config.yaml` (LLD §2.4). |
 | `BIDI_BROWSER_ENV` | variable | `BIDI_BROWSER_ENV = "YAM_BIDI_BROWSER"` | `YAM_BIDI_BROWSER`: the Gecko binary to launch. |
 | `BIDI_CAPABILITIES` | variable | `BIDI_CAPABILITIES: Capabilities ` | What this adapter can do (LLD §2.4, §7.3). |
@@ -32,7 +32,7 @@ WebDriver BiDi adapter (independence proof)
 | `ContextId` | typealias | `export type ContextId = string;` | A BiDi browsing context id: a top-level tab, or a frame inside one. |
 | `cookiesFor` | function | `export function cookiesFor(url: string, cookies: readonly BidiCookie[]): Record<string, string>` | The cookies a browser would send with a request to `url`, by name (RFC 6265 |
 | `createBidiSurface` | function | `export function createBidiSurface(` | Build a surface from a project config (LLD §2.4). |
-| `describeElement` | function | `export function describeElement(` |  |
+| `describeElement` | function | `declare function describeElement(el: Element, options:` |  |
 | `evaluateBidiPredicate` | function | `export async function evaluateBidiPredicate(` |  |
 | `findGecko` | function | `export function findGecko(` | The first Gecko binary that exists, or nothing. |
 | `fromRemoteValue` | function | `export function fromRemoteValue(remote: unknown): unknown` | Turn BiDi's tagged `RemoteValue` back into a plain JSON value. |
@@ -41,16 +41,16 @@ WebDriver BiDi adapter (independence proof)
 | `keyValue` | function | `export function keyValue(name: string): string` | The codepoint a key name means, or the name itself when it is one character. |
 | `LaunchOptions` | interface | `export interface LaunchOptions` |  |
 | `literalValue` | function | `export function literalValue(ref: ValueRef): string` | The literal a `ValueRef` names. |
-| `locateInPage` | function | `export function locateInPage(options:` | `Candidate` → indices into the handle registry (LLD §6.3, REQ-RUN-5). |
+| `locateInPage` | function | `declare function locateInPage(options:` | `Candidate` → indices into the handle registry (LLD §6.3, REQ-RUN-5). |
 | `openEndpoint` | function | `export async function openEndpoint(options: LaunchOptions = {}): Promise<BidiEndpoint>` | Open a BiDi endpoint: attach to one, or launch a browser that serves one. |
 | `pointerClick` | function | `export async function pointerClick(` | One pointer action against an element. |
 | `pointerDrag` | function | `export async function pointerDrag(` | Press, hold, move and release: `dragTo` (LLD §7.1's action table). |
-| `RawCandidate` | interface | `export interface RawCandidate` | The subset of `Candidate` a web adapter can honour, flattened for the wire. |
-| `RawDescription` | interface | `export interface RawDescription` | The shape `describeElement` returns. Mirrors `ElementDescription` minus `ref`. |
-| `RawNode` | interface | `export interface RawNode` | The shape `walkDocument` returns for one node. Mirrors `SnapshotNode`. |
+| `RawCandidate` | interface | `interface RawCandidate` | The subset of `Candidate` a web adapter can honour, flattened for the wire. |
+| `RawDescription` | interface | `interface RawDescription` | The shape `describeElement` returns. Mirrors `ElementDescription` minus `ref`. |
+| `RawNode` | interface | `interface RawNode` | The shape `walkDocument` returns for one node. Mirrors `SnapshotNode`. |
 | `RefSpace` | class | `export class RefSpace` | Everything `snapshot`, `locate`, `describe` and `act` need to turn a `Ref` |
 | `registerBidiAdapter` | function | `export function registerBidiAdapter(): void` | Register the adapter. Idempotent, because the registry refuses a silent |
 | `REGISTRY` | variable | `REGISTRY = "__yamRefs__"` | The in-page array `walkDocument` fills. Reset by every walk and lost on |
 | `toLocalValue` | function | `export function toLocalValue(value: unknown): LocalValue` | Turn a plain JSON value into BiDi's tagged `LocalValue` form. |
 | `typeText` | function | `export async function typeText(session: BidiSession, text: string): Promise<void>` | Type text into whatever has focus, one key at a time. |
-| `walkDocument` | function | `export function walkDocument(options:` |  |
+| `walkDocument` | function | `declare function walkDocument(options:` |  |

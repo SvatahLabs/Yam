@@ -63,7 +63,7 @@ export {
   type RawCandidate,
   type RawDescription,
   type RawNode,
-} from "./page-script.js";
+} from "@svatah/yam-page-script";
 
 export { keyActions, keyValue, pointerClick, pointerDrag, typeText } from "./input.js";
 export { evaluateBidiPredicate, literalValue } from "./predicates.js";
