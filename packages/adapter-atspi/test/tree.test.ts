@@ -1261,6 +1261,75 @@ describe.skipIf(!PYTHON)("the walker, run against a stand-in pyatspi", () => {
   });
 
   /*
+   * A tree that changed while it was being read (SF-10).
+   *
+   * AT-SPI is a live, out-of-process tree owned by another process: the child
+   * count is read, then each child is fetched by index, and a child that went
+   * away in between comes back as `None`. The walker called `getRoleName()` on
+   * it, so one closed row took the whole snapshot down with
+   * `AttributeError: 'NoneType' object has no attribute 'getRoleName'`.
+   *
+   * That is what the nightly Linux gate reported on `app.result` — the one
+   * case that drives a run and then reads the list it lands in, so the window
+   * is still settling underneath the walk. Nothing in the suite had read a
+   * tree that moved: every other fixture is a tree that sits still.
+   *
+   * Skipping it silently is the whole truth a snapshot can tell. The element
+   * is not in the window any more, and unlike SF-11's Action interface there
+   * is no second answer to tell it apart from. It is not `truncated` either:
+   * that says more nodes exist than were returned, and here there is nothing
+   * left to ask for.
+   */
+  it("keeps walking when a child closed between the count and the read", () => {
+    const dir = mkdtempSync(join(tmpdir(), "yam-atspi-"));
+    try {
+      writeFileSync(
+        join(dir, "pyatspi.py"),
+        // One vanished sibling, and one vanished child of a surviving sibling.
+        FAKE_PYATSPI.replace(
+          "    Accessible('label', 'Plain'),",
+          "    None,\n    Accessible('label', 'Plain', children=[None]),",
+        ),
+      );
+      const ran = spawnSync("python3", ["-c", WALK_SCRIPT, "Yam", "50"], {
+        encoding: "utf8",
+        env: { ...process.env, PYTHONPATH: dir },
+      });
+      expect(ran.stderr).toBe("");
+      const window = parseTree(ran.stdout);
+      // The survivors are all there, in document order, and none of them moved.
+      expect(window.nodes.map((one) => one.name)).toEqual(["Yam", "Save", "Busy", "Plain"]);
+      expect(window.nodes.map((one) => one.parent)).toEqual([-1, 0, 0, 0]);
+      expect(window.truncated).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  /*
+   * And the same race one level up: the window itself is a child of the
+   * application, fetched the same way, so it can be gone the same way.
+   * `title = window.name` died on it before the walk ever started.
+   *
+   * An application whose only window has closed publishes no window, which is
+   * a sentence the surface already has.
+   */
+  it("says the application publishes no window when the window closed mid-read", () => {
+    const dir = mkdtempSync(join(tmpdir(), "yam-atspi-"));
+    try {
+      writeFileSync(join(dir, "pyatspi.py"), FAKE_PYATSPI.replace("children=[_window]", "children=[None]"));
+      const ran = spawnSync("python3", ["-c", WALK_SCRIPT, "Yam", "50"], {
+        encoding: "utf8",
+        env: { ...process.env, PYTHONPATH: dir },
+      });
+      expect(ran.stderr).toBe("");
+      expect(() => parseTree(ran.stdout)).toThrow(/publishes no window/u);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  /*
    * The states the walker writes are the ones `statesOf` reads (SF-23).
    *
    * Everything above this line in the file drives `statesOf` against
