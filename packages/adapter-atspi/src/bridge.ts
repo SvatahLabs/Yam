@@ -280,7 +280,22 @@ export const WALK_SCRIPT = [
   "        if said:",
   "            out.append(said)",
   "    return out",
+  /*
+   * A child fetched by index can be `None`.
+   *
+   * The tree belongs to another process and keeps moving while it is read: the
+   * child count is taken, then each child is fetched, and one that closed in
+   * between answers `None`. Calling `getRoleName()` on it took the whole
+   * snapshot down, which is how one closing row failed the Linux gate's
+   * `app.result` — the case that drives a run and then reads the list it lands
+   * in, so the window is still settling underneath the walk.
+   *
+   * Skipping it is the whole answer: the element is not in the window any
+   * more. Not `truncated` either, which promises more nodes to ask for.
+   */
   "def walk(element, parent):",
+  "    if element is None:",
+  "        return",
   "    if len(nodes) >= limit:",
   "        truncated[0] = True",
   "        return",
@@ -355,6 +370,9 @@ export const WALK_SCRIPT = [
   "    except Exception:",
   "        continue",
   "    for window in app:",
+  /* The window is fetched the same way, so it can be gone the same way. */
+  "        if window is None:",
+  "            continue",
   "        try:",
   "            active = window.getState().contains(pyatspi.STATE_ACTIVE)",
   "        except Exception:",
