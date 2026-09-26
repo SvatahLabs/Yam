@@ -104,6 +104,33 @@ describe("yam heal", () => {
     expect(io.stdout.join("\n")).toContain("Nothing to repair");
   });
 
+  /*
+   * `--json` is one JSON document on stdout, whatever the answer.
+   *
+   * "Nothing to repair" was written to stdout as a sentence, so the one run
+   * with nothing to heal answered a JSON caller with `"No locator"… is not
+   * valid JSON` — which is how a Windows nightly reported a fixture problem as
+   * a parse error. The empty answer is a report like any other, with the
+   * sentence on stderr where progress goes.
+   */
+  it("answers --json with an empty report, not a sentence, when there is nothing to repair", async () => {
+    const io = capture();
+    expect(await main(["heal", "--run", "01ABC", "--runs", join(dir, "runs"), "--json"], io)).toBe(EXIT.ok);
+    const report = JSON.parse(io.stdout.join("\n")) as {
+      inputs: number;
+      results: unknown[];
+      totals: { repaired: number; regrounded: number; unrepaired: number };
+      applied: boolean;
+    };
+    expect(report).toMatchObject({
+      inputs: 0,
+      results: [],
+      totals: { repaired: 0, regrounded: 0, unrepaired: 0 },
+      applied: false,
+    });
+    expect(io.stderr.join("\n")).toContain("Nothing to repair");
+  });
+
   it("selects only the locator failures out of a run's results", async () => {
     const runDir = join(dir, "runs", "01ABC");
     mkdirSync(runDir, { recursive: true });
