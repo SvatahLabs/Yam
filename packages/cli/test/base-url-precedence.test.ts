@@ -28,7 +28,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
 import { EXIT } from "@svatah/yam-bindings-cli";
-import type { Summary } from "@svatah/yam-schema";
+import type { StepResult, Summary } from "@svatah/yam-schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
@@ -246,7 +246,32 @@ async function brokenRun(env: Record<string, string>): Promise<string> {
   // A failed run is the input to healing; anything else means the fixture is
   // wrong rather than the precedence.
   expect(result.code, result.output).toBe(EXIT.failed);
+  /*
+   * And failed on the binding this broke, as a `locator` failure — the only
+   * kind `heal` repairs (REQ-HEAL-1).
+   *
+   * The exit code alone says the run failed, not where. When a Windows nightly
+   * failed some other way, `heal` rightly found nothing to repair, and the test
+   * went red three steps later on a JSON parse of "No locator failures", with
+   * nothing to say which step had failed or why.
+   */
+  const failed = failedSteps(project, "broken");
+  expect(failed, `${JSON.stringify(failed, null, 2)}\n${result.output}`).toMatchObject([
+    { text: "Click the login button", class: "locator" },
+  ]);
   return project;
+}
+
+/** The steps a run recorded as failed, and why, from its `results.jsonl`. */
+function failedSteps(project: string, runId: string): Array<{ text?: string; class?: string; message?: string }> {
+  const file = join(project, "runs", runId, "results.jsonl");
+  if (!existsSync(file)) return [];
+  return readFileSync(file, "utf8")
+    .split("\n")
+    .filter((line) => line.trim() !== "")
+    .map((line) => JSON.parse(line) as StepResult)
+    .filter((one) => one.status === "failed")
+    .map((one) => ({ text: one.text, class: one.failure?.class, message: one.failure?.message }));
 }
 
 describe("yam heal --run", () => {
