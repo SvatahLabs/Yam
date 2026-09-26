@@ -89,7 +89,24 @@ export async function healCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
   if (inputs.length === 0) {
     if (unbound.length > 0) return EXIT.someUnrepaired;
     const where = runId === undefined ? join(outputDir, "bind-failures.jsonl") : join(runsDir, runId);
-    io.out(`No locator failures in ${where}. Nothing to repair.`);
+    const nothing = `No locator failures in ${where}. Nothing to repair.`;
+    if (!json) {
+      io.out(nothing);
+      return EXIT.ok;
+    }
+    /*
+     * `--json` is one JSON document on stdout, and this was a sentence: the one
+     * run with nothing to repair answered a JSON caller with `"No locator"… is
+     * not valid JSON`. The empty report comes from the same `heal()` as a full
+     * one, so its shape cannot drift from it; with no inputs it opens nothing.
+     */
+    io.err(nothing);
+    const empty = await heal({
+      bindingsDir,
+      inputs: [],
+      open: () => Promise.reject(new Error("There is nothing to repair, so there is no session to open.")),
+    });
+    io.out(JSON.stringify(empty, null, 2));
     return EXIT.ok;
   }
 
